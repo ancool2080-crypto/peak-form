@@ -1982,6 +1982,184 @@ function autoCleanOldData(){
   if(bristolLog.length>180){DB.set('bristolLog',bristolLog.slice(-150));console.log('bristolLog auto-cleaned');}
 }
 
+let currentSession = null;
+
+
+// ===== gut.js (欠落関数の補完) =====
+let currentBristolType = null;
+
+function renderGutPage() {
+  const gutData = DB.get('gutData') || { tasks: {}, steps: {} };
+  // ステップ完了状態を復元
+  for (let s = 0; s < 5; s++) {
+    const sc = document.getElementById('sc-' + s);
+    if (sc) {
+      const done = !!(gutData.steps && gutData.steps[s]);
+      sc.classList.toggle('done', done);
+      sc.textContent = done ? '✓' : '';
+      const card = document.getElementById('gut-step-' + s);
+      if (card) {
+        card.classList.toggle('completed', done);
+        card.classList.toggle('active-step', !done);
+      }
+    }
+    // タスク完了状態を復元
+    const taskEls = document.querySelectorAll('#gut-tasks-' + s + ' .step-task-check');
+    taskEls.forEach((tc, ti) => {
+      const done = !!(gutData.tasks && gutData.tasks[s + '_' + ti]);
+      tc.classList.toggle('done', done);
+      tc.textContent = done ? '✓' : '';
+      const textEl = tc.nextElementSibling;
+      if (textEl) textEl.classList.toggle('done', done);
+    });
+  }
+  updateGutProgress();
+  renderBristolStreak();
+}
+
+function toggleTask(stepIdx, taskIdx) {
+  const gutData = DB.get('gutData') || { tasks: {}, steps: {} };
+  if (!gutData.tasks) gutData.tasks = {};
+  const key = stepIdx + '_' + taskIdx;
+  gutData.tasks[key] = !gutData.tasks[key];
+  DB.set('gutData', gutData);
+  const taskEls = document.querySelectorAll('#gut-tasks-' + stepIdx + ' .step-task-check');
+  const tc = taskEls[taskIdx];
+  if (tc) {
+    tc.classList.toggle('done', gutData.tasks[key]);
+    tc.textContent = gutData.tasks[key] ? '✓' : '';
+    const textEl = tc.nextElementSibling;
+    if (textEl) textEl.classList.toggle('done', gutData.tasks[key]);
+  }
+  updateGutProgress();
+}
+
+function toggleStepComplete(stepIdx) {
+  const gutData = DB.get('gutData') || { tasks: {}, steps: {} };
+  if (!gutData.steps) gutData.steps = {};
+  gutData.steps[stepIdx] = !gutData.steps[stepIdx];
+  DB.set('gutData', gutData);
+  const sc = document.getElementById('sc-' + stepIdx);
+  if (sc) {
+    sc.classList.toggle('done', gutData.steps[stepIdx]);
+    sc.textContent = gutData.steps[stepIdx] ? '✓' : '';
+  }
+  const card = document.getElementById('gut-step-' + stepIdx);
+  if (card) {
+    card.classList.toggle('completed', gutData.steps[stepIdx]);
+    card.classList.toggle('active-step', !gutData.steps[stepIdx]);
+  }
+  updateGutProgress();
+}
+
+function updateGutProgress() {
+  const gutData = DB.get('gutData') || { tasks: {}, steps: {} };
+  const completedSteps = Object.values(gutData.steps || {}).filter(Boolean).length;
+  const pct = Math.round(completedSteps / 5 * 100);
+  const fill = document.getElementById('gut-progress-fill');
+  if (fill) fill.style.width = pct + '%';
+  const label = document.getElementById('gut-step-label');
+  if (label) label.textContent = 'ステップ ' + completedSteps + '/5';
+  const desc = document.getElementById('gut-progress-desc');
+  if (desc) {
+    const descs = [
+      '各ステップを完了してプログラムを進めましょう',
+      'STEP 1完了！腸を守る環境が整い始めました。',
+      'STEP 2完了！善玉菌が育つ環境が整いました。',
+      'STEP 3完了！腸内の多様性が高まっています。',
+      'STEP 4完了！自律神経と腸の連携が改善中です。',
+      '全ステップ完了！腸内環境の修復プログラム達成！'
+    ];
+    desc.textContent = descs[completedSteps] || descs[0];
+  }
+  const dots = document.querySelectorAll('.gut-step-dot');
+  dots.forEach((d, i) => {
+    d.classList.remove('done', 'active');
+    if (i < completedSteps) d.classList.add('done');
+    else if (i === completedSteps) d.classList.add('active');
+  });
+  const badge = document.getElementById('gut-overall-badge');
+  if (badge) {
+    const t = completedSteps >= 5 ? {c:'badge-green',l:'完了'} :
+              completedSteps >= 3 ? {c:'badge-blue',l:'進行中'} :
+              completedSteps >= 1 ? {c:'badge-amber',l:'開始済'} :
+                                    {c:'badge-gray',l:'未開始'};
+    badge.innerHTML = '<span class="badge ' + t.c + '">' + t.l + '（' + completedSteps + '/5）</span>';
+  }
+}
+
+function selectBristol(type) {
+  currentBristolType = type;
+  for (let i = 1; i <= 7; i++) {
+    const btn = document.getElementById('brs-' + i);
+    if (btn) btn.classList.toggle('selected', i === type);
+  }
+  const advEl = document.getElementById('bristol-advice');
+  if (!advEl) return;
+  const advices = {
+    1: {c:'alert-warn',m:'Type 1: 硬い塊。水分不足・Mg不足が主因。水2L以上＋マグネシウム300〜400mgを補給してください。'},
+    2: {c:'alert-warn',m:'Type 2: ソーセージ状の塊。やや便秘気味。水溶性食物繊維（オートミール・海藻）を増やしましょう。'},
+    3: {c:'alert-success',m:'Type 3: ひび割れのあるソーセージ状。良好な方向です。水分と食物繊維をもう少し増やすとType 4に近づきます。'},
+    4: {c:'alert-success',m:'Type 4: バナナ型・滑らか。理想的な便です！腸内環境が良好な状態を示しています。この状態を維持しましょう。'},
+    5: {c:'alert-info',m:'Type 5: 柔らかい塊。やや軟便。食物繊維の種類を見直してください（不溶性を増やす）。'},
+    6: {c:'alert-warn',m:'Type 6: 泥状便。炎症またはストレス過多の可能性。発酵食品の過剰摂取も原因になります。'},
+    7: {c:'alert-danger',m:'Type 7: 水様便（下痢）。食中毒・腸炎の可能性があります。症状が続く場合は医療機関を受診してください。'},
+  };
+  const adv = advices[type];
+  if (adv) {
+    advEl.className = 'alert ' + adv.c;
+    advEl.textContent = adv.m;
+    advEl.style.display = 'block';
+  }
+}
+
+function saveBristolLog() {
+  if (currentBristolType === null) { alert('タイプを選択してください'); return; }
+  const log = DB.arr('bristolLog');
+  const existing = log.findIndex(l => l.date === today());
+  if (existing >= 0) { log[existing] = {date:today(),type:currentBristolType,id:Date.now()}; DB.set('bristolLog', log); }
+  else DB.push('bristolLog', {date:today(),type:currentBristolType,id:Date.now()});
+  alert('Type ' + currentBristolType + ' を記録しました！');
+  renderBristolStreak();
+}
+
+function renderBristolStreak() {
+  const el = document.getElementById('bristol-streak');
+  if (!el) return;
+  const log = DB.arr('bristolLog');
+  const logMap = {};
+  log.forEach(l => { logMap[l.date] = l.type; });
+  const now = new Date();
+  let html = '';
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(now); d.setDate(now.getDate() - i);
+    const ds = d.toISOString().slice(0, 10);
+    const type = logMap[ds];
+    const isToday = ds === today();
+    const good = type === 3 || type === 4;
+    const col = type ? (good ? 'rgba(34,197,94,0.45)' : 'rgba(245,166,35,0.45)') : 'var(--bg4)';
+    html += '<div class="streak-day' + (type ? ' logged' : '') + (isToday ? ' today-s' : '') + '" style="background:' + col + '">' +
+      '<span style="font-size:9px">' + d.getDate() + '</span>' +
+      (type ? '<span style="font-size:8px">T' + type + '</span>' : '') +
+      '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function clearShiftMonth() {
+  if (!confirm('今月のシフトデータをクリアしますか？')) return;
+  const data = getShiftData();
+  const now = new Date();
+  const base = new Date(now.getFullYear(), now.getMonth() + shiftMonthDelta, 1);
+  const year = base.getFullYear(), month = base.getMonth();
+  const monthStr = year + '-' + String(month + 1).padStart(2, '0');
+  Object.keys(data).forEach(k => { if (k.startsWith(monthStr)) delete data[k]; });
+  DB.set('pf_shift_data', data);
+  renderShiftPage();
+  alert('今月のシフトをクリアしました');
+}
+
+
 // ===== main.js =====
 function init(){
   const t=today();['t-date','n-date','s-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=t});
