@@ -4407,78 +4407,38 @@ function init(){
 // ⑥ PWA: Service Worker登録
 // ============================================================
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    // インラインでService Workerを登録（外部ファイル不要）
-    const swCode = `
-const CACHE = 'peak-form-v2-6';
-const ASSETS = [
-  self.registration.scope,
-  'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js',
-  'https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Bebas+Neue&display=swap'
-];
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS).catch(() => {})));
-  self.skipWaiting();
-});
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-  ));
-  self.clients.claim();
-});
-self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(resp => {
-        if (resp && resp.status === 200 && resp.type !== 'opaque') {
-          const clone = resp.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-        }
-        return resp;
-      }).catch(() => cached);
-    })
-  );
-});
-`;
-    const blob = new Blob([swCode], { type: 'application/javascript' });
-    const swUrl = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl)
-      .then(reg => {
-        console.log('PEAK FORM SW registered:', reg.scope);
-        // インストール促進バナーは初回のみ表示
-        const shown = localStorage.getItem('pf_pwa_prompted');
-        if (!shown && window.matchMedia('(display-mode: browser)').matches) {
-          setTimeout(() => {
-            const banner = document.getElementById('pwa-install-banner');
-            if (banner) banner.style.display = 'flex';
-          }, 3000);
-        }
-      })
-      .catch(err => console.log('SW registration failed:', err));
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register(
+      'https://ancool2080-crypto.github.io/peak-form/sw.js'
+    ).then(function(reg) {
+      console.log('PEAK FORM SW: OK');
+      if (!localStorage.getItem('pf_pwa_prompted')) {
+        setTimeout(function() {
+          var b = document.getElementById('pwa-install-banner');
+          if (b) b.style.display = 'flex';
+        }, 3000);
+      }
+    }).catch(function(e) { console.log('SW failed:', e); });
   });
 }
 
 function dismissPwaBanner() {
-  const banner = document.getElementById('pwa-install-banner');
-  if (banner) banner.style.display = 'none';
+  var b = document.getElementById('pwa-install-banner');
+  if (b) b.style.display = 'none';
   localStorage.setItem('pf_pwa_prompted', '1');
 }
 
 init();
 
-
-
-// PWAインストールプロンプトをキャプチャ
-window.addEventListener('beforeinstallprompt', e => {
+window.addEventListener('beforeinstallprompt', function(e) {
   e.preventDefault();
   window._pwaPrompt = e;
-  const banner = document.getElementById('pwa-install-banner');
-  const prompted = localStorage.getItem('pf_pwa_prompted');
-  if (banner && !prompted) setTimeout(() => { banner.style.display = 'flex'; }, 2000);
+  var b = document.getElementById('pwa-install-banner');
+  if (b && !localStorage.getItem('pf_pwa_prompted')) {
+    setTimeout(function() { b.style.display = 'flex'; }, 2000);
+  }
 });
-window.addEventListener('appinstalled', () => {
+window.addEventListener('appinstalled', function() {
   dismissPwaBanner();
   localStorage.setItem('pf_pwa_prompted', '1');
 });
