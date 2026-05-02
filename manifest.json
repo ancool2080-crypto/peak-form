@@ -1,0 +1,37 @@
+{
+  "name": "PEAK FORM",
+  "short_name": "PEAK FORM",
+  "description": "消防士コンディショニングシステム — 科学的根拠に基づく総合管理",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#ff4560",
+  "orientation": "portrait-primary",
+  "categories": [
+    "health",
+    "fitness"
+  ],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "トレーニング記録",
+      "short_name": "トレーニング",
+      "description": "今日のトレーニングを記録",
+      "url": "./#training"
+    },
+    {
+      "name": "栄養管理",
+      "short_name": "栄養",
+      "description": "食事を記録",
+      "url": "./#nutrition"
+    }
+  ]
+}

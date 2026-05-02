@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+  <radialGradient id="bg" cx="30%" cy="30%">
+    <stop offset="0%" stop-color="#1e1e30"/>
+    <stop offset="100%" stop-color="#080810"/>
+  </radialGradient>
+  <linearGradient id="helmG" x1="30%" y1="0%" x2="70%" y2="100%">
+    <stop offset="0%" stop-color="#d8d8f0"/>
+    <stop offset="50%" stop-color="#9090b8"/>
+    <stop offset="100%" stop-color="#585878"/>
+  </linearGradient>
+  <linearGradient id="flG" x1="50%" y1="100%" x2="50%" y2="0%">
+    <stop offset="0%" stop-color="#ff2040"/>
+    <stop offset="40%" stop-color="#ff6020"/>
+    <stop offset="80%" stop-color="#ffaa00"/>
+    <stop offset="100%" stop-color="#fff080"/>
+  </linearGradient>
+  <linearGradient id="bdgG" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#ffd700"/>
+    <stop offset="100%" stop-color="#ffa000"/>
+  </linearGradient>
+  <filter id="hs"><feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="rgba(0,0,0,0.7)"/></filter>
+  <filter id="fg"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <pattern id="gr" width="16" height="16" patternUnits="userSpaceOnUse">
+    <path d="M 16 0 L 0 0 0 16" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="0.6"/>
+  </pattern>
+</defs>
+<!-- 背景 -->
+<rect width="512" height="512" rx="100" fill="url(#bg)"/>
+<rect width="512" height="512" rx="100" fill="url(#gr)"/>
+<!-- 外枠 -->
+<rect x="14" y="14" width="484" height="484" rx="90" fill="none" stroke="rgba(255,69,96,0.38)" stroke-width="2.5"/>
+<!-- コーナー装飾 -->
+<rect x="14" y="14" width="30" height="3" rx="1.5" fill="rgba(255,69,96,0.6)"/>
+<rect x="14" y="14" width="3" height="30" rx="1.5" fill="rgba(255,69,96,0.6)"/>
+<rect x="468" y="14" width="30" height="3" rx="1.5" fill="rgba(255,69,96,0.6)"/>
+<rect x="495" y="14" width="3" height="30" rx="1.5" fill="rgba(255,69,96,0.6)"/>
+<rect x="14" y="495" width="30" height="3" rx="1.5" fill="rgba(255,69,96,0.6)"/>
+<rect x="14" y="468" width="3" height="30" rx="1.5" fill="rgba(255,69,96,0.6)"/>
+<rect x="468" y="495" width="30" height="3" rx="1.5" fill="rgba(255,69,96,0.6)"/>
+<rect x="495" y="468" width="3" height="30" rx="1.5" fill="rgba(255,69,96,0.6)"/>
+<!-- 炎（ヘルメット背後） -->
+<path d="M 256 66
+  C 228 94 196 132 202 166 C 185 132 182 96 190 70
+  C 164 100 158 144 170 180 C 152 148 150 110 158 84
+  C 133 118 132 164 148 200 C 139 174 137 142 144 122
+  C 136 160 143 204 168 230 C 158 202 156 166 163 148
+  C 154 188 165 232 192 256 C 228 232 284 232 320 256
+  C 348 232 358 188 350 148 C 356 166 354 202 346 230
+  C 370 204 382 160 374 122 C 381 142 380 174 371 200
+  C 386 164 386 118 362 84 C 369 110 366 148 348 180
+  C 360 144 354 100 328 70 C 336 96 332 132 315 166
+  C 322 132 290 94 256 66 Z"
+  fill="url(#flG)" filter="url(#fg)" opacity="0.88"/>
+<!-- ヘルメット本体 -->
+<path d="M 256 138
+  C 162 138 104 200 98 268 L 91 300 L 421 300 L 414 268
+  C 408 200 350 138 256 138 Z"
+  fill="url(#helmG)" filter="url(#hs)"/>
+<!-- ヘルメットシャイン（ハイライト） -->
+<path d="M 256 138 C 208 138 168 162 142 198
+  C 174 164 214 148 256 150
+  C 298 148 338 164 370 198
+  C 344 162 304 138 256 138 Z"
+  fill="rgba(255,255,255,0.42)"/>
+<!-- つば -->
+<path d="M 70 290 L 442 290 L 457 318 Q 457 336 440 336 L 72 336 Q 55 336 55 318 Z"
+  fill="url(#helmG)" filter="url(#hs)"/>
+<!-- ヘルメット帯 -->
+<rect x="162" y="138" width="188" height="15" rx="7" fill="rgba(70,70,110,0.45)"/>
+<!-- バッジ（金色の盾） -->
+<path d="M 256 168 L 233 183 L 233 215 Q 233 238 256 250 Q 279 238 279 215 L 279 183 Z"
+  fill="url(#bdgG)" filter="url(#hs)"/>
+<!-- バッジ文字 P -->
+<text x="256" y="234" font-family="Georgia,Times New Roman,serif"
+  font-size="46" font-weight="bold" text-anchor="middle" fill="#7a4000">P</text>
+<!-- PEAK テキスト -->
+<text x="256" y="408" font-family="Arial Black,Arial,sans-serif"
+  font-size="74" font-weight="900" text-anchor="middle" fill="white" opacity="0.96">PEAK</text>
+<!-- FORM テキスト -->
+<text x="256" y="455" font-family="Arial,sans-serif"
+  font-size="36" font-weight="600" text-anchor="middle" fill="#ff4560" letter-spacing="16">FORM</text>
+<!-- アクセントライン -->
+<rect x="154" y="466" width="204" height="3" rx="1.5" fill="rgba(255,69,96,0.6)"/>
+</svg>
