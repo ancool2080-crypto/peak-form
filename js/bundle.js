@@ -1,3 +1,4 @@
+
 // ===== db.js =====
 const DB={get(k){try{return JSON.parse(localStorage.getItem('pf_'+k)||'null')}catch{return null}},set(k,v){localStorage.setItem('pf_'+k,JSON.stringify(v))},arr(k){return this.get(k)||[]},push(k,v){const a=this.arr(k);a.push(v);this.set(k,a)}};
 const cfg=()=>DB.get('cfg')||{tdee:2800,goalmode:'maintain',water:2500,name:''};
@@ -41,6 +42,445 @@ let sleepChart=null,wellnessChart=null;
 
 let aWeekly=null,aWeight=null,aNutr=null,aWell=null;
 
+// ========= プログラムデータ定義 =========
+c
+
+// ===== data-programs.js =====
+const PROGRAMS={
+  FBS:{id:'FBS',name:'FULL BODY SPLIT',abbr:'FBS',desc:'SGIR HQ PREMIUM準拠・全身3分割',color:'#4a9eff',freq:'週3〜4回',
+    sessions:{FBA:{name:'FULL BODY A',focus:'プレスフォーカス',color:'#4a9eff',letter:'A'},FBB:{name:'FULL BODY B',focus:'プルフォーカス',color:'#f5a623',letter:'B'},FBC:{name:'FULL BODY C',focus:'スクワットフォーカス',color:'#22c55e',letter:'C'}},
+    cycle:['FBA','FBB','FBC'],scheduleHint:'A→B→C→休養のサイクル'},
+  PPL:{id:'PPL',name:'PPL SPLIT',abbr:'PPL',desc:'Push・Pull・Legs 3分割',color:'#f5a623',freq:'週3〜6回',
+    sessions:{PUSH:{name:'PUSH DAY',focus:'胸・肩・三頭筋',color:'#ff4560',letter:'P'},PULL:{name:'PULL DAY',focus:'背中・二頭筋',color:'#4a9eff',letter:'L'},LEGS:{name:'LEGS DAY',focus:'脚・臀部・腹',color:'#22c55e',letter:'L'}},
+    cycle:['PUSH','PULL','LEGS'],scheduleHint:'Push→Pull→Legs→休養のサイクル'},
+  PPL_LU:{id:'PPL_LU',name:'PPL + LOWER/UPPER',abbr:'PPL+LU',desc:'PPLにLower・Upperを組み合わせた5分割',color:'#a78bfa',freq:'週5回',
+    sessions:{PUSH:{name:'PUSH DAY',focus:'胸・肩・三頭',color:'#ff4560',letter:'P'},PULL:{name:'PULL DAY',focus:'背中・二頭',color:'#4a9eff',letter:'P'},LEGS:{name:'LEGS DAY',focus:'脚全体',color:'#22c55e',letter:'L'},UPPER:{name:'UPPER DAY',focus:'上半身',color:'#f5a623',letter:'U'},LOWER:{name:'LOWER DAY',focus:'下半身',color:'#6b7280',letter:'L'}},
+    cycle:['PUSH','PULL','LEGS','UPPER','LOWER'],scheduleHint:'Push→Pull→Legs→Upper→Lower の5日サイクル'},
+  LU:{id:'LU',name:'LOWER / UPPER',abbr:'L/U',desc:'上半身・下半身の2分割',color:'#22c55e',freq:'週2〜4回',
+    sessions:{UPPER:{name:'UPPER DAY',focus:'胸・背中・肩・腕',color:'#4a9eff',letter:'U'},LOWER:{name:'LOWER DAY',focus:'脚・臀部・ハム・腹',color:'#22c55e',letter:'L'}},
+    cycle:['UPPER','LOWER'],scheduleHint:'Upper→Lower→休養 または Upper→Lower×2'}
+};
+
+const DEFAULT_EXERCISES={
+  FBS_FBA:[{name:'ワイドグリップチンニング（広背筋）',reps:'6-10',part:'背中',rpe:'C'},{name:'オーバーグリップマシンロウ（上背部）',reps:'8-12',part:'背中',rpe:'M'},{name:'S/Aケーブルプルダウン',reps:'10-15',part:'背中',rpe:'I'},{name:'スミスマシン ハイインクラインプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'HSマシンペックフライ',reps:'10-15',part:'胸',rpe:'I'},{name:'ディップス',reps:'8-12',part:'胸・三頭',rpe:'C'},{name:'ワンレッグレッグエクステンション',reps:'10-15',part:'四頭',rpe:'I'},{name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},{name:'マシンアダクター',reps:'12-15',part:'内転筋',rpe:'I'},{name:'クロスボディケーブルエクステンション',reps:'12-15',part:'三頭',rpe:'I'},{name:'S/A DBプリチャーカール',reps:'10-15',part:'二頭',rpe:'I'},{name:'マシン サイドレイズ',reps:'12-20',part:'肩',rpe:'I'},{name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'},{name:'マシンアブクランチ',reps:'AMRAP',part:'腹',rpe:'I'}],
+  FBS_FBB:[{name:'ケーブルYレイズ',reps:'12-15',part:'肩後部',rpe:'I'},{name:'HSプレートロードインクラインプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'スミスマシン フラットプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'スミスマシン JMプレス',reps:'10-15',part:'三頭',rpe:'M'},{name:'ワイドグリップラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},{name:'チェストサポーテッド T-BARロウ',reps:'8-12',part:'背中',rpe:'M'},{name:'S/Aケーブルプルダウン',reps:'10-15',part:'背中',rpe:'I'},{name:'ハイパーエクステンション',reps:'10-15',part:'脊柱起立筋',rpe:'C'},{name:'45°レッグプレス',reps:'10-15',part:'脚全体',rpe:'M'},{name:'ワンレッグレッグカール',reps:'10-15',part:'ハム',rpe:'I'},{name:'オルタネイトDBカール（スピネイト）',reps:'10-12',part:'二頭',rpe:'I'},{name:'ケーブルトライセプスプッシュダウン',reps:'12-15',part:'三頭',rpe:'I'},{name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'},{name:'マシンアブクランチ',reps:'AMRAP',part:'腹',rpe:'I'}],
+  FBS_FBC:[{name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},{name:'スミスマシン スクワット',reps:'8-12',part:'四頭',rpe:'C'},{name:'マシンヒッププレス',reps:'10-15',part:'臀部',rpe:'M'},{name:'レッグエクステンション',reps:'10-15',part:'四頭',rpe:'I'},{name:'Vバーラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},{name:'ケルソーシュラッグ',reps:'10-15',part:'僧帽筋',rpe:'M'},{name:'リバースペックフライ',reps:'12-15',part:'肩後部',rpe:'I'},{name:'マシンフラットチェストプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'マシンショルダープレス',reps:'8-12',part:'肩',rpe:'M'},{name:'ケーブルデクラインフライ',reps:'12-15',part:'胸下部',rpe:'I'},{name:'EZバープッシュダウン',reps:'12-15',part:'三頭',rpe:'I'},{name:'インクラインDBカール',reps:'10-12',part:'二頭',rpe:'I'},{name:'ハンマーカール',reps:'10-12',part:'二頭',rpe:'I'},{name:'DBサイドレイズ',reps:'12-20',part:'肩',rpe:'I'},{name:'ハンギングレッグレイズ',reps:'AMRAP',part:'腹',rpe:'I'},{name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'}],
+  PPL_PUSH:[{name:'バーベルベンチプレス',reps:'6-10',part:'胸',rpe:'C'},{name:'インクラインDBプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'ケーブルフライ',reps:'12-15',part:'胸',rpe:'I'},{name:'バーベルOHプレス',reps:'6-10',part:'肩',rpe:'C'},{name:'DBサイドレイズ',reps:'12-20',part:'肩',rpe:'I'},{name:'トライセプスプッシュダウン',reps:'12-15',part:'三頭',rpe:'I'},{name:'OHトライセプスエクステンション',reps:'10-15',part:'三頭',rpe:'I'},{name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'}],
+  PPL_PULL:[{name:'デッドリフト',reps:'3-6',part:'背中',rpe:'C'},{name:'バーベルロウ',reps:'6-10',part:'背中',rpe:'C'},{name:'ラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},{name:'ケーブルロウ',reps:'10-15',part:'背中',rpe:'M'},{name:'フェイスプル',reps:'15-20',part:'肩後部',rpe:'I'},{name:'リバースペックフライ',reps:'12-15',part:'肩後部',rpe:'I'},{name:'バーベルカール',reps:'8-12',part:'二頭',rpe:'C'},{name:'ハンマーカール',reps:'10-12',part:'二頭',rpe:'I'}],
+  PPL_LEGS:[{name:'バーベルスクワット',reps:'4-8',part:'四頭',rpe:'C'},{name:'レッグプレス',reps:'8-12',part:'四頭',rpe:'M'},{name:'レッグエクステンション',reps:'12-15',part:'四頭',rpe:'I'},{name:'ルーマニアンデッドリフト',reps:'6-10',part:'ハム',rpe:'C'},{name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},{name:'ヒップスラスト',reps:'8-12',part:'臀部',rpe:'M'},{name:'カーフレイズ',reps:'12-20',part:'カーフ',rpe:'I'},{name:'ハンギングレッグレイズ',reps:'AMRAP',part:'腹',rpe:'I'}],
+  PPL_LU_PUSH:'PPL_PUSH',PPL_LU_PULL:'PPL_PULL',PPL_LU_LEGS:'PPL_LEGS',
+  PPL_LU_UPPER:[{name:'インクラインDBプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'ケーブルフライ',reps:'12-15',part:'胸',rpe:'I'},{name:'ラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},{name:'ケーブルロウ',reps:'10-15',part:'背中',rpe:'M'},{name:'DBショルダープレス',reps:'8-12',part:'肩',rpe:'M'},{name:'DBサイドレイズ',reps:'15-20',part:'肩',rpe:'I'},{name:'トライセプスプッシュダウン',reps:'12-15',part:'三頭',rpe:'I'},{name:'バーベルカール',reps:'8-12',part:'二頭',rpe:'C'}],
+  PPL_LU_LOWER:[{name:'バーベルスクワット',reps:'4-8',part:'四頭',rpe:'C'},{name:'レッグプレス',reps:'8-12',part:'四頭',rpe:'M'},{name:'ルーマニアンデッドリフト',reps:'6-10',part:'ハム',rpe:'C'},{name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},{name:'ヒップスラスト',reps:'8-12',part:'臀部',rpe:'M'},{name:'カーフレイズ',reps:'12-20',part:'カーフ',rpe:'I'},{name:'アブクランチ',reps:'AMRAP',part:'腹',rpe:'I'}],
+  LU_UPPER:[{name:'バーベルベンチプレス',reps:'6-10',part:'胸',rpe:'C'},{name:'インクラインDBプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'バーベルロウ',reps:'6-10',part:'背中',rpe:'C'},{name:'ラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},{name:'バーベルOHプレス',reps:'6-10',part:'肩',rpe:'C'},{name:'DBサイドレイズ',reps:'15-20',part:'肩',rpe:'I'},{name:'トライセプスプッシュダウン',reps:'12-15',part:'三頭',rpe:'I'},{name:'バーベルカール',reps:'8-12',part:'二頭',rpe:'C'}],
+  LU_LOWER:[{name:'バーベルスクワット',reps:'4-8',part:'四頭',rpe:'C'},{name:'レッグプレス',reps:'8-12',part:'四頭',rpe:'M'},{name:'レッグエクステンション',reps:'12-15',part:'四頭',rpe:'I'},{name:'ルーマニアンデッドリフト',reps:'6-10',part:'ハム',rpe:'C'},{name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},{name:'ヒップスラスト',reps:'8-12',part:'臀部',rpe:'M'},{name:'カーフレイズ',reps:'12-20',part:'カーフ',rpe:'I'},{name:'ハンギングレッグレイズ',reps:'AMRAP',part:'腹',rpe:'I'}]
+};
+
+let custPid='',custSid='',custExArr=[];
+function moveEx(i,dir){if(i+dir<0||i+dir>=custExArr.length)return;[custExArr[i],custExArr[i+dir]]=[custExArr[i+dir],custExArr[i]];renderCustomizerList();}
+function removeEx(i){custExArr.splice(i,1);renderCustomizerList();}
+
+// ===== data-food.js =====
+// ============================================================
+// 食品プリセットデータベース（SGIR HQ PREMIUM + 日本食品標準成分表2020）
+// ============================================================
+const FOOD_PRESETS={
+  // docx第4.3節データ + 日本食品標準成分表2020準拠
+  protein:[
+    {name:'鶏むね肉（皮なし）',unit:'g',cal:108,p:24.4,c:0,f:1.5,
+     highlight:'アンセリン・カルノシン（抗疲労）・L-カルニチン豊富',
+     note:'消防士の筋肥大と抗疲労のベース。100gで体重60kgの人の約40%のタンパク質目標をカバー。'},
+    {name:'鶏もも肉（皮なし）',unit:'g',cal:116,p:18.8,c:0,f:3.9,
+     highlight:'鉄分・ビタミンB6・B3豊富',
+     note:'むね肉より風味があり継続しやすい。発汗による鉄喪失の補充に有効。'},
+    {name:'鶏ささみ',unit:'g',cal:98,p:23.0,c:0,f:0.8,
+     highlight:'最低脂質・減量期最強のタンパク源',
+     note:'むね肉より低脂質。レンチン調理で手軽に高タンパク摂取。'},
+    {name:'全卵（Lサイズ）',unit:'個(60g)',per:60,cal:91,p:7.4,c:0.2,f:6.2,
+     highlight:'卵黄の脂質がMPSシグナルを強化・コリン・ロイシン豊富',
+     note:'卵白より全卵の方が筋タンパク質合成が高い（Vliet et al.）。毎日3〜6個推奨。'},
+    {name:'牛モモ赤身',unit:'g',cal:117,p:21.3,c:0.5,f:3.8,
+     highlight:'ヘム鉄・亜鉛・B12・クレアチン（天然）',
+     note:'消防士の欠乏しやすいミネラルの宝庫。週2〜3回で免疫・ホルモン維持。'},
+    {name:'サーモン',unit:'g',cal:139,p:22.5,c:0.1,f:4.5,
+     highlight:'EPA+DHA約1,000mg・ビタミンD・EIMD抑制',
+     note:'火災現場活動後の筋損傷（EIMD）を抑制。週2回以上が理想。'},
+    {name:'サバ（生）',unit:'g',cal:202,p:18.0,c:0.3,f:14.0,
+     highlight:'EPA+DHA約1,800mg（最強クラス）・ビタミンD同時補給',
+     note:'コスパ最高の青魚。缶詰も可（水煮缶推奨）。'},
+    {name:'イワシ（生）',unit:'g',cal:156,p:19.8,c:0.2,f:8.8,
+     highlight:'EPA+DHA約2,000mg・カルシウム・セレン',
+     note:'骨ごと食べるとカルシウム吸収率大幅UP。骨密度維持に重要。'},
+    {name:'マグロ赤身',unit:'g',cal:125,p:26.4,c:0.1,f:1.4,
+     highlight:'高タンパク低脂質・鉄・B12・セレン',
+     note:'刺身で手軽に高タンパク摂取。鉄欠乏の補充にも有効。'},
+    {name:'納豆（1パック）',unit:'パック(45g)',per:45,cal:86,p:7.4,c:5.4,f:4.5,
+     highlight:'ビタミンK2・プロバイオティクス・ナットウキナーゼ',
+     note:'骨密度・血管柔軟性を維持。日本人の心疾患リスク低減に寄与（docx第1.1.2節）。'},
+    {name:'木綿豆腐',unit:'g',cal:72,p:6.6,c:1.6,f:4.2,
+     highlight:'植物性タンパク・酸化ストレス軽減・カルシウム',
+     note:'動物性と組み合わせてタンパク源を多様化。腸内環境多様性向上。'},
+    {name:'ギリシャヨーグルト（無糖）',unit:'g',cal:67,p:10.0,c:4.0,f:0.4,
+     highlight:'カゼイン型・就寝中のMPS維持・プロバイオティクス',
+     note:'就寝前30gで一晩中の筋肉保護。腸活も兼ねる。（docx第1.1.1節）'},
+    {name:'ホエイプロテイン（WPI）',unit:'g',cal:110,p:25.0,c:2.0,f:1.0,
+     highlight:'最速吸収・出動直後の急速アミノ酸補給',
+     note:'トレ後・出動直後に25〜40g。食事で補えない時の緊急補給源。'},
+  ],
+  carb:[
+    {name:'白米（炊飯）',unit:'g',cal:168,p:2.5,c:37.1,f:0.3,
+     highlight:'グリコーゲン急速補充・消化良好',
+     note:'勤務明けの枯渇グリコーゲンを最短で回復。トレ後の主力炭水化物。'},
+    {name:'玄米（炊飯）',unit:'g',cal:165,p:2.8,c:35.6,f:1.0,
+     highlight:'食物繊維・マグネシウム・B1・低GI',
+     note:'訓練前2hに最適。GIは白米より低く持続的エネルギー供給。'},
+    {name:'さつまいも（蒸し）',unit:'g',cal:131,p:1.2,c:31.2,f:0.2,
+     highlight:'低GI・カリウム（発汗補充）・食物繊維',
+     note:'現場活動前の持続燃料。カリウムが発汗時の筋痙攣を防ぐ（消防士は発汗量が多くリスク高）。'},
+    {name:'じゃがいも（茹で）',unit:'g',cal:76,p:1.8,c:17.6,f:0.1,
+     highlight:'カリウム豊富・電解質補充',
+     note:'冷やすとレジスタントスターチ増加→腸活効果UP。グリコーゲン回復にも有効。'},
+    {name:'バナナ',unit:'本(100g)',per:100,cal:86,p:1.1,c:22.5,f:0.2,
+     highlight:'即効エネルギー・カリウム・マグネシウム',
+     note:'トレ中の血糖維持・電解質補給に最適。携帯性も高い。'},
+    {name:'オートミール（乾燥）',unit:'g',cal:380,p:13.7,c:69.1,f:5.7,
+     highlight:'β-グルカン・腸内炎症抑制・Mg豊富',
+     note:'40g(152kcal)が1食分。食物繊維がシフト勤務による腸の乱れを抑制（docx第1.2.2節）。'},
+    {name:'そば（茹で）',unit:'g',cal:130,p:4.8,c:26.0,f:1.0,
+     highlight:'ルチン（抗酸化・血管保護）・亜鉛含有',
+     note:'GI低め。消防士の血管への負荷を軽減するルチンが特徴。'},
+    {name:'キウイ',unit:'個(100g)',per:100,cal:53,p:1.0,c:13.5,f:0.1,
+     highlight:'ビタミンC・K・睡眠改善効果（RCTあり）',
+     note:'就寝前摂取で睡眠の質向上（セロトニン前駆体）。夜勤明けの回復に。'},
+  ],
+  veggie:[
+    {name:'ブロッコリー（茹で）',unit:'g',cal:33,p:3.9,c:4.3,f:0.4,
+     highlight:'スルフォラファン（解毒酵素誘導）・ビタミンC・K・葉酸',
+     note:'火災ガス暴露による解毒をサポート。最強の抗酸化野菜。毎日推奨。'},
+    {name:'ほうれん草（茹で）',unit:'g',cal:25,p:2.6,c:3.6,f:0.5,
+     highlight:'鉄・葉酸・マグネシウム・K1',
+     note:'消防士のMg不足リスク（発汗消耗）の食事対策。鉄はビタミンCと同時摂取で吸収率2〜3倍。'},
+    {name:'小松菜（生）',unit:'g',cal:14,p:1.5,c:2.4,f:0.2,
+     highlight:'カルシウム（ほうれん草の約3倍）・鉄・ビタミンK',
+     note:'疲労骨折リスクが高い消防士の骨密度維持に重要。毎日摂取推奨。'},
+    {name:'パプリカ（赤）',unit:'g',cal:30,p:1.0,c:7.2,f:0.2,
+     highlight:'ビタミンC（ブロッコリーの2倍）・βカロテン・抗酸化',
+     note:'高熱環境下での粘膜保護と免疫維持。炎症マーカー低下効果あり。'},
+    {name:'トマト',unit:'g',cal:19,p:0.7,c:4.7,f:0.1,
+     highlight:'リコピン（活性酸素除去）・カリウム',
+     note:'加熱するとリコピン吸収率UP。缶詰も可。火災現場の酸化ストレスに対抗。'},
+    {name:'ブルーベリー（冷凍）',unit:'g',cal:49,p:0.5,c:12.9,f:0.1,
+     highlight:'アントシアニン・活性酸素（ROS）早期正常化',
+     note:'最強のリカバリーフード。毎日欠かさず摂取すべき（docx第1.3節RCT）。'},
+    {name:'アボカド',unit:'半個(80g)',per:80,cal:149,p:2.1,c:3.2,f:14.8,
+     highlight:'オレイン酸・カリウム（最高含有）・葉酸',
+     note:'消防士の電解質補充（カリウム豊富）に有効。良質な一価不飽和脂肪酸。'},
+    {name:'かぼちゃ（茹で）',unit:'g',cal:60,p:1.6,c:15.1,f:0.3,
+     highlight:'ビタミンA（β-カロテン）・C・高熱環境での粘膜保護',
+     note:'高熱環境下での粘膜保護・免疫維持。持続的な炭水化物源としても優秀。'},
+  ],
+  fermented:[
+    {name:'ヨーグルト（無糖）',unit:'g',cal:62,p:3.6,c:4.9,f:3.0,
+     highlight:'プロバイオティクス・カルシウム・ビタミンB2',
+     note:'毎日100〜200g。シフト勤務による腸内フローラの乱れを修正。'},
+    {name:'味噌（天然醸造）',unit:'大さじ1(18g)',per:18,cal:35,p:2.3,c:4.7,f:1.1,
+     highlight:'プロバイオティクス・大豆イソフラボン・腸内環境改善',
+     note:'沸騰後に溶かすと菌が生きた状態で摂取可能。毎日の味噌汁で腸活。'},
+    {name:'キムチ（無添加）',unit:'g',cal:29,p:2.1,c:4.3,f:0.5,
+     highlight:'乳酸菌・カプサイシン・ビタミンC',
+     note:'腸内多様性向上。週3〜4回推奨（腸内環境ガイド準拠）。'},
+    {name:'ぬか漬け（きゅうり）',unit:'g',cal:14,p:1.1,c:2.4,f:0.1,
+     highlight:'植物性乳酸菌・腸内フローラ改善',
+     note:'日本の伝統的発酵食品。腸内細菌の多様性向上に有効。'},
+  ],
+  fat:[
+    {name:'アーモンド',unit:'g',cal:598,p:19.6,c:19.7,f:51.8,
+     highlight:'ビタミンE・マグネシウム・食物繊維・抗酸化',
+     note:'28g(約20粒)が1食分。抗酸化作用で火災ガス暴露の酸化ストレスに対抗（docx第1.3節）。'},
+    {name:'くるみ',unit:'g',cal:674,p:14.6,c:11.7,f:68.8,
+     highlight:'ALA（植物性オメガ3）・抗酸化物質・脳機能保護',
+     note:'30g=1食分。脳機能・炎症抑制に有効。'},
+    {name:'カボチャの種',unit:'g',cal:590,p:26.5,c:12.6,f:51.8,
+     highlight:'マグネシウム（最高含有クラス）・亜鉛・セレン',
+     note:'消防士のMg・亜鉛を同時補給できる優秀なスナック。おやつとして最適。'},
+    {name:'オリーブオイル（EV）',unit:'大さじ1(12g)',per:12,cal:111,p:0,c:0,f:12.0,
+     highlight:'オレイン酸・ポリフェノール・心血管保護（PREDIMED試験）',
+     note:'加熱調理の基本油。慢性炎症抑制効果が確認されている。'},
+    {name:'アボカドオイル',unit:'大さじ1(12g)',per:12,cal:111,p:0,c:0,f:12.0,
+     highlight:'高煙点・オレイン酸・ビタミンE',
+     note:'高温調理に適した油。心血管保護とホルモン生成をサポート。'},
+  ],
+  custom:[]
+};
+
+let selectedPreset=null;
+let selectedPresetAmount=100;
+
+function showPresetCategory(cat){
+  const grid=document.getElementById('preset-grid');
+  if(!grid)return;
+  let foods=FOOD_PRESETS[cat]||[];
+  // マイプリセット
+  if(cat==='custom'){
+    foods=DB.get('pf_custom_presets')||[];
+  }
+  if(!foods.length){
+    grid.innerHTML='<div class="muted" style="font-size:12px;padding:8px">まだマイプリセットがありません。食品を入力して「⭐ 保存」ボタンで登録できます。</div>';
+    return;
+  }
+  grid.innerHTML=foods.map((f,i)=>`
+    <div onclick="selectPreset(${JSON.stringify({...f,_cat:cat,_idx:i}).replace(/"/g,'&quot;')})" style="cursor:pointer;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent2)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:12px;font-weight:500;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.name}</div>
+      <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">${f.cal}kcal / P${f.p}g / C${f.c}g / F${f.f}g</div>
+      ${f.highlight?`<div style="font-size:10px;color:var(--accent2);margin-top:2px">${f.highlight}</div>`:''}
+    </div>`).join('');
+  // datalistも更新
+  const dl=document.getElementById('food-datalist');
+  if(dl)dl.innerHTML=foods.map(f=>`<option value="${f.name}">`).join('');
+}
+
+function selectPreset(f){
+  selectedPreset=f;
+  selectedPresetAmount=f.per||100;
+  const row=document.getElementById('preset-amount-row');
+  const nameEl=document.getElementById('preset-selected-name');
+  const slider=document.getElementById('preset-amount-slider');
+  if(row)row.style.display='block';
+  if(nameEl)nameEl.textContent=f.name;
+  if(slider){
+    slider.min=f.per?Math.round(f.per/4):25;
+    slider.max=f.per?f.per*8:400;
+    slider.step=f.per||25;
+    slider.value=f.per||100;
+  }
+  updatePresetAmount(f.per||100);
+}
+
+function updatePresetAmount(amount){
+  if(!selectedPreset)return;
+  selectedPresetAmount=parseFloat(amount);
+  const base=selectedPreset.per||100;
+  const ratio=selectedPresetAmount/base;
+  const cal=Math.round(selectedPreset.cal*ratio);
+  const p=Math.round(selectedPreset.p*ratio*10)/10;
+  const c=Math.round(selectedPreset.c*ratio*10)/10;
+  const f=Math.round(selectedPreset.f*ratio*10)/10;
+  const disp=document.getElementById('preset-amount-display');
+  const prev=document.getElementById('preset-macro-preview');
+  const unitLabel=selectedPreset.per?`${selectedPresetAmount}${selectedPreset.unit}`:`${selectedPresetAmount}g`;
+  if(disp)disp.textContent=unitLabel;
+  if(prev)prev.innerHTML=`<span class="mono">${cal}kcal / P${p}g / C${c}g / F${f}g</span>${selectedPreset.note?` <span style="color:var(--text3)">— ${selectedPreset.note}</span>`:''}`;
+}
+
+function applyPreset(){
+  if(!selectedPreset)return;
+  const base=selectedPreset.per||100;
+  const ratio=selectedPresetAmount/base;
+  const unitLabel=selectedPreset.per?`${selectedPresetAmount}${selectedPreset.unit}`:`${selectedPresetAmount}g`;
+  document.getElementById('n-food').value=`${selectedPreset.name} ${unitLabel}`;
+  document.getElementById('n-cal').value=Math.round(selectedPreset.cal*ratio);
+  document.getElementById('n-protein').value=Math.round(selectedPreset.p*ratio*10)/10;
+  document.getElementById('n-carb').value=Math.round(selectedPreset.c*ratio*10)/10;
+  document.getElementById('n-fat').value=Math.round(selectedPreset.f*ratio*10)/10;
+  clearPreset();
+}
+
+function clearPreset(){
+  selectedPreset=null;
+  const row=document.getElementById('preset-amount-row');
+  if(row)row.style.display='none';
+}
+
+function saveCustomPreset(){
+  const name=document.getElementById('n-food').value.trim();
+  const cal=parseFloat(document.getElementById('n-cal').value)||0;
+  const p=parseFloat(document.getElementById('n-protein').value)||0;
+  const c=parseFloat(document.getElementById('n-carb').value)||0;
+  const f=parseFloat(document.getElementById('n-fat').value)||0;
+  if(!name||!cal){alert('食品名とカロリーを入力してください');return}
+  const custom=DB.get('pf_custom_presets')||[];
+  if(custom.find(x=>x.name===name)){alert('同名のプリセットがすでに存在します');return}
+  custom.push({name,unit:'g',cal,p,c,f,highlight:'マイプリセット',note:''});
+  DB.set('pf_custom_presets',custom);
+  alert(`「${name}」をマイプリセットに保存しました`);
+}
+
+// ============================================================
+// サプリメントデータベース（SGIR HQ + 最新エビデンス統合）
+// ============================================================
+c
+
+// ===== data-supps.js =====
+const SUPPS={
+  tier1:[
+    {id:'creatine',
+     name:'クレアチンモノハイドレート',
+     dose:'5g/日（ローディング不要）',
+     timing:'トレ後 or いつでも（毎日継続が最重要）',
+     effect:'筋力↑ / 筋肥大↑ / 認知機能・短期記憶↑ / 無酸素パワー↑ / TBI神経保護',
+     evidence:'Lanhers 2017 / Rawson 2011 / Firefighter Nation 2024',
+     firefighter:'睡眠不足・低酸素下での認知機能維持が火災現場の判断力に直結。頭部外傷（TBI）への神経保護作用も確認済み（docx第3.1.1節）。緊急出動・重量物搬送の瞬発力に直結。腎機能正常者での長期摂取は安全。',
+     foodAlt:'赤身肉1kgに約5g含有→毎日1kg摂取は非現実的。サプリが唯一の実用的手段。'},
+    {id:'vitd3',
+     name:'ビタミンD3 + K2',
+     dose:'D3: 2,000〜4,000IU / K2: 100〜200µg',
+     timing:'脂質を含む食事と一緒（吸収率最大化）',
+     effect:'免疫機能↑ / 筋力↑ / 骨密度↑ / 炎症抑制 / 疲労骨折リスク↓',
+     evidence:'Endocrine Society 2024 / Nutrients 2025（最多引用論文）',
+     firefighter:'消防士のビタミンD欠乏リスク高（屋内・夜勤が多い職種で75〜80%が不足水準：Colorado消防士研究）。血中25(OH)D目標値40〜60ng/mL。日本DRI 340IUは推奨値の10分の1以下で完全に不十分。屋内活動・夜勤で日光不足→疲労骨折・筋力低下・免疫低下の主因。K2はカルシウムを骨に沈着させ血管石灰化を防ぐ（必須の同時摂取）。',
+     foodAlt:'サーモン100g≈400IU。食事だけで2,000〜4,000IUは事実上不可能→サプリ必須。'},
+    {id:'omega3',
+     name:'オメガ3（EPA + DHA）',
+     dose:'EPA+DHA合計 1,500〜2,000mg/日',
+     timing:'食事と一緒（酸化防止・吸収率向上）',
+     effect:'慢性炎症抑制 / 筋損傷（EIMD）回復↑ / 心血管保護 / 脳機能↑',
+     evidence:'ISSFAL 2019 / Smith 2011 / docx第3.1.3節',
+     firefighter:'火災ガス（アクロレイン等）暴露による酸化ストレスへの化学的バリア。日本人約半数のALDH2不活性型（rs671）は脂質過酸化物の解毒能力が低い→オメガ3+ビタミンEの積極摂取が特に重要（docx第3.1.3節）。',
+     foodAlt:'サバ100g≈1,800mg / イワシ100g≈2,000mg。週3〜4回の青魚でサプリ不要になる場合あり。'},
+  ],
+  tier2:[
+    {id:'magnesium',
+     name:'マグネシウム（グリシン酸塩）',
+     dose:'200〜400mg/日',
+     timing:'就寝30〜60分前',
+     effect:'睡眠の質↑ / 筋痙攣↓ / 神経機能↑ / インスリン感受性↑',
+     evidence:'Nielsen 2010 / Abbasi 2012 / docx引用',
+     firefighter:'消防士のMg欠乏リスク高（発汗で需要10〜20%増：Volpe 2013）。24時間勤務・発汗でMg急速消耗。形態は酸化Mgよりグリシン酸塩を推奨（吸収率3〜4倍）。現場での筋痙攣は命取り→予防最優先。',
+     foodAlt:'カボチャの種28g≈Mg150mg / アーモンド28g≈Mg80mg。食事から200〜300mgまで補給可能。'},
+    {id:'citrulline',
+     name:'L-シトルリン',
+     dose:'6〜8g（トレ前60〜90分）',
+     timing:'トレーニング60〜90分前',
+     effect:'血流改善↑ / 筋持久力↑ / 疲労回復↑',
+     evidence:'Pérez-Guisado 2010 / Suzuki 2016',
+     firefighter:'長時間の消防活動・救助訓練での持久力向上に有効（docx第3.2節）。スイカが天然源だが有効量の補給は現実的でない。',
+     foodAlt:'スイカ2kgで約6g→食事での補給は現実的でない。'},
+    {id:'probiotic',
+     name:'プロバイオティクス（マルチストレイン）',
+     dose:'100億〜1,000億CFU/日',
+     timing:'食事と一緒（or 製品に従う）',
+     effect:'腸内環境↑ / 免疫機能↑ / シフトワーカーのストレス反応軽減',
+     evidence:'Cryan 2019 / Griffith University 2021（夜勤者対象）',
+     firefighter:'シフト勤務者は腸内フローラが乱れやすい。Lactobacillus rhamnosus GG等のマルチストレインがシフトワーカーのストレス反応を軽減（docx第3.2節）。腸内環境ガイドのSTEP2「環境整備後に投入」原則に従う。',
+     foodAlt:'納豆・ぬか漬け・ヨーグルト・キムチを毎日摂取すればサプリは補助的でOK。'},
+    {id:'curcumin',
+     name:'クルクミン（高吸収型 BCM-95）',
+     dose:'500〜1,000mg/日',
+     timing:'食後（脂質と一緒）',
+     effect:'炎症↓ / DOMS軽減 / 酸化ストレス↓ / 関節保護',
+     evidence:'Drobnic 2014 / Hewlings 2017',
+     firefighter:'職業性の慢性炎症（火災ガス暴露・重装備負荷）を日常的に抑制。標準ウコン粉末の6〜7倍の吸収率（BCM-95形態）（docx第1.3節）。',
+     foodAlt:'ターメリック小さじ1≈クルクミン60mg。有効量500mgの補給にはサプリが現実的。'},
+  ],
+  tier3:[
+    {id:'vitaminc',
+     name:'ビタミンC',
+     dose:'500〜1,000mg/日（分割摂取）',
+     timing:'食事と一緒（複数回）',
+     effect:'免疫機能↑ / 抗酸化 / 鉄吸収促進（非ヘム鉄を2〜3倍に）',
+     evidence:'Hemilä 2017 / Shaw 2017（コラーゲン合成）',
+     firefighter:'煙暴露後の免疫サポート。鉄欠乏が多い消防士では非ヘム鉄の吸収率向上が特に重要。コラーゲン合成目的でトレ前30分摂取も有効（docx第1.3節）。',
+     foodAlt:'赤パプリカ100g≈VC170mg / ブロッコリー100g≈VC120mg。食事から300〜500mgは補給可能。'},
+    {id:'collagen',
+     name:'コラーゲンペプチド + ビタミンC',
+     dose:'コラーゲン15g + VC 50mg（セット摂取）',
+     timing:'トレーニング前30〜60分',
+     effect:'腱・靱帯強化 / 関節保護 / 怪我予防',
+     evidence:'Shaw et al. 2017 JAP',
+     firefighter:'重装備着用・急激な動作が多い消防士の関節・腱保護に有効。骨スープ（コラーゲン・グリシン・プロリン）も同等効果あり（docx第1.3節）。',
+     foodAlt:'骨スープ（ボーンブロス）を毎日1杯の習慣でコラーゲン・グリシンを自然補給。'},
+    {id:'caffeine',
+     name:'カフェイン',
+     dose:'3〜6mg/体重kg（上限400mg/日）',
+     timing:'トレーニング30〜60分前（就寝6時間前まで厳守）',
+     effect:'筋力↑ / 持久力↑ / 認知機能↑ / 脂肪燃焼促進',
+     evidence:'Grgic et al. 2018 BJSM',
+     firefighter:'夜勤・24h勤務明けのトレーニング時に有効。ただし半減期5〜7時間のため就寝6時間前以降は厳禁。慢性使用で耐性形成あり→週末はカフェインオフを推奨。',
+     foodAlt:'コーヒー1杯≈80〜100mg。体重70kgで必要量は2〜4杯相当→食事から補給可能。'},
+  ]
+}
+
+function renderSupplementPage(){
+  const suppData=DB.get('pf_supp_checks')||{};
+  const todayStr=today();
+  const todayChecks=suppData[todayStr]||[];
+
+  ['tier1','tier2','tier3'].forEach(tier=>{
+    const el=document.getElementById('supp-'+tier);
+    if(!el)return;
+    el.innerHTML=SUPPS[tier].map(s=>`
+      <div style="padding:12px 0;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;margin-bottom:3px">${s.name}</div>
+            <div style="font-size:11px;color:var(--accent2);margin-bottom:4px">📍 ${s.dose} / ${s.timing}</div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:4px">${s.effect}</div>
+            <div style="font-size:11px;color:var(--accent3);margin-bottom:3px">🔥 消防士特記：${s.firefighter}</div>
+            <div style="font-size:11px;color:var(--accent4)">🥗 食事での代替：${s.foodAlt}</div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:4px">根拠：${s.evidence}</div>
+      </div>`).join('');
+  });
+
+  // 今日の摂取チェック
+  const dailyEl=document.getElementById('supp-daily-check');
+  if(dailyEl){
+    const allSupps=[...SUPPS.tier1,...SUPPS.tier2,...SUPPS.tier3];
+    dailyEl.innerHTML=allSupps.map(s=>{
+      const checked=todayChecks.includes(s.id);
+      return`<label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer">
+        <input type="checkbox" id="supp-chk-${s.id}" ${checked?'checked':''} style="width:18px;height:18px">
+        <span style="font-size:13px">${s.name}</span>
+        <span style="font-size:11px;color:var(--text3)">${s.dose}</span>
+      </label>`;
+    }).join('');
+  }
+
+  // 継続ストリーク
+  const streakEl=document.getElementById('supp-streak');
+  if(streakEl){
+    const days=7;const now=new Date();
+    let streak=0,html2='<div style="display:flex;gap:4px;flex-wrap:wrap">';
+    for(let i=days-1;i>=0;i--){
+      const d=new Date(now);d.setDate(now.getDate()-i);
+      const ds=d.toISOString().slice(0,10);
+      const chks=(suppData[ds]||[]).length;
+      const isToday=ds===todayStr;
+      const col=chks>=3?'var(--accent4)':chks>=1?'var(--accent3)':'var(--bg4)';
+      if(chks>=1&&!isToday)streak++;
+      html2+=`<div style="text-align:center">
+        <div style="width:32px;height:32px;border-radius:6px;background:${col};border:1px solid var(--border);display:flex;align-items:center;justify-content:center;${isToday?'box-shadow:0 0 0 2px var(--accent2)':''}">
+          <span style="font-size:10px;font-family:var(--font-mono);color:${chks>0?'var(--bg)':'var(--text3)'}">${chks}</span>
+        </div>
+        <div style="font-size:9px;color:var(--text3);margin-top:2px">${d.getDate()}</div>
+      </div>`;
+    }
+    html2+='</div>';
+    html2+=`<div style="font-size:12px;color:var(--text2);margin-top:8px">継続ストリーク：<span style="color:var(--accent4);font-weight:600;font-family:var(--font-mono)">${streak}</span>日 / 数字は当日の摂取サプリ数</div>`;
+    streakEl.innerHTML=html2;
+  }
+
+  // バッジ
+  const todayCount=todayChecks.length;
+  const badge=document.getElementById('supp-overall-badge');
+  if(badge){
+    const t=todayCount>=6?{c:'badge-green',l:'完璧'}:todayCount>=3?{c:'badge-blue',l:'良好'}:todayCount>=1?{c:'badge-amber',l:'一部'}:{c:'badge-gray',l:'未記録'};
+    badge.innerHTML=`<span class="badge ${t.c}">本日：${t.l}（${todayCount}種）</span>`;
+  }
+}
+
+function saveSuppCheck(){
+  const suppData=DB.get('pf_supp_checks')||{};
+  const todayStr=today();
+  const allSupps=[...SUPPS.tier1,...SUPPS.tier2,...SUPPS.tier3];
+  const checked=allSupps.filter(s=>document.getElementById('supp-chk-'+s.id)?.checked).map(s=>s.id);
+  suppData[todayStr]=checked;
+  DB.set('pf_supp_checks',suppData);
+  renderSupplementPage();
+  alert(`${checked.length}種のサプリ摂取を記録しました。`);
+}
+
+f
 
 // ===== dashboard.js =====
 function renderDashboard(){
@@ -258,6 +698,35 @@ function computeWeeklyVolume(){
   });
 
   return partVolume;
+}
+
+// ===== peaking.js =====
+function generatePeakingPlan(){
+  const w1=parseInt(document.getElementById('pk-w1').value)||4,w2=parseInt(document.getElementById('pk-w2').value)||4,w3=parseInt(document.getElementById('pk-w3').value)||3,w4=parseInt(document.getElementById('pk-w4').value)||1;
+  const startStr=document.getElementById('pk-start').value||today();
+  const phases=[{type:'accumulate',label:'蓄積期',weeks:w1,startWeek:0,color:'#4a9eff',note:'高ボリューム・低強度。筋肉・有酸素基盤を構築。タンパク質高め、炭水化物多め。'},{type:'intensify',label:'強化期',weeks:w2,startWeek:w1,color:'#f5a623',note:'中ボリューム・中〜高強度。力を高める。栄養は維持〜やや増量。'},{type:'convert',label:'変換期',weeks:w3,startWeek:w1+w2,color:'#ff4560',note:'低ボリューム・高強度。スピード・爆発力に変換。カロリーを絞り始める。'},{type:'taper',label:'テーパー期',weeks:w4,startWeek:w1+w2+w3,color:'#22c55e',note:'ボリューム大幅削減・強度維持。TSBを最大化。炭水化物を増やしグリコーゲン充填。'}];
+  const totalWeeks=w1+w2+w3+w4;
+  DB.set('peaking',{start:startStr,phases,totalWeeks,event:document.getElementById('pk-event').value});
+  document.getElementById('phase-bar').innerHTML=phases.map(p=>`<div class="phase-block phase-${p.type}" style="flex:${p.weeks}"><span>${p.label}</span><span style="font-size:9px">${p.weeks}W</span></div>`).join('');
+  document.getElementById('phase-legend').innerHTML=phases.map(p=>`<span><span class="phase-dot" style="background:${p.color}40;border:1px solid ${p.color}60"></span><span style="font-size:12px;color:var(--text2)">${p.label} ${p.weeks}週</span></span>`).join('');
+  document.getElementById('phase-descriptions').innerHTML='<div class="grid2" style="margin-top:12px">'+phases.map(p=>`<div class="card-sm" style="border-color:${p.color}40"><div style="font-size:12px;font-weight:700;color:${p.color};margin-bottom:6px">${p.label} — ${p.weeks}週間</div><div class="muted">${p.note}</div></div>`).join('')+'</div>';
+  const cal=document.getElementById('peaking-calendar');cal.innerHTML='';
+  const start=new Date(startStr);const dow=start.getDay();const monday=new Date(start);monday.setDate(start.getDate()-(dow===0?6:dow-1));const todayStr=today();
+  const sched={accumulate:['strength','cardio','rest','strength','cardio','strength','rest'],intensify:['strength','hiit','rest','strength','cardio','strength','rest'],convert:['hiit','strength','rest','hiit','cardio','strength','rest'],taper:['strength','cardio','rest','strength','rest','mobility','rest']};
+  for(let w=0;w<Math.min(totalWeeks,16);w++){
+    const ws=new Date(monday);ws.setDate(monday.getDate()+w*7);const ph=phases.find(p=>w>=p.startWeek&&w<p.startWeek+p.weeks);const sc=sched[ph?.type||'accumulate'];
+    let rowHTML=`<div class="week-label" style="font-size:10px">W${w+1}${ph?` <span style="color:${ph.color};font-size:9px">${ph.label.slice(0,2)}</span>`:''}</div>`;
+    const icons={strength:'▲',hiit:'◆',cardio:'●',mobility:'◎',rest:'—'};
+    for(let d=0;d<7;d++){const dt=new Date(ws);dt.setDate(ws.getDate()+d);const ds=dt.toISOString().slice(0,10);const tp=sc[d]||'rest';rowHTML+=`<div class="day-cell ${tp}${ds===todayStr?' today-cell':''}" title="${ds}"><span style="font-size:11px">${icons[tp]||'—'}</span><span style="font-size:9px;opacity:0.7">${dt.getDate()}</span></div>`;}
+    const row=document.createElement('div');row.className='week-row';row.innerHTML=rowHTML;cal.appendChild(row);
+  }
+  const ns={accumulate:{cal:'+5〜10%',protein:'2.0〜2.2g/kg',carb:'4〜6g/kg',timing:'トレ後30分以内に高P・高C食'},intensify:{cal:'維持〜+5%',protein:'2.0g/kg',carb:'3〜5g/kg',timing:'トレ前2hに中GI炭水化物'},convert:{cal:'維持〜-5%',protein:'2.2〜2.4g/kg',carb:'3〜4g/kg',timing:'トレ後のプロテイン窓を厳守'},taper:{cal:'+5〜10%（炭水化物増）',protein:'1.8〜2.0g/kg',carb:'6〜8g/kg（充填）',timing:'毎日こまめに摂取、空腹を避ける'}};
+  document.getElementById('phase-nutrition-table').innerHTML='<table><thead><tr><th>フェーズ</th><th>カロリー</th><th>タンパク質</th><th>炭水化物</th><th>タイミング戦略</th></tr></thead><tbody>'+phases.map(p=>`<tr><td><span class="badge" style="background:${p.color}20;color:${p.color};border:1px solid ${p.color}40">${p.label}</span></td><td class="muted">${ns[p.type].cal}</td><td class="muted">${ns[p.type].protein}</td><td class="muted">${ns[p.type].carb}</td><td class="muted">${ns[p.type].timing}</td></tr>`).join('')+'</tbody></table>';
+  const tsbData=[];const labels=[];let sAtl=0,sCtl=0;const lbp={accumulate:350,intensify:420,convert:480,taper:120};
+  for(let w=0;w<totalWeeks;w++){const ph=phases.find(p=>w>=p.startWeek&&w<p.startWeek+p.weeks);const wl=ph?lbp[ph.type]:0;for(let d=0;d<7;d++){const dl=wl/7;sAtl=sAtl+(dl-sAtl)*(1-Math.exp(-1/7));sCtl=sCtl+(dl-sCtl)*(1-Math.exp(-1/42));}tsbData.push(Math.round(sCtl-sAtl));labels.push('W'+(w+1));}
+  if(pkTsbChart)pkTsbChart.destroy();
+  pkTsbChart=new Chart(document.getElementById('pk-tsb-chart'),{type:'line',data:{labels,datasets:[{data:tsbData,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.08)',tension:0.4,fill:true,borderWidth:2,pointRadius:3,pointBackgroundColor:tsbData.map(v=>v>0?'#22c55e':'#ff4560')},{data:labels.map(()=>0),borderColor:'rgba(255,255,255,0.15)',borderDash:[4,4],borderWidth:1,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a5a78',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#5a5a78',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'}}}}});
+  document.getElementById('peaking-result').style.display='block';
 }
 
 // ===== program-master.js =====
@@ -590,6 +1059,84 @@ function populateExDatalist(){
 // 有酸素フィールド切替
 // ============================================================
 
+// ===== program.js =====
+function getPrevRecord(exName){
+  const all=DB.arr('trainings').slice().reverse();
+  for(const t of all){
+    if(!t.exercises)continue;
+    const ex=t.exercises.find(e=>e.name===exName&&(parseFloat(e.weight)||0)>0);
+    if(ex)return{date:t.date,sets:ex.sets,reps:ex.reps,weight:ex.weight};
+  }
+  return null;
+}
+
+function selectSession(id){
+  currentSession=id;
+  const prog=getCurrentProgramData();
+  const s=prog.sessions[id];if(!s)return;
+  document.querySelectorAll('[id^="prog-btn-"]').forEach(b=>b.style.opacity=b.id==='prog-btn-'+id?'1':'0.45');
+  document.getElementById('prog-session-name').textContent=s.name;
+  document.getElementById('prog-session-focus').textContent=s.focus;
+  const pk=DB.get('peaking');let phaseType=null,phaseText='フェーズ未設定',phaseClass='badge-gray';
+  if(pk){const sD=new Date(pk.start);const tD=new Date(today());const wN=Math.floor((tD-sD)/(7*86400000));const ph=pk.phases.find(p=>wN>=p.startWeek&&wN<p.startWeek+p.weeks);if(ph){phaseType=ph.type;const n={accumulate:'蓄積期',intensify:'強化期',convert:'変換期 6〜8rep',taper:'テーパー期'};const cl={accumulate:'badge-blue',intensify:'badge-amber',convert:'badge-red',taper:'badge-green'};phaseText=n[ph.type];phaseClass=cl[ph.type];}}
+  document.getElementById('prog-phase-advice').className='badge '+phaseClass;
+  document.getElementById('prog-phase-advice').textContent=phaseText;
+  const rirTable={accumulate:['RIR3〜4','RIR2〜3','RIR1〜2'],intensify:['RIR2〜3','RIR1〜2','RIR0〜1'],convert:['RIR1〜2','RIR1〜2','RIR0〜1'],taper:['RIR3〜4','RIR3〜4','RIR2〜3'],none:['RIR2〜3','RIR1〜2','RIR0〜1']};
+  const rirColTable={accumulate:['#4a9eff','#4a9eff','#f5a623'],intensify:['#4a9eff','#f5a623','#ff4560'],convert:['#f5a623','#f5a623','#ff4560'],taper:['#4a9eff','#4a9eff','#4a9eff'],none:['#4a9eff','#f5a623','#ff4560']};
+  const rirArr=rirTable[phaseType||'none'];const rirColArr=rirColTable[phaseType||'none'];
+  const typeIdx={C:0,M:1,I:2};
+  const typeBg={C:'rgba(255,69,96,0.12)',M:'rgba(74,158,255,0.12)',I:'rgba(167,139,250,0.12)'};
+  const typeCol={C:'#ff4560',M:'#4a9eff',I:'#a78bfa'};
+  const typeShort={C:'CF',M:'CM',I:'ISO'};
+  const pc={'背中':'#4a9eff','胸':'#ff4560','胸・三頭':'#ff4560','四頭':'#22c55e','ハム':'#22c55e','腹':'#888','肩':'#f5a623','肩後部':'#f5a623','三頭':'#a78bfa','二頭':'#a78bfa','カーフ':'#6b7280','内転筋':'#22c55e','臀部':'#22c55e','脚全体':'#22c55e','脊柱起立筋':'#4a9eff','僧帽筋':'#4a9eff','胸下部':'#ff4560'};
+  document.getElementById('prog-exercise-list').innerHTML=
+    '<table><thead><tr><th>#</th><th>種目</th><th>部位</th><th>タイプ</th><th>推奨rep</th><th style="color:var(--accent)">今日のRIR</th></tr></thead><tbody>'+
+    s.exercises.map((e,i)=>{
+      const col=pc[e.part]||'#888';const t=e.rpe||'I';const ti=typeIdx[t]??2;
+      const rirVal=rirArr[ti];const rirCol=rirColArr[ti];
+      return`<tr><td class="mono" style="color:var(--text3);font-size:12px">${i+1}</td><td style="font-size:13px">${e.name}</td><td><span style="font-size:10px;padding:2px 7px;border-radius:10px;background:${col}20;color:${col};border:1px solid ${col}40">${e.part}</span></td><td><span style="font-size:10px;padding:2px 6px;border-radius:4px;background:${typeBg[t]};color:${typeCol[t]};font-weight:500">${typeShort[t]}</span></td><td class="mono" style="font-size:12px">${e.reps}</td><td class="mono" style="color:${rirCol};font-weight:600">${rirVal}</td></tr>`;
+    }).join('')+'</tbody></table>'+
+    '<div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap;font-size:11px;color:var(--text2)">'+
+    '<span><span style="padding:1px 6px;border-radius:3px;background:rgba(255,69,96,0.12);color:#ff4560;font-weight:500">CF</span> コンパウンド（フリー重量）</span>'+
+    '<span><span style="padding:1px 6px;border-radius:3px;background:rgba(74,158,255,0.12);color:#4a9eff;font-weight:500">CM</span> コンパウンド（マシン）</span>'+
+    '<span><span style="padding:1px 6px;border-radius:3px;background:rgba(167,139,250,0.12);color:#a78bfa;font-weight:500">ISO</span> アイソレーション</span></div>';
+  document.getElementById('program-detail').style.display='block';
+  DB.set('lastSession',id);
+}
+
+function loadProgramToTraining(){
+  if(!currentSession)return;
+  const prog=getCurrentProgramData();
+  const s=prog.sessions[currentSession];if(!s)return;
+  document.getElementById('t-type').value='strength';
+  document.getElementById('t-date').value=today();
+  document.getElementById('exercise-list').innerHTML='';
+  exCount=0;
+  s.exercises.forEach(e=>{
+    exCount++;
+    const did='ex'+exCount;
+    const prev=getPrevRecord(e.name);
+    const prevKg=prev?parseFloat(prev.weight):null;
+    const prevReps=prev?parseInt(prev.reps):null;
+    const prevHint=prev
+      ? `<span style="font-size:10px;color:var(--accent4);padding:2px 6px;background:rgba(34,197,94,0.12);border-radius:4px;white-space:nowrap">前回:${prevKg}kg×${prevReps}rep (${prev.date.slice(5)})</span>`
+      : `<span style="font-size:10px;color:var(--text3);padding:2px 6px;background:var(--bg4);border-radius:4px">初回</span>`;
+    const div=document.createElement('div');
+    div.className='input-row';div.id=did;
+    div.style.cssText='margin-bottom:10px;flex-wrap:wrap;gap:6px;align-items:center';
+    div.innerHTML=`<input type="text" value="${e.name}" style="flex:2;min-width:140px"><input type="number" value="1" min="1" max="30" style="max-width:65px" placeholder="セット"><input type="number" value="${prevReps||''}" min="1" max="100" style="max-width:65px" placeholder="回数"><input type="number" value="${prevKg||''}" min="0" max="500" step="0.5" style="max-width:75px" placeholder="kg">${prevHint}<button class="btn btn-sm btn-ghost" onclick="document.getElementById('${did}').remove()">✕</button>`;
+    document.getElementById('exercise-list').appendChild(div);
+  });
+  showPage('training');
+}
+
+
+// ============================================================
+// SHIFT MANAGEMENT
+// ============================================================
+let shiftMonthDelta=0,currentShiftMode='24h';
+c
+
 // ===== training.js =====
 function addExRow(){
   exCount++;const id='ex'+exCount;
@@ -906,6 +1453,11 @@ function updateSmartNutrition(){const c=cfg();const isTr=document.getElementById
   const bEl=document.getElementById('smart-badges');if(bEl){const mc={maintain:'badge-blue',cut:'badge-amber',bulk:'badge-green'};const ml={maintain:'維持',cut:'減量',bulk:'増量'};bEl.innerHTML=`<span class="badge ${mc[autoMode]}">${ml[autoMode]}モード</span>${isTr?'<span class="badge badge-blue">トレ日</span>':'<span class="badge badge-gray">オフ日</span>'}`;}
   const aEl=document.getElementById('smart-advice-box');if(aEl&&bfAlert)aEl.innerHTML=`<div class="alert ${bfAlert.t}">${bfAlert.m}</div>`;else if(aEl)aEl.innerHTML='';
   updateNutritionTotals();}
+
+// ===== sleep.js =====
+function saveSleep(){const bed=document.getElementById('s-bed').value;const wake=document.getElementById('s-wake').value;let dur=0;if(bed&&wake){const[bh,bm]=bed.split(':').map(Number);const[wh,wm]=wake.split(':').map(Number);let m=(wh*60+wm)-(bh*60+bm);if(m<0)m+=1440;dur=Math.round(m/60*10)/10}const fat=parseInt(document.getElementById('s-fatigue').value)||7,sor=parseInt(document.getElementById('s-soreness').value)||7,mot=parseInt(document.getElementById('s-motivation').value)||7,mood=parseInt(document.getElementById('s-mood').value)||7;const wellness=Math.round((fat+sor+mot+mood)/4*10)/10;DB.push('sleeps',{date:document.getElementById('s-date').value,bedtime:bed,waketime:wake,duration:dur,quality:parseInt(document.getElementById('s-quality').value)||3,fatigue:fat,soreness:sor,motivation:mot,mood,wellness,weight:parseFloat(document.getElementById('s-weight').value)||0,id:Date.now()});alert('記録しました！睡眠: '+dur+'h / ウェルネス: '+wellness+'/10');renderSleepCharts();}
+
+function renderSleepCharts(){const sl=DB.arr('sleeps').slice(-7);if(!sl.length)return;const labels=sl.map(s=>s.date.slice(5));const co={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a5a78',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#5a5a78',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}}};if(sleepChart)sleepChart.destroy();sleepChart=new Chart(document.getElementById('sleep-chart'),{type:'bar',data:{labels,datasets:[{data:sl.map(s=>s.duration||0),backgroundColor:'rgba(74,158,255,0.45)',borderColor:'#4a9eff',borderWidth:1,borderRadius:4}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:0,max:12}}}});if(wellnessChart)wellnessChart.destroy();wellnessChart=new Chart(document.getElementById('wellness-chart'),{type:'line',data:{labels,datasets:[{data:sl.map(s=>s.wellness||0),borderColor:'#f5a623',tension:0.4,borderWidth:2,fill:false,pointRadius:5,pointBackgroundColor:'#f5a623'}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:0,max:10}}}});}
 
 // ===== shift.js =====
 const SHIFT_TYPES={
@@ -1403,6 +1955,32 @@ function renderCondSuggestions(history,avgs){
 }
 
 f
+
+// ===== tdee.js =====
+function calcTDEE(){const sex=document.getElementById('td-sex').value;const age=parseInt(document.getElementById('td-age').value)||30;const h=parseFloat(document.getElementById('td-height').value)||175;const w=parseFloat(document.getElementById('td-weight').value)||70;const act=parseFloat(document.getElementById('td-act').value)||1.55;const shift=parseInt(document.getElementById('td-shift').value)||300;let bmr=sex==='male'?10*w+6.25*h-5*age+5:10*w+6.25*h-5*age-161;const tdee=Math.round(bmr*act)+Math.round(shift*3/7)+Math.round(parseInt(document.getElementById('td-tdays').value||4)*30/7);const neat=Math.round(tdee-bmr);document.getElementById('td-bmr').textContent=Math.round(bmr);document.getElementById('td-tdee').textContent=tdee;document.getElementById('td-neat').textContent=neat;const goals=[{l:'減量（-15%）',c:Math.round(tdee*0.85)},{l:'維持',c:tdee},{l:'増量（+10%）',c:Math.round(tdee*1.10)}];document.getElementById('tdee-goal-table').innerHTML='<table><thead><tr><th>モード</th><th>目標kcal</th></tr></thead><tbody>'+goals.map(g=>`<tr><td>${g.l}</td><td class="mono" style="color:var(--accent)">${g.c}</td></tr>`).join('')+'</tbody></table>';const macros=getMacros(tdee,w);document.getElementById('tdee-macro-table').innerHTML='<table><thead><tr><th>栄養素</th><th>量</th><th>根拠</th></tr></thead><tbody>'+`<tr><td>タンパク質</td><td class="mono">${macros.protein}g</td><td class="muted">2.0g/kg (Morton 2018)</td></tr><tr><td>脂質</td><td class="mono">${macros.fat}g</td><td class="muted">総kcalの25%</td></tr><tr><td>炭水化物</td><td class="mono">${macros.carb}g</td><td class="muted">残余から算出</td></tr>`+'</tbody></table>';document.getElementById('tdee-result').style.display='block';const c=cfg();c.tdeeCalc=tdee;c.tdeeweight=w;DB.set('cfg',c);}
+
+function applyTDEE(){const tdee=parseInt(document.getElementById('td-tdee').textContent);if(!tdee){alert('先に算出してください');return}const c=cfg();c.tdee=tdee;DB.set('cfg',c);document.getElementById('cfg-tdee').value=tdee;alert('TDEEを'+tdee+'kcalに設定しました。');}
+
+// ===== settings.js =====
+function saveSettings(){const c={name:document.getElementById('cfg-name').value,dept:document.getElementById('cfg-dept').value,goalweight:parseFloat(document.getElementById('cfg-goalweight').value)||0,goalmode:document.getElementById('cfg-goalmode').value,tdee:parseInt(document.getElementById('cfg-tdee').value)||2800,water:parseInt(document.getElementById('cfg-water').value)||2500};DB.set('cfg',c);alert('設定を保存しました');}
+
+function loadSettings(){const c=cfg();['cfg-name','cfg-dept','cfg-tdee','cfg-water'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=c[id.replace('cfg-','')]||''});if(document.getElementById('cfg-goalmode'))document.getElementById('cfg-goalmode').value=c.goalmode||'maintain';if(document.getElementById('cfg-goalweight'))document.getElementById('cfg-goalweight').value=c.goalweight||'';}
+
+function exportData(){const data={trainings:DB.arr('trainings'),meals:DB.arr('meals'),sleeps:DB.arr('sleeps'),peaking:DB.get('peaking'),cfg:DB.get('cfg'),gut:DB.get('gutData'),bristolLog:DB.arr('bristolLog'),exported:new Date().toISOString()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='peakform_'+today()+'.json';a.click();URL.revokeObjectURL(url);}
+
+function clearAll(){if(confirm('全データを削除しますか？')){['trainings','meals','sleeps','peaking','cfg','gutData','bristolLog'].forEach(k=>localStorage.removeItem('pf_'+k));location.reload();}}
+
+function autoCleanOldData(){
+  // 古いデータを自動削除（パフォーマンス保護）
+  const trainings=DB.arr('trainings');
+  if(trainings.length>500){DB.set('trainings',trainings.slice(-400));console.log('trainings auto-cleaned');}
+  const meals=DB.arr('meals');
+  if(meals.length>1000){DB.set('meals',meals.slice(-800));console.log('meals auto-cleaned');}
+  const sleeps=DB.arr('sleeps');
+  if(sleeps.length>365){DB.set('sleeps',sleeps.slice(-300));console.log('sleeps auto-cleaned');}
+  const bristolLog=DB.arr('bristolLog');
+  if(bristolLog.length>180){DB.set('bristolLog',bristolLog.slice(-150));console.log('bristolLog auto-cleaned');}
+}
 
 // ===== main.js =====
 function init(){
