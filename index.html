@@ -184,6 +184,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   </nav>
   <nav class="nav-section">
     <div class="nav-label">HEALTH</div>
+    <div class="nav-item" onclick="showPage('shift')"><span class="nav-icon">📅</span>シフト管理</div>
     <div class="nav-item" onclick="showPage('gut')"><span class="nav-icon">🌿</span>腸内環境管理</div>
   </nav>
   <nav class="nav-section">
@@ -192,7 +193,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="nav-item" onclick="showPage('analysis')"><span class="nav-icon">∿</span>分析レポート</div>
     <div class="nav-item" onclick="showPage('settings')"><span class="nav-icon">⊙</span>設定</div>
   </nav>
-  <div class="sidebar-footer"><div class="version">PEAK FORM v2.1</div><div class="version" style="margin-top:2px;opacity:0.5">based on sports science</div></div>
+  <div class="sidebar-footer"><div class="version">PEAK FORM v2.4</div><div class="version" style="margin-top:2px;opacity:0.5">based on sports science</div></div>
 </aside>
 <main class="main">
 <div class="topbar">
@@ -286,16 +287,24 @@ input[type=range]:focus{border:none;box-shadow:none}
 
 <!-- PROGRAM -->
 <div class="page" id="page-program">
-  <div class="h2">今日のメニュー — FULL BODY SPLIT</div>
-  <div class="alert alert-info" style="margin-bottom:18px">A→B→C→休養のサイクル。ピーキングフェーズに応じてRIRを調整してください。</div>
+  <div class="row-between" style="margin-bottom:18px">
+    <div><div class="h1">TODAY</div><div class="muted" style="margin-top:4px" id="prog-program-label">—</div></div>
+    <button class="btn btn-sm" onclick="showProgramSelector()" style="gap:6px">⚙ プログラム変更</button>
+  </div>
+  <!-- プログラム選択オーバーレイ -->
+  <div id="prog-selector" style="display:none;margin-bottom:18px">
+    <div class="card card-accent">
+      <div class="card-header-bar"></div>
+      <div class="h3" style="margin-bottom:14px">トレーニングプログラム選択</div>
+      <div id="prog-selector-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:14px"></div>
+      <button class="btn btn-sm btn-ghost" onclick="document.getElementById('prog-selector').style.display="none"">閉じる</button>
+    </div>
+  </div>
+  <div class="alert alert-info" style="margin-bottom:18px" id="prog-cycle-hint">セッションを選択してください</div>
   <div class="card" style="margin-bottom:18px">
     <div class="card-header-bar blue"></div>
     <div class="h3" style="margin-bottom:16px">セッション選択</div>
-    <div class="grid3">
-      <div class="card-sm" id="prog-btn-FBA" onclick="selectSession('FBA')" style="cursor:pointer;border-color:rgba(74,158,255,0.4);text-align:center;padding:20px;transition:all 0.2s"><div style="font-size:30px;margin-bottom:8px;font-family:var(--font-display)">A</div><div style="font-weight:700;color:#4a9eff">FULL BODY A</div><div class="muted" style="margin-top:4px">プレスフォーカス・14種目</div></div>
-      <div class="card-sm" id="prog-btn-FBB" onclick="selectSession('FBB')" style="cursor:pointer;border-color:rgba(245,166,35,0.4);text-align:center;padding:20px;transition:all 0.2s"><div style="font-size:30px;margin-bottom:8px;font-family:var(--font-display)">B</div><div style="font-weight:700;color:#f5a623">FULL BODY B</div><div class="muted" style="margin-top:4px">プルフォーカス・14種目</div></div>
-      <div class="card-sm" id="prog-btn-FBC" onclick="selectSession('FBC')" style="cursor:pointer;border-color:rgba(34,197,94,0.4);text-align:center;padding:20px;transition:all 0.2s"><div style="font-size:30px;margin-bottom:8px;font-family:var(--font-display)">C</div><div style="font-weight:700;color:#22c55e">FULL BODY C</div><div class="muted" style="margin-top:4px">スクワットフォーカス・16種目</div></div>
-    </div>
+    <div id="prog-session-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px"></div>
   </div>
   <div id="program-detail" style="display:none">
     <div class="card card-blue" style="margin-bottom:18px"><div class="row-between"><div><div class="h3" id="prog-session-name">—</div><div class="muted" id="prog-session-focus" style="margin-top:3px"></div></div><div class="row" style="gap:8px"><div id="prog-phase-advice" class="badge badge-blue"></div><button class="btn btn-primary btn-sm" onclick="loadProgramToTraining()">記録画面に読み込む ↗</button></div></div></div>
@@ -318,7 +327,60 @@ input[type=range]:focus{border:none;box-shadow:none}
         <div style="font-size:12px;color:var(--text2);line-height:1.6"><strong style="color:var(--text)">①</strong> 設定レップ範囲の上限を全セット達成する → <strong style="color:var(--text)">②</strong> 次回セッションから重量を+2.5〜5kg引き上げ、レップ目標を下限にリセット → <strong style="color:var(--text)">③</strong> 再び上限に到達するまで継続。この「回数達成→重量UP」サイクルが、プログレッシブオーバーロードを最も安全かつ継続的に実現する実用的な方法として研究で支持されています（Ralston et al. 2017/2020）。</div>
       </div>
     </div>
-    <div class="card"><div class="card-header-bar blue"></div><div class="h3" style="margin-bottom:14px">種目リスト</div><div id="prog-exercise-list"></div></div>
+    <div class="card">
+      <div class="card-header-bar blue"></div>
+      <div class="row-between" style="margin-bottom:14px">
+        <div class="h3">種目リスト</div>
+        <button class="btn btn-sm" onclick="openExerciseCustomizer()" style="font-size:11px">✏ 種目をカスタマイズ</button>
+      </div>
+      <div id="prog-exercise-list"></div>
+    </div>
+    <!-- 種目カスタマイザーパネル -->
+    <div id="exercise-customizer" style="display:none">
+      <div class="card card-purple">
+        <div class="card-header-bar purple"></div>
+        <div class="row-between" style="margin-bottom:14px">
+          <div class="h3">種目カスタマイズ</div>
+          <button class="btn btn-sm btn-ghost" onclick="closeExerciseCustomizer()">✕ 閉じる</button>
+        </div>
+        <div class="alert alert-info" style="margin-bottom:12px;font-size:12px">部位を選んで種目を追加・削除できます。変更はこのプログラム・セッションに保存されます。</div>
+        <div class="field">
+          <label class="label">部位フィルター</label>
+          <div id="part-filter-row" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
+        </div>
+        <div id="customizer-ex-list" style="margin-bottom:14px"></div>
+        <div class="divider"></div>
+        <div class="h3" style="margin-bottom:10px;font-size:13px">種目を追加</div>
+        <div class="grid2" style="margin-bottom:10px">
+          <div class="field">
+            <label class="label">種目名</label>
+            <input type="text" id="custom-ex-name" placeholder="例: インクラインDBプレス" list="ex-datalist">
+            <datalist id="ex-datalist"></datalist>
+          </div>
+          <div class="field">
+            <label class="label">部位</label>
+            <select id="custom-ex-part">
+              <option>胸</option><option>背中</option><option>肩</option><option>肩後部</option>
+              <option>四頭</option><option>ハム</option><option>臀部</option><option>脚全体</option>
+              <option>二頭</option><option>三頭</option><option>腹</option><option>カーフ</option>
+              <option>脊柱起立筋</option><option>僧帽筋</option><option>内転筋</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid3" style="margin-bottom:10px">
+          <div class="field"><label class="label">推奨rep</label><input type="text" id="custom-ex-reps" placeholder="8-12"></div>
+          <div class="field"><label class="label">種目タイプ</label>
+            <select id="custom-ex-type">
+              <option value="C">CF コンパウンド（フリー）</option>
+              <option value="M">CM コンパウンド（マシン）</option>
+              <option value="I" selected>ISO アイソレーション</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:flex-end"><button class="btn btn-primary" style="width:100%" onclick="addCustomExercise()">追加</button></div>
+        </div>
+        <button class="btn btn-primary" onclick="saveCustomExercises()" style="width:100%">この構成を保存</button>
+      </div>
+    </div>
   </div>
   <div class="card">
     <div class="card-header-bar"></div>
@@ -406,6 +468,70 @@ input[type=range]:focus{border:none;box-shadow:none}
   </div>
   <div class="grid2"><div class="card"><div class="card-header-bar blue"></div><div class="h3" style="margin-bottom:14px">睡眠推移（7日）</div><div class="chart-wrap" style="height:160px"><canvas id="sleep-chart"></canvas></div></div><div class="card"><div class="card-header-bar amber"></div><div class="h3" style="margin-bottom:14px">ウェルネス推移（7日）</div><div class="chart-wrap" style="height:160px"><canvas id="wellness-chart"></canvas></div></div></div>
 </div>
+<!-- SHIFT -->
+<div class="page" id="page-shift">
+  <div class="row-between" style="margin-bottom:18px">
+    <div><div class="h1">SHIFT</div><div class="muted" style="margin-top:4px">消防シフトカレンダー管理</div></div>
+    <div class="row" style="gap:8px"><span id="shift-month-label" class="mono" style="font-size:14px"></span></div>
+  </div>
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar blue"></div>
+    <div class="row-between" style="margin-bottom:14px">
+      <div class="h3">シフトカレンダー</div>
+      <div class="row" style="gap:6px">
+        <button class="btn btn-sm btn-ghost" onclick="shiftMonthOffset(-1)">◀</button>
+        <button class="btn btn-sm btn-ghost" onclick="shiftMonthOffset(1)">▶</button>
+        <button class="btn btn-sm" onclick="shiftMonthOffset(0)">今月</button>
+      </div>
+    </div>
+    <div class="row-between" style="margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="row" style="gap:6px;flex-wrap:wrap">
+        <span style="font-size:11px;font-weight:500;color:var(--text2)">タップして登録：</span>
+        <span class="badge badge-red" style="cursor:pointer" id="shift-mode-24" onclick="setShiftMode('24h')">24h勤務</span>
+        <span class="badge badge-gray" style="cursor:pointer" id="shift-mode-off" onclick="setShiftMode('off')">非番</span>
+        <span class="badge badge-blue" style="cursor:pointer" id="shift-mode-rest" onclick="setShiftMode('rest')">週休</span>
+        <span class="badge badge-green" style="cursor:pointer" id="shift-mode-train" onclick="setShiftMode('gym')">ジム</span>
+        <span class="badge badge-amber" style="cursor:pointer" id="shift-mode-cardio" onclick="setShiftMode('cardio')">有酸素</span>
+        <span class="badge badge-gray" style="cursor:pointer" id="shift-mode-clear" onclick="setShiftMode('clear')">クリア</span>
+      </div>
+      <div class="badge badge-blue" id="shift-cur-mode-label">モード: 24h勤務</div>
+    </div>
+    <div class="week-row" style="margin-bottom:4px"><div></div><div class="day-header">月</div><div class="day-header">火</div><div class="day-header">水</div><div class="day-header">木</div><div class="day-header">金</div><div class="day-header">土</div><div class="day-header">日</div></div>
+    <div id="shift-calendar-grid"></div>
+  </div>
+  <div class="grid2" style="margin-bottom:18px">
+    <div class="card card-blue">
+      <div class="card-header-bar blue"></div>
+      <div class="h3" style="margin-bottom:12px">今月のシフト集計</div>
+      <div id="shift-summary" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="card card-amber">
+      <div class="card-header-bar amber"></div>
+      <div class="h3" style="margin-bottom:12px">ACWR計算（負荷管理）</div>
+      <div id="shift-acwr"></div>
+      <div class="muted" style="font-size:11px;margin-top:10px;line-height:1.6">24h勤務 = 負荷800 / 非番 = 150 / ジム = 記録値 / 有酸素 = 200。ACWR 0.8〜1.3がスイートスポット（Firefighter Nation 2024）。</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header-bar green"></div>
+    <div class="h3" style="margin-bottom:10px">シフトパターン設定（繰り返し登録）</div>
+    <div class="muted" style="margin-bottom:12px;font-size:12px">東京消防庁の標準パターン（3日サイクル：24h勤務→非番→週休）を一括登録できます。</div>
+    <div class="grid3" style="margin-bottom:12px">
+      <div class="field"><label class="label">開始日</label><input type="date" id="shift-pattern-start"></div>
+      <div class="field"><label class="label">登録週数</label><input type="number" id="shift-pattern-weeks" value="8" min="1" max="26"></div>
+      <div class="field"><label class="label">パターン</label>
+        <select id="shift-pattern-type">
+          <option value="tfd">東消標準（24h→非番→週休）</option>
+          <option value="tfd2">東消変形（24h→非番→週休×2）</option>
+          <option value="custom">カスタム</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="applyShiftPattern()">パターンを一括登録</button>
+    <button class="btn btn-danger btn-sm" onclick="clearShiftMonth()" style="margin-left:10px">今月をクリア</button>
+  </div>
+</div>
+
 <!-- GUT HEALTH -->
 <div class="page" id="page-gut">
   <div class="row-between" style="margin-bottom:18px">
@@ -966,7 +1092,7 @@ const fmtInt=n=>isFinite(n)?Math.round(n):'—';
 const fmt1=n=>isFinite(n)?Number(n).toFixed(1):'—';
 const typeLabel={strength:'筋力',hiit:'HIIT',cardio:'有酸素',functional:'機能',mobility:'回復',firefighting:'消防訓練'};
 const mealLabel={breakfast:'朝食',preworkout:'トレ前',postworkout:'トレ後',lunch:'昼食',dinner:'夕食',snack:'間食'};
-const pageNames={dashboard:'ダッシュボード',peaking:'ピーキングプランナー',program:'今日のメニュー',training:'トレーニング記録',nutrition:'栄養管理',sleep:'睡眠・回復',gut:'腸内環境管理',tdee:'TDEEカリキュレーター',analysis:'分析レポート',settings:'設定'};
+const pageNames={dashboard:'ダッシュボード',peaking:'ピーキングプランナー',program:'今日のメニュー',training:'トレーニング記録',nutrition:'栄養管理',sleep:'睡眠・回復',shift:'シフト管理',gut:'腸内環境管理',tdee:'TDEEカリキュレーター',analysis:'分析レポート',settings:'設定'};
 
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -980,6 +1106,7 @@ function showPage(id){
   if(id==='analysis'){renderAnalysis();updateWeeklyWeightPanel();updateMiniCut();}
   if(id==='nutrition'){updateNutritionGoals();updateSmartNutrition();renderMealLog();updateNutritionTotals();}
   if(id==='sleep')renderSleepCharts();
+  if(id==='shift')renderShiftPage();
   if(id==='gut')renderGutPage();
   if(id==='training')renderTrainingLog();
 }
@@ -1014,7 +1141,7 @@ function computeWeeklyVolume(){
 
   // FBP種目データから部位タイプを引く
   const exTypeMap={};
-  Object.values(FBP.sessions).forEach(s=>{s.exercises.forEach(e=>{exTypeMap[e.name]={part:e.part,rpe:e.rpe||'I'};});});
+  const curProg=getCurrentProgramData();Object.values(curProg.sessions).forEach(s=>{s.exercises.forEach(e=>{exTypeMap[e.name]={part:e.part,rpe:e.rpe||'I'};});});
 
   // コンパウンド種目の補助筋マップ
   const compoundAssist={
@@ -1337,15 +1464,114 @@ function autoCleanOldData(){
   if(bristolLog.length>180){DB.set('bristolLog',bristolLog.slice(-150));console.log('bristolLog auto-cleaned');}
 }
 
-const FBP={sessions:{
-  FBA:{name:'FULL BODY A',focus:'プレスフォーカス',color:'#4a9eff',exercises:[{name:'ワイドグリップチンニング（広背筋）',reps:'6-10',part:'背中',rpe:'C'},{name:'オーバーグリップマシンロウ（上背部）',reps:'8-12',part:'背中',rpe:'M'},{name:'S/Aケーブルプルダウン',reps:'10-15',part:'背中',rpe:'I'},{name:'スミスマシン ハイインクラインプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'HSマシンペックフライ',reps:'10-15',part:'胸',rpe:'I'},{name:'ディップス',reps:'8-12',part:'胸・三頭',rpe:'C'},{name:'ワンレッグレッグエクステンション',reps:'10-15',part:'四頭',rpe:'I'},{name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},{name:'マシンアダクター',reps:'12-15',part:'内転筋',rpe:'I'},{name:'クロスボディケーブルエクステンション',reps:'12-15',part:'三頭',rpe:'I'},{name:'S/A DBプリチャーカール',reps:'10-15',part:'二頭',rpe:'I'},{name:'マシン サイドレイズ',reps:'12-20',part:'肩',rpe:'I'},{name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'},{name:'マシンアブクランチ',reps:'AMRAP',part:'腹',rpe:'I'}]},
-  FBB:{name:'FULL BODY B',focus:'プルフォーカス',color:'#f5a623',exercises:[{name:'ケーブルYレイズ',reps:'12-15',part:'肩後部',rpe:'I'},{name:'HSプレートロードインクラインプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'スミスマシン フラットプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'スミスマシン JMプレス',reps:'10-15',part:'三頭',rpe:'M'},{name:'ワイドグリップラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},{name:'チェストサポーテッド T-BARロウ',reps:'8-12',part:'背中',rpe:'M'},{name:'S/Aケーブルプルダウン',reps:'10-15',part:'背中',rpe:'I'},{name:'ハイパーエクステンション',reps:'10-15',part:'脊柱起立筋',rpe:'C'},{name:'45°レッグプレス',reps:'10-15',part:'脚全体',rpe:'M'},{name:'ワンレッグレッグカール',reps:'10-15',part:'ハム',rpe:'I'},{name:'オルタネイトDBカール（スピネイト）',reps:'10-12',part:'二頭',rpe:'I'},{name:'ケーブルトライセプスプッシュダウン',reps:'12-15',part:'三頭',rpe:'I'},{name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'},{name:'マシンアブクランチ',reps:'AMRAP',part:'腹',rpe:'I'}]},
-  FBC:{name:'FULL BODY C',focus:'スクワットパターンフォーカス',color:'#22c55e',exercises:[{name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},{name:'スミスマシン スクワット',reps:'8-12',part:'四頭',rpe:'C'},{name:'マシンヒッププレス',reps:'10-15',part:'臀部',rpe:'M'},{name:'レッグエクステンション',reps:'10-15',part:'四頭',rpe:'I'},{name:'Vバーラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},{name:'ケルソーシュラッグ',reps:'10-15',part:'僧帽筋',rpe:'M'},{name:'リバースペックフライ',reps:'12-15',part:'肩後部',rpe:'I'},{name:'マシンフラットチェストプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'マシンショルダープレス',reps:'8-12',part:'肩',rpe:'M'},{name:'ケーブルデクラインフライ',reps:'12-15',part:'胸下部',rpe:'I'},{name:'EZバープッシュダウン',reps:'12-15',part:'三頭',rpe:'I'},{name:'インクラインDBカール',reps:'10-12',part:'二頭',rpe:'I'},{name:'ハンマーカール',reps:'10-12',part:'二頭',rpe:'I'},{name:'DBサイドレイズ',reps:'12-20',part:'肩',rpe:'I'},{name:'ハンギングレッグレイズ',reps:'AMRAP',part:'腹',rpe:'I'},{name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'}]}
-}};
-let currentSession=null;
+// ========= プログラムデータ定義 =========
+const PROGRAMS={
+  FBS:{id:'FBS',name:'FULL BODY SPLIT',abbr:'FBS',desc:'SGIR HQ PREMIUM準拠・全身3分割',color:'#4a9eff',freq:'週3〜4回',
+    sessions:{FBA:{name:'FULL BODY A',focus:'プレスフォーカス',color:'#4a9eff',letter:'A'},FBB:{name:'FULL BODY B',focus:'プルフォーカス',color:'#f5a623',letter:'B'},FBC:{name:'FULL BODY C',focus:'スクワットフォーカス',color:'#22c55e',letter:'C'}},
+    cycle:['FBA','FBB','FBC'],scheduleHint:'A→B→C→休養のサイクル'},
+  PPL:{id:'PPL',name:'PPL SPLIT',abbr:'PPL',desc:'Push・Pull・Legs 3分割',color:'#f5a623',freq:'週3〜6回',
+    sessions:{PUSH:{name:'PUSH DAY',focus:'胸・肩・三頭筋',color:'#ff4560',letter:'P'},PULL:{name:'PULL DAY',focus:'背中・二頭筋',color:'#4a9eff',letter:'L'},LEGS:{name:'LEGS DAY',focus:'脚・臀部・腹',color:'#22c55e',letter:'L'}},
+    cycle:['PUSH','PULL','LEGS'],scheduleHint:'Push→Pull→Legs→休養のサイクル'},
+  PPL_LU:{id:'PPL_LU',name:'PPL + LOWER/UPPER',abbr:'PPL+LU',desc:'PPLにLower・Upperを組み合わせた5分割',color:'#a78bfa',freq:'週5回',
+    sessions:{PUSH:{name:'PUSH DAY',focus:'胸・肩・三頭',color:'#ff4560',letter:'P'},PULL:{name:'PULL DAY',focus:'背中・二頭',color:'#4a9eff',letter:'P'},LEGS:{name:'LEGS DAY',focus:'脚全体',color:'#22c55e',letter:'L'},UPPER:{name:'UPPER DAY',focus:'上半身',color:'#f5a623',letter:'U'},LOWER:{name:'LOWER DAY',focus:'下半身',color:'#6b7280',letter:'L'}},
+    cycle:['PUSH','PULL','LEGS','UPPER','LOWER'],scheduleHint:'Push→Pull→Legs→Upper→Lower の5日サイクル'},
+  LU:{id:'LU',name:'LOWER / UPPER',abbr:'L/U',desc:'上半身・下半身の2分割',color:'#22c55e',freq:'週2〜4回',
+    sessions:{UPPER:{name:'UPPER DAY',focus:'胸・背中・肩・腕',color:'#4a9eff',letter:'U'},LOWER:{name:'LOWER DAY',focus:'脚・臀部・ハム・腹',color:'#22c55e',letter:'L'}},
+    cycle:['UPPER','LOWER'],scheduleHint:'Upper→Lower→休養 または Upper→Lower×2'}
+};
+
+const DEFAULT_EXERCISES={
+  FBS_FBA:[{name:'ワイドグリップチンニング（広背筋）',reps:'6-10',part:'背中',rpe:'C'},{name:'オーバーグリップマシンロウ（上背部）',reps:'8-12',part:'背中',rpe:'M'},{name:'S/Aケーブルプルダウン',reps:'10-15',part:'背中',rpe:'I'},{name:'スミスマシン ハイインクラインプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'HSマシンペックフライ',reps:'10-15',part:'胸',rpe:'I'},{name:'ディップス',reps:'8-12',part:'胸・三頭',rpe:'C'},{name:'ワンレッグレッグエクステンション',reps:'10-15',part:'四頭',rpe:'I'},{name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},{name:'マシンアダクター',reps:'12-15',part:'内転筋',rpe:'I'},{name:'クロスボディケーブルエクステンション',reps:'12-15',part:'三頭',rpe:'I'},{name:'S/A DBプリチャーカール',reps:'10-15',part:'二頭',rpe:'I'},{name:'マシン サイドレイズ',reps:'12-20',part:'肩',rpe:'I'},{name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'},{name:'マシンアブクランチ',reps:'AMRAP',part:'腹',rpe:'I'}],
+  FBS_FBB:[{name:'ケーブルYレイズ',reps:'12-15',part:'肩後部',rpe:'I'},{name:'HSプレートロードインクラインプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'スミスマシン フラットプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'スミスマシン JMプレス',reps:'10-15',part:'三頭',rpe:'M'},{name:'ワイドグリップラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},{name:'チェストサポーテッド T-BARロウ',reps:'8-12',part:'背中',rpe:'M'},{name:'S/Aケーブルプルダウン',reps:'10-15',part:'背中',rpe:'I'},{name:'ハイパーエクステンション',reps:'10-15',part:'脊柱起立筋',rpe:'C'},{name:'45°レッグプレス',reps:'10-15',part:'脚全体',rpe:'M'},{name:'ワンレッグレッグカール',reps:'10-15',part:'ハム',rpe:'I'},{name:'オルタネイトDBカール（スピネイト）',reps:'10-12',part:'二頭',rpe:'I'},{name:'ケーブルトライセプスプッシュダウン',reps:'12-15',part:'三頭',rpe:'I'},{name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'},{name:'マシンアブクランチ',reps:'AMRAP',part:'腹',rpe:'I'}],
+  FBS_FBC:[{name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},{name:'スミスマシン スクワット',reps:'8-12',part:'四頭',rpe:'C'},{name:'マシンヒッププレス',reps:'10-15',part:'臀部',rpe:'M'},{name:'レッグエクステンション',reps:'10-15',part:'四頭',rpe:'I'},{name:'Vバーラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},{name:'ケルソーシュラッグ',reps:'10-15',part:'僧帽筋',rpe:'M'},{name:'リバースペックフライ',reps:'12-15',part:'肩後部',rpe:'I'},{name:'マシンフラットチェストプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'マシンショルダープレス',reps:'8-12',part:'肩',rpe:'M'},{name:'ケーブルデクラインフライ',reps:'12-15',part:'胸下部',rpe:'I'},{name:'EZバープッシュダウン',reps:'12-15',part:'三頭',rpe:'I'},{name:'インクラインDBカール',reps:'10-12',part:'二頭',rpe:'I'},{name:'ハンマーカール',reps:'10-12',part:'二頭',rpe:'I'},{name:'DBサイドレイズ',reps:'12-20',part:'肩',rpe:'I'},{name:'ハンギングレッグレイズ',reps:'AMRAP',part:'腹',rpe:'I'},{name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'}],
+  PPL_PUSH:[{name:'バーベルベンチプレス',reps:'6-10',part:'胸',rpe:'C'},{name:'インクラインDBプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'ケーブルフライ',reps:'12-15',part:'胸',rpe:'I'},{name:'バーベルOHプレス',reps:'6-10',part:'肩',rpe:'C'},{name:'DBサイドレイズ',reps:'12-20',part:'肩',rpe:'I'},{name:'トライセプスプッシュダウン',reps:'12-15',part:'三頭',rpe:'I'},{name:'OHトライセプスエクステンション',reps:'10-15',part:'三頭',rpe:'I'},{name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'}],
+  PPL_PULL:[{name:'デッドリフト',reps:'3-6',part:'背中',rpe:'C'},{name:'バーベルロウ',reps:'6-10',part:'背中',rpe:'C'},{name:'ラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},{name:'ケーブルロウ',reps:'10-15',part:'背中',rpe:'M'},{name:'フェイスプル',reps:'15-20',part:'肩後部',rpe:'I'},{name:'リバースペックフライ',reps:'12-15',part:'肩後部',rpe:'I'},{name:'バーベルカール',reps:'8-12',part:'二頭',rpe:'C'},{name:'ハンマーカール',reps:'10-12',part:'二頭',rpe:'I'}],
+  PPL_LEGS:[{name:'バーベルスクワット',reps:'4-8',part:'四頭',rpe:'C'},{name:'レッグプレス',reps:'8-12',part:'四頭',rpe:'M'},{name:'レッグエクステンション',reps:'12-15',part:'四頭',rpe:'I'},{name:'ルーマニアンデッドリフト',reps:'6-10',part:'ハム',rpe:'C'},{name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},{name:'ヒップスラスト',reps:'8-12',part:'臀部',rpe:'M'},{name:'カーフレイズ',reps:'12-20',part:'カーフ',rpe:'I'},{name:'ハンギングレッグレイズ',reps:'AMRAP',part:'腹',rpe:'I'}],
+  PPL_LU_PUSH:'PPL_PUSH',PPL_LU_PULL:'PPL_PULL',PPL_LU_LEGS:'PPL_LEGS',
+  PPL_LU_UPPER:[{name:'インクラインDBプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'ケーブルフライ',reps:'12-15',part:'胸',rpe:'I'},{name:'ラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},{name:'ケーブルロウ',reps:'10-15',part:'背中',rpe:'M'},{name:'DBショルダープレス',reps:'8-12',part:'肩',rpe:'M'},{name:'DBサイドレイズ',reps:'15-20',part:'肩',rpe:'I'},{name:'トライセプスプッシュダウン',reps:'12-15',part:'三頭',rpe:'I'},{name:'バーベルカール',reps:'8-12',part:'二頭',rpe:'C'}],
+  PPL_LU_LOWER:[{name:'バーベルスクワット',reps:'4-8',part:'四頭',rpe:'C'},{name:'レッグプレス',reps:'8-12',part:'四頭',rpe:'M'},{name:'ルーマニアンデッドリフト',reps:'6-10',part:'ハム',rpe:'C'},{name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},{name:'ヒップスラスト',reps:'8-12',part:'臀部',rpe:'M'},{name:'カーフレイズ',reps:'12-20',part:'カーフ',rpe:'I'},{name:'アブクランチ',reps:'AMRAP',part:'腹',rpe:'I'}],
+  LU_UPPER:[{name:'バーベルベンチプレス',reps:'6-10',part:'胸',rpe:'C'},{name:'インクラインDBプレス',reps:'8-12',part:'胸',rpe:'M'},{name:'バーベルロウ',reps:'6-10',part:'背中',rpe:'C'},{name:'ラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},{name:'バーベルOHプレス',reps:'6-10',part:'肩',rpe:'C'},{name:'DBサイドレイズ',reps:'15-20',part:'肩',rpe:'I'},{name:'トライセプスプッシュダウン',reps:'12-15',part:'三頭',rpe:'I'},{name:'バーベルカール',reps:'8-12',part:'二頭',rpe:'C'}],
+  LU_LOWER:[{name:'バーベルスクワット',reps:'4-8',part:'四頭',rpe:'C'},{name:'レッグプレス',reps:'8-12',part:'四頭',rpe:'M'},{name:'レッグエクステンション',reps:'12-15',part:'四頭',rpe:'I'},{name:'ルーマニアンデッドリフト',reps:'6-10',part:'ハム',rpe:'C'},{name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},{name:'ヒップスラスト',reps:'8-12',part:'臀部',rpe:'M'},{name:'カーフレイズ',reps:'12-20',part:'カーフ',rpe:'I'},{name:'ハンギングレッグレイズ',reps:'AMRAP',part:'腹',rpe:'I'}]
+};
+
+function getCurrentProgram(){return DB.get('programType')||'FBS';}
+function setCurrentProgram(pid){DB.set('programType',pid);DB.set('lastSession',null);initProgramPage();}
+function getExercises(pid,sid){
+  const key='customEx_'+pid+'_'+sid;
+  const custom=DB.get(key);if(custom&&custom.length)return custom;
+  const defKey=pid+'_'+sid;const def=DEFAULT_EXERCISES[defKey];
+  if(typeof def==='string')return DEFAULT_EXERCISES[def]||[];
+  return def||[];
+}
+function saveExercises(pid,sid,exArr){DB.set('customEx_'+pid+'_'+sid,exArr);}
+
+function showProgramSelector(){
+  const el=document.getElementById('prog-selector');if(!el)return;
+  el.style.display=el.style.display==='none'?'block':'none';
+  const grid=document.getElementById('prog-selector-grid');if(!grid)return;
+  const cur=getCurrentProgram();
+  grid.innerHTML=Object.values(PROGRAMS).map(p=>`<div onclick="setCurrentProgram('${p.id}')" style="cursor:pointer;background:${p.id===cur?p.color+'22':'var(--bg3)'};border:1px solid ${p.id===cur?p.color:'var(--border)'};border-radius:var(--rs);padding:14px;transition:all 0.2s"><div style="font-weight:700;color:${p.color};font-size:13px;margin-bottom:3px">${p.name}</div><div class="muted" style="font-size:11px;margin-bottom:3px">${p.desc}</div><div style="font-size:10px;color:var(--text3)">${p.freq}${p.id===cur?' <span style="color:'+p.color+';font-weight:600">✓ 使用中</span>':''}</div></div>`).join('');
+}
+
+
+let custPid='',custSid='',custExArr=[];
+function openExerciseCustomizer(){
+  custPid=getCurrentProgram();custSid=currentSession;
+  custExArr=JSON.parse(JSON.stringify(getExercises(custPid,custSid)));
+  document.getElementById('exercise-customizer').style.display='block';
+  renderCustomizerList();
+  // 全種目名リストをdatalistに
+  const allNames=new Set();Object.values(DEFAULT_EXERCISES).forEach(v=>{if(Array.isArray(v))v.forEach(e=>allNames.add(e.name));});
+  document.getElementById('ex-datalist').innerHTML=[...allNames].map(n=>`<option value="${n}">`).join('');
+}
+function closeExerciseCustomizer(){document.getElementById('exercise-customizer').style.display='none';}
+function renderCustomizerList(){
+  const el=document.getElementById('customizer-ex-list');if(!el)return;
+  if(!custExArr.length){el.innerHTML='<div class="muted">種目がありません</div>';return;}
+  const typeBg={C:'rgba(255,69,96,0.12)',M:'rgba(74,158,255,0.12)',I:'rgba(167,139,250,0.12)'};
+  const typeCol={C:'#ff4560',M:'#4a9eff',I:'#a78bfa'};const typeShort={C:'CF',M:'CM',I:'ISO'};
+  el.innerHTML='<div style="display:flex;flex-direction:column;gap:5px">'+custExArr.map((e,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg3);border-radius:var(--rs)">
+      <div style="flex:1;font-size:13px">${e.name}</div>
+      <span style="font-size:10px;padding:1px 6px;border-radius:3px;background:${typeBg[e.rpe||'I']};color:${typeCol[e.rpe||'I']}">${typeShort[e.rpe||'I']}</span>
+      <span style="font-size:10px;color:var(--text3);padding:1px 6px;background:var(--bg4);border-radius:3px">${e.part}</span>
+      <span class="mono" style="font-size:11px;color:var(--text3);min-width:45px">${e.reps}</span>
+      <button class="btn btn-sm btn-ghost" style="padding:4px 6px;color:var(--accent3)" onclick="moveEx(${i},-1)" ${i===0?'disabled':''}>↑</button>
+      <button class="btn btn-sm btn-ghost" style="padding:4px 6px;color:var(--accent3)" onclick="moveEx(${i},1)" ${i===custExArr.length-1?'disabled':''}>↓</button>
+      <button class="btn btn-sm btn-ghost" style="padding:4px 6px;color:var(--accent)" onclick="removeEx(${i})">✕</button>
+    </div>`).join('')+'</div>';
+}
+function moveEx(i,dir){if(i+dir<0||i+dir>=custExArr.length)return;[custExArr[i],custExArr[i+dir]]=[custExArr[i+dir],custExArr[i]];renderCustomizerList();}
+function removeEx(i){custExArr.splice(i,1);renderCustomizerList();}
+function addCustomExercise(){
+  const name=document.getElementById('custom-ex-name').value.trim();
+  const part=document.getElementById('custom-ex-part').value;
+  const reps=document.getElementById('custom-ex-reps').value||'8-12';
+  const rpe=document.getElementById('custom-ex-type').value;
+  if(!name)return;
+  custExArr.push({name,part,reps,rpe});renderCustomizerList();
+  document.getElementById('custom-ex-name').value='';
+}
+function saveCustomExercises(){
+  saveExercises(custPid,custSid,custExArr);
+  closeExerciseCustomizer();selectSession(custSid);
+}
+
+function getPrevRecord(exName){
+  const all=DB.arr('trainings').slice().reverse();
+  for(const t of all){
+    if(!t.exercises)continue;
+    const ex=t.exercises.find(e=>e.name===exName&&(parseFloat(e.weight)||0)>0);
+    if(ex)return{date:t.date,sets:ex.sets,reps:ex.reps,weight:ex.weight};
+  }
+  return null;
+}
+
 function selectSession(id){
-  currentSession=id;const s=FBP.sessions[id];
-  ['FBA','FBB','FBC'].forEach(k=>{const b=document.getElementById('prog-btn-'+k);if(b)b.style.opacity=k===id?'1':'0.45';});
+  currentSession=id;
+  const prog=getCurrentProgramData();
+  const s=prog.sessions[id];if(!s)return;
+  document.querySelectorAll('[id^="prog-btn-"]').forEach(b=>b.style.opacity=b.id==='prog-btn-'+id?'1':'0.45');
   document.getElementById('prog-session-name').textContent=s.name;
   document.getElementById('prog-session-focus').textContent=s.focus;
   const pk=DB.get('peaking');let phaseType=null,phaseText='フェーズ未設定',phaseClass='badge-gray';
@@ -1374,19 +1600,11 @@ function selectSession(id){
   document.getElementById('program-detail').style.display='block';
   DB.set('lastSession',id);
 }
-function getPrevRecord(exName){
-  // 同種目名を含む過去セッションを新しい順に検索
-  const all=DB.arr('trainings').slice().reverse();
-  for(const t of all){
-    if(!t.exercises)continue;
-    const ex=t.exercises.find(e=>e.name===exName&&(parseFloat(e.weight)||0)>0);
-    if(ex)return{date:t.date,sets:ex.sets,reps:ex.reps,weight:ex.weight};
-  }
-  return null;
-}
+
 function loadProgramToTraining(){
   if(!currentSession)return;
-  const s=FBP.sessions[currentSession];
+  const prog=getCurrentProgramData();
+  const s=prog.sessions[currentSession];if(!s)return;
   document.getElementById('t-type').value='strength';
   document.getElementById('t-date').value=today();
   document.getElementById('exercise-list').innerHTML='';
@@ -1397,39 +1615,478 @@ function loadProgramToTraining(){
     const prev=getPrevRecord(e.name);
     const prevKg=prev?parseFloat(prev.weight):null;
     const prevReps=prev?parseInt(prev.reps):null;
-    // Double Progression: 前回重量を初期値、前回repは参考表示
     const prevHint=prev
       ? `<span style="font-size:10px;color:var(--accent4);padding:2px 6px;background:rgba(34,197,94,0.12);border-radius:4px;white-space:nowrap">前回:${prevKg}kg×${prevReps}rep (${prev.date.slice(5)})</span>`
       : `<span style="font-size:10px;color:var(--text3);padding:2px 6px;background:var(--bg4);border-radius:4px">初回</span>`;
     const div=document.createElement('div');
-    div.className='input-row';
-    div.id=did;
+    div.className='input-row';div.id=did;
     div.style.cssText='margin-bottom:10px;flex-wrap:wrap;gap:6px;align-items:center';
     div.innerHTML=`<input type="text" value="${e.name}" style="flex:2;min-width:140px"><input type="number" value="1" min="1" max="30" style="max-width:65px" placeholder="セット"><input type="number" value="${prevReps||''}" min="1" max="100" style="max-width:65px" placeholder="回数"><input type="number" value="${prevKg||''}" min="0" max="500" step="0.5" style="max-width:75px" placeholder="kg">${prevHint}<button class="btn btn-sm btn-ghost" onclick="document.getElementById('${did}').remove()">✕</button>`;
     document.getElementById('exercise-list').appendChild(div);
   });
   showPage('training');
 }
-function initProgramPage(){const last=DB.get('lastSession');const nextMap={FBA:'FBB',FBB:'FBC',FBC:'FBA'};selectSession(last&&nextMap[last]?nextMap[last]:'FBA');}
 
-let selectedBristol=null;
-function getGutData(){return DB.get('gutData')||{completedSteps:[],taskStates:{}}}
-function saveGutData(d){DB.set('gutData',d)}
-function toggleStepComplete(i){const d=getGutData();const idx=d.completedSteps.indexOf(i);if(idx>-1)d.completedSteps.splice(idx,1);else d.completedSteps.push(i);saveGutData(d);renderGutPage();}
-function toggleTask(si,ti){const d=getGutData();const k=`${si}-${ti}`;d.taskStates[k]=!d.taskStates[k];saveGutData(d);renderGutPage();}
-function selectBristol(type){selectedBristol=type;for(let i=1;i<=7;i++){const b=document.getElementById('brs-'+i);if(b)b.classList.toggle('selected',i===type);}const msgs={1:{c:'alert-warn',m:'Type 1（硬い塊）: 重度の便秘。水分を大幅に増やしマグネシウム補給を検討してください。'},2:{c:'alert-warn',m:'Type 2（塊状）: 軽度の便秘。食物繊維と水分を増やしてください。'},3:{c:'alert-info',m:'Type 3（ひび割れ）: やや硬め。水分・発酵食品を追加すると改善します。'},4:{c:'alert-success',m:'Type 4（理想的）: 完璧な状態です！腸内環境が良好です。'},5:{c:'alert-info',m:'Type 5（柔らかい）: やや柔らかめ。不溶性食物繊維を増やしてみてください。'},6:{c:'alert-warn',m:'Type 6（泥状）: 下痢気味。消化に負担のかかる食事・ストレスを減らしてください。'},7:{c:'alert-danger',m:'Type 7（水様）: 急性下痢。水分と電解質の補給を最優先。2日以上続く場合は医療機関へ。'}};const adv=document.getElementById('bristol-advice');const m=msgs[type];if(adv&&m){adv.className='alert '+m.c;adv.textContent=m.m;adv.style.display='block';}}
-function saveBristolLog(){if(!selectedBristol){alert('便のタイプを選択してください');return}DB.push('bristolLog',{date:today(),type:selectedBristol,id:Date.now()});alert('記録しました（Type '+selectedBristol+'）');renderBristolStreak();}
-function renderBristolStreak(){const log=DB.arr('bristolLog');const lbd={};log.forEach(l=>lbd[l.date]=l.type);const el=document.getElementById('bristol-streak');if(!el)return;el.innerHTML='';const todayD=new Date();for(let i=13;i>=0;i--){const d=new Date(todayD);d.setDate(todayD.getDate()-i);const ds=d.toISOString().slice(0,10);const type=lbd[ds];const div=document.createElement('div');div.className='streak-day'+(type?' logged':'')+(i===0?' today-s':'');div.title=ds+(type?' Type '+type:'');div.innerHTML=`<span style="font-size:9px">${d.getDate()}</span>${type?`<span style="font-size:9px">T${type}</span>`:''}`;el.appendChild(div);}}
-function renderGutPage(){
-  const data=getGutData();const completed=data.completedSteps.length;
-  const fill=document.getElementById('gut-progress-fill');if(fill)fill.style.width=(completed/5*100)+'%';
-  const sl=document.getElementById('gut-step-label');if(sl)sl.textContent=`ステップ ${completed}/5`;
-  const pd=document.getElementById('gut-progress-desc');if(pd){if(completed===0)pd.textContent='STEP 1から始めましょう。まず有害物質の排除が最優先です。';else if(completed===5)pd.textContent='✓ 全ステップ完了！継続的な管理で腸内環境を最高の状態に保ちましょう。';else pd.textContent=`STEP ${completed+1}に進みましょう。積み上げが腸内環境を変えていきます。`;}
-  const dots=document.querySelectorAll('.gut-step-dot');dots.forEach((dot,i)=>{dot.classList.remove('done','active');if(data.completedSteps.includes(i))dot.classList.add('done');else if(i===completed)dot.classList.add('active');});
-  const badges=[{l:'未開始',c:'badge-gray'},{l:'開始済み',c:'badge-blue'},{l:'進行中',c:'badge-blue'},{l:'良好',c:'badge-amber'},{l:'優秀',c:'badge-green'},{l:'最適化完了',c:'badge-green'}];const b=badges[completed]||badges[0];const be=document.getElementById('gut-overall-badge');if(be)be.innerHTML=`<span class="badge ${b.c}">${b.l}</span>`;
-  for(let s=0;s<5;s++){const card=document.getElementById('gut-step-'+s);const check=document.getElementById('sc-'+s);if(!card||!check)continue;const isDone=data.completedSteps.includes(s);const isActive=!isDone&&s===completed;card.className='step-card'+(isDone?' completed':'')+(isActive?' active-step':'');check.className='step-check'+(isDone?' done':'');check.textContent=isDone?'✓':'';}
-  for(let si=0;si<5;si++){const tl=document.getElementById('gut-tasks-'+si);if(!tl)continue;tl.querySelectorAll('.step-task').forEach((task,ti)=>{const k=`${si}-${ti}`;const isDone=!!data.taskStates[k];const ch=task.querySelector('.step-task-check');const tx=task.querySelector('.step-task-text');if(ch){ch.className='step-task-check'+(isDone?' done':'');ch.textContent=isDone?'✓':'';}if(tx)tx.className='step-task-text'+(isDone?' done':'');});}
-  renderBristolStreak();
+
+// ============================================================
+// SHIFT MANAGEMENT
+// ============================================================
+let shiftMonthDelta=0,currentShiftMode='24h';
+const SHIFT_TYPES={
+  '24h':{label:'24h勤務',bg:'rgba(255,69,96,0.25)',border:'rgba(255,69,96,0.6)',text:'#ff6b7a',icon:'🔥',load:800},
+  'off':{label:'非番',bg:'rgba(90,90,120,0.25)',border:'rgba(90,90,120,0.5)',text:'var(--text2)',icon:'💤',load:100},
+  'rest':{label:'週休',bg:'rgba(74,158,255,0.2)',border:'rgba(74,158,255,0.5)',text:'#6baaff',icon:'🏠',load:0},
+  'gym':{label:'ジム',bg:'rgba(34,197,94,0.2)',border:'rgba(34,197,94,0.5)',text:'#4ade80',icon:'💪',load:0},
+  'cardio':{label:'有酸素',bg:'rgba(167,139,250,0.2)',border:'rgba(167,139,250,0.5)',text:'#c4b5fd',icon:'🏃',load:200},
+};
+function getShiftData(){return DB.get('pf_shift_data')||{};}
+function setShiftMode(mode){
+  currentShiftMode=mode;
+  const modeLabels={'24h':'24h勤務','off':'非番','rest':'週休','gym':'ジム','cardio':'有酸素','clear':'クリア'};
+  const el=document.getElementById('shift-cur-mode-label');
+  if(el)el.textContent='モード: '+(modeLabels[mode]||mode);
+  document.querySelectorAll('[id^="shift-mode-"]').forEach(b=>b.style.opacity='0.4');
+  const cur=document.getElementById('shift-mode-'+mode.replace('h',''));
+  const cur2=document.getElementById('shift-mode-'+mode);
+  if(cur)cur.style.opacity='1';if(cur2)cur2.style.opacity='1';
+}
+function toggleShiftDay(dateStr){
+  const data=getShiftData();
+  if(currentShiftMode==='clear')delete data[dateStr];
+  else data[dateStr]=currentShiftMode;
+  DB.set('pf_shift_data',data);
+  renderShiftPage();
+}
+function shiftMonthOffset(delta){
+  if(delta===0)shiftMonthDelta=0;else shiftMonthDelta+=delta;
+  renderShiftPage();
+}
+function renderShiftPage(){
+  const now=new Date();
+  const base=new Date(now.getFullYear(),now.getMonth()+shiftMonthDelta,1);
+  const year=base.getFullYear(),month=base.getMonth();
+  const el=document.getElementById('shift-month-label');
+  if(el)el.textContent=`${year}年${month+1}月`;
+  const grid=document.getElementById('shift-calendar-grid');
+  if(!grid)return;
+  const data=getShiftData();
+  const todayStr=today();
+  const firstDay=new Date(year,month,1);
+  const lastDay=new Date(year,month+1,0);
+  const startDow=firstDay.getDay()===0?6:firstDay.getDay()-1;// 月曜始まり
+  let html2='';
+  let weekHtml=`<div class="week-row"><div class="week-label"></div>`;
+  // 前月の空白
+  for(let i=0;i<startDow;i++){weekHtml+=`<div class="day-cell" style="opacity:0.2"></div>`;}
+  let col=startDow;
+  for(let d=1;d<=lastDay.getDate();d++){
+    const dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const type=data[dateStr];const t=SHIFT_TYPES[type];
+    const isToday=dateStr===todayStr;
+    const style=t?`background:${t.bg};border:1px solid ${t.border};color:${t.text}`:'background:var(--bg3);border:1px solid var(--border)';
+    weekHtml+=`<div class="day-cell${isToday?' today-cell':''}" style="${style};cursor:pointer;flex-direction:column;gap:1px" onclick="toggleShiftDay('${dateStr}')">
+      <span style="font-size:13px">${t?t.icon:''}</span>
+      <span style="font-size:9px;font-family:var(--font-mono)">${d}</span>
+    </div>`;
+    col++;
+    if(col===7){weekHtml+='</div>';html2+=weekHtml;weekHtml=`<div class="week-row"><div class="week-label"></div>`;col=0;}
+  }
+  if(col>0){for(let i=col;i<7;i++)weekHtml+=`<div class="day-cell" style="opacity:0.2"></div>`;weekHtml+='</div>';html2+=weekHtml;}
+  grid.innerHTML=html2;
+  // Summary
+  const monthKeys=Object.keys(data).filter(k=>k.startsWith(`${year}-${String(month+1).padStart(2,'0')}`));
+  const counts={};Object.values(SHIFT_TYPES).forEach(t=>counts[t.label]=0);
+  monthKeys.forEach(k=>{const t=SHIFT_TYPES[data[k]];if(t)counts[t.label]=(counts[t.label]||0)+1;});
+  const sumEl=document.getElementById('shift-summary');
+  if(sumEl)sumEl.innerHTML=Object.entries(counts).filter(([,v])=>v>0).map(([k,v])=>
+    `<div class="row-between" style="padding:5px 0;border-bottom:1px solid var(--border)"><span class="muted">${k}</span><span class="mono">${v}日</span></div>`
+  ).join('')||'<div class="muted">登録なし</div>';
+  // ACWR
+  renderShiftACWR(data);
+}
+function renderShiftACWR(data){
+  const el=document.getElementById('shift-acwr');if(!el)return;
+  const nowD=new Date();
+  let acute=0,chronic7sum=0;
+  const trainings=DB.arr('trainings');
+  for(let i=0;i<28;i++){
+    const d=new Date(nowD);d.setDate(nowD.getDate()-i);
+    const ds=d.toISOString().slice(0,10);
+    const stype=data[ds];
+    let load=0;
+    if(stype==='24h')load=800;
+    else if(stype==='cardio')load=200;
+    else if(stype==='off')load=100;
+    // トレーニング記録があればそれを使う
+    const tr=trainings.filter(t=>t.date===ds);
+    if(tr.length)load=Math.max(load,tr.reduce((a,t)=>(parseInt(t.duration)||0)*(parseInt(t.rpe)||5)+a,0));
+    if(i<7)acute+=load;
+    chronic7sum+=load;
+  }
+  const chronic=chronic7sum/4;
+  const acwr=chronic>0?Math.round(acute/chronic*100)/100:0;
+  const color=acwr>=0.8&&acwr<=1.3?'var(--accent4)':acwr<0.8?'var(--accent2)':'var(--accent)';
+  el.innerHTML=`<div class="grid2" style="gap:8px;margin-bottom:8px">
+    <div class="metric"><div class="metric-label">急性負荷(7日)</div><div class="metric-val" style="font-size:20px">${acute}</div></div>
+    <div class="metric"><div class="metric-label">慢性負荷(28日平均)</div><div class="metric-val" style="font-size:20px">${Math.round(chronic)}</div></div>
+  </div>
+  <div style="text-align:center;padding:10px 0">
+    <div style="font-size:11px;color:var(--text3);letter-spacing:2px;font-family:var(--font-mono);margin-bottom:4px">ACWR</div>
+    <div style="font-size:36px;font-weight:500;font-family:var(--font-mono);color:${color}">${acwr.toFixed(2)}</div>
+    <div style="font-size:12px;color:${color};margin-top:4px">${acwr>=0.8&&acwr<=1.3?'✓ スイートスポット':acwr<0.8?'低負荷ゾーン':'⚠ 過負荷リスク'}</div>
+  </div>`;
+}
+function applyShiftPattern(){
+  const start=document.getElementById('shift-pattern-start').value;
+  const weeks=parseInt(document.getElementById('shift-pattern-weeks').value)||8;
+  const pat=document.getElementById('shift-pattern-type').value;
+  if(!start){alert('開始日を設定してください');return}
+  const data=getShiftData();
+  const patterns={
+    tfd:['24h','off','rest'],
+    tfd2:['24h','off','rest','rest'],
+  };
+  const cycle=patterns[pat]||['24h','off','rest'];
+  let idx=0;
+  const base=new Date(start);
+  for(let d=0;d<weeks*7;d++){
+    const cur=new Date(base);cur.setDate(base.getDate()+d);
+    const ds=cur.toISOString().slice(0,10);
+    data[ds]=cycle[idx%cycle.length];
+    idx++;
+  }
+  DB.set('pf_shift_data',data);
+  renderShiftPage();
+  alert(`${weeks}週間分のシフトを登録しました。`);
+}
+
+// ============================================================
+// PROGRAM SELECTOR + EXERCISE CUSTOMIZER
+// ============================================================
+// 全プログラムマスターデータ
+const PROGRAMS_MASTER={
+  FBS:{
+    name:'FULL BODY SPLIT',label:'フルボディ',desc:'週3〜4回・全身法。各セッションで全部位を刺激。',
+    color:'#4a9eff',icon:'◈',
+    sessions:{
+      FBA:{name:'FULL BODY A',focus:'プレスフォーカス',color:'#4a9eff',exercises:[
+        {name:'ワイドグリップチンニング（広背筋）',reps:'6-10',part:'背中',rpe:'C'},
+        {name:'オーバーグリップマシンロウ（上背部）',reps:'8-12',part:'背中',rpe:'M'},
+        {name:'S/Aケーブルプルダウン',reps:'10-15',part:'背中',rpe:'M'},
+        {name:'スミスマシン ハイインクラインプレス',reps:'8-12',part:'胸',rpe:'M'},
+        {name:'HSマシンペックフライ',reps:'10-15',part:'胸',rpe:'I'},
+        {name:'ディップス',reps:'8-12',part:'胸・三頭',rpe:'C'},
+        {name:'ワンレッグレッグエクステンション',reps:'10-15',part:'四頭',rpe:'I'},
+        {name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},
+        {name:'マシンアダクター',reps:'12-15',part:'内転筋',rpe:'I'},
+        {name:'クロスボディケーブルエクステンション',reps:'12-15',part:'三頭',rpe:'I'},
+        {name:'S/A DBプリチャーカール',reps:'10-15',part:'二頭',rpe:'I'},
+        {name:'マシン サイドレイズ',reps:'12-20',part:'肩',rpe:'I'},
+        {name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'},
+        {name:'マシンアブクランチ',reps:'AMRAP',part:'腹',rpe:'I'}]},
+      FBB:{name:'FULL BODY B',focus:'プルフォーカス',color:'#f5a623',exercises:[
+        {name:'ケーブルYレイズ',reps:'12-15',part:'肩後部',rpe:'I'},
+        {name:'HSプレートロードインクラインプレス',reps:'8-12',part:'胸',rpe:'C'},
+        {name:'スミスマシン フラットプレス',reps:'8-12',part:'胸',rpe:'C'},
+        {name:'スミスマシン JMプレス',reps:'10-15',part:'三頭',rpe:'M'},
+        {name:'ワイドグリップラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},
+        {name:'チェストサポーテッド T-BARロウ',reps:'8-12',part:'背中',rpe:'M'},
+        {name:'S/Aケーブルプルダウン',reps:'10-15',part:'背中',rpe:'I'},
+        {name:'ハイパーエクステンション',reps:'10-15',part:'脊柱起立筋',rpe:'C'},
+        {name:'45°レッグプレス',reps:'10-15',part:'脚全体',rpe:'M'},
+        {name:'ワンレッグレッグカール',reps:'10-15',part:'ハム',rpe:'I'},
+        {name:'オルタネイトDBカール（スピネイト）',reps:'10-12',part:'二頭',rpe:'I'},
+        {name:'ケーブルトライセプスプッシュダウン',reps:'12-15',part:'三頭',rpe:'I'},
+        {name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'},
+        {name:'マシンアブクランチ',reps:'AMRAP',part:'腹',rpe:'I'}]},
+      FBC:{name:'FULL BODY C',focus:'スクワットパターンフォーカス',color:'#22c55e',exercises:[
+        {name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},
+        {name:'スミスマシン スクワット',reps:'8-12',part:'四頭',rpe:'C'},
+        {name:'マシンヒッププレス',reps:'10-15',part:'臀部',rpe:'M'},
+        {name:'レッグエクステンション',reps:'10-15',part:'四頭',rpe:'I'},
+        {name:'Vバーラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},
+        {name:'ケルソーシュラッグ',reps:'10-15',part:'僧帽筋',rpe:'M'},
+        {name:'リバースペックフライ',reps:'12-15',part:'肩後部',rpe:'I'},
+        {name:'マシンフラットチェストプレス',reps:'8-12',part:'胸',rpe:'M'},
+        {name:'マシンショルダープレス',reps:'8-12',part:'肩',rpe:'M'},
+        {name:'ケーブルデクラインフライ',reps:'12-15',part:'胸下部',rpe:'I'},
+        {name:'EZバープッシュダウン',reps:'12-15',part:'三頭',rpe:'I'},
+        {name:'インクラインDBカール',reps:'10-12',part:'二頭',rpe:'I'},
+        {name:'ハンマーカール',reps:'10-12',part:'二頭',rpe:'I'},
+        {name:'DBサイドレイズ',reps:'12-20',part:'肩',rpe:'I'},
+        {name:'ハンギングレッグレイズ',reps:'AMRAP',part:'腹',rpe:'I'},
+        {name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'}]}},
+    cycle:['FBA','FBB','FBC'],schedule:{3:'A・休・B・休・C・有酸素・休',4:'A・休・B・C・休・A・有酸素'}},
+  PPL:{
+    name:'PUSH PULL LEGS',label:'PPL',desc:'週3〜6回・プッシュ/プル/レッグスの3分割。',
+    color:'#f5a623',icon:'▶',
+    sessions:{
+      PUSH:{name:'PUSH（胸・肩・三頭）',focus:'プレス系・押す動作',color:'#ff4560',exercises:[
+        {name:'スミスマシン インクラインプレス',reps:'6-10',part:'胸',rpe:'C'},
+        {name:'マシンフラットチェストプレス',reps:'8-12',part:'胸',rpe:'M'},
+        {name:'ケーブルデクラインフライ',reps:'12-15',part:'胸下部',rpe:'I'},
+        {name:'HSマシンペックフライ',reps:'12-15',part:'胸',rpe:'I'},
+        {name:'マシンショルダープレス',reps:'8-12',part:'肩',rpe:'M'},
+        {name:'マシン サイドレイズ',reps:'12-20',part:'肩',rpe:'I'},
+        {name:'ケーブルリアレイズ',reps:'12-15',part:'肩後部',rpe:'I'},
+        {name:'ケーブルトライセプスプッシュダウン',reps:'12-15',part:'三頭',rpe:'I'},
+        {name:'EZバープッシュダウン',reps:'10-15',part:'三頭',rpe:'I'},
+        {name:'マシンアブクランチ',reps:'AMRAP',part:'腹',rpe:'I'}]},
+      PULL:{name:'PULL（背中・二頭）',focus:'プル系・引く動作',color:'#4a9eff',exercises:[
+        {name:'ワイドグリップチンニング（広背筋）',reps:'6-10',part:'背中',rpe:'C'},
+        {name:'チェストサポーテッド T-BARロウ',reps:'8-12',part:'背中',rpe:'M'},
+        {name:'ワイドグリップラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},
+        {name:'S/Aケーブルプルダウン',reps:'10-15',part:'背中',rpe:'I'},
+        {name:'ケーブルYレイズ',reps:'12-15',part:'肩後部',rpe:'I'},
+        {name:'オーバーグリップマシンロウ（上背部）',reps:'10-15',part:'背中',rpe:'M'},
+        {name:'ケルソーシュラッグ',reps:'12-15',part:'僧帽筋',rpe:'M'},
+        {name:'S/A DBプリチャーカール',reps:'10-15',part:'二頭',rpe:'I'},
+        {name:'インクラインDBカール',reps:'10-12',part:'二頭',rpe:'I'},
+        {name:'ハンマーカール',reps:'10-12',part:'二頭',rpe:'I'}]},
+      LEGS:{name:'LEGS（脚・腹）',focus:'下半身・コア',color:'#22c55e',exercises:[
+        {name:'スミスマシン スクワット',reps:'8-12',part:'四頭',rpe:'C'},
+        {name:'45°レッグプレス',reps:'10-15',part:'脚全体',rpe:'M'},
+        {name:'レッグエクステンション',reps:'12-15',part:'四頭',rpe:'I'},
+        {name:'ワンレッグレッグエクステンション',reps:'12-15',part:'四頭',rpe:'I'},
+        {name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},
+        {name:'ワンレッグレッグカール',reps:'12-15',part:'ハム',rpe:'I'},
+        {name:'マシンヒッププレス',reps:'10-15',part:'臀部',rpe:'M'},
+        {name:'マシンアダクター',reps:'12-15',part:'内転筋',rpe:'I'},
+        {name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'},
+        {name:'ハンギングレッグレイズ',reps:'AMRAP',part:'腹',rpe:'I'},
+        {name:'マシンアブクランチ',reps:'AMRAP',part:'腹',rpe:'I'}]}},
+    cycle:['PUSH','PULL','LEGS'],schedule:{3:'PUSH・休・PULL・休・LEGS・休・休',6:'PUSH・PULL・LEGS・PUSH・PULL・LEGS・休'}},
+  PPL_LU:{
+    name:'PPL + UPPER/LOWER',label:'PPL+UL',desc:'週5〜6回・PPLとアッパー/ロアーのハイブリッド。',
+    color:'#a78bfa',icon:'◎',
+    sessions:{
+      PUSH:{name:'PUSH',focus:'胸・肩・三頭',color:'#ff4560',exercises:[
+        {name:'スミスマシン インクラインプレス',reps:'6-10',part:'胸',rpe:'C'},
+        {name:'マシンフラットチェストプレス',reps:'8-12',part:'胸',rpe:'M'},
+        {name:'ケーブルデクラインフライ',reps:'12-15',part:'胸下部',rpe:'I'},
+        {name:'マシンショルダープレス',reps:'8-12',part:'肩',rpe:'M'},
+        {name:'マシン サイドレイズ',reps:'12-20',part:'肩',rpe:'I'},
+        {name:'EZバープッシュダウン',reps:'12-15',part:'三頭',rpe:'I'}]},
+      PULL:{name:'PULL',focus:'背中・二頭',color:'#4a9eff',exercises:[
+        {name:'ワイドグリップチンニング（広背筋）',reps:'6-10',part:'背中',rpe:'C'},
+        {name:'チェストサポーテッド T-BARロウ',reps:'8-12',part:'背中',rpe:'M'},
+        {name:'ワイドグリップラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},
+        {name:'S/A DBプリチャーカール',reps:'10-15',part:'二頭',rpe:'I'},
+        {name:'ハンマーカール',reps:'10-12',part:'二頭',rpe:'I'}]},
+      LEGS:{name:'LEGS',focus:'下半身',color:'#22c55e',exercises:[
+        {name:'スミスマシン スクワット',reps:'8-12',part:'四頭',rpe:'C'},
+        {name:'45°レッグプレス',reps:'10-15',part:'脚全体',rpe:'M'},
+        {name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},
+        {name:'マシンヒッププレス',reps:'10-15',part:'臀部',rpe:'M'},
+        {name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'}]},
+      UPPER:{name:'UPPER',focus:'上半身補強',color:'#f5a623',exercises:[
+        {name:'HSプレートロードインクラインプレス',reps:'8-12',part:'胸',rpe:'C'},
+        {name:'HSマシンペックフライ',reps:'10-15',part:'胸',rpe:'I'},
+        {name:'S/Aケーブルプルダウン',reps:'10-15',part:'背中',rpe:'I'},
+        {name:'ケーブルYレイズ',reps:'12-15',part:'肩後部',rpe:'I'},
+        {name:'インクラインDBカール',reps:'10-12',part:'二頭',rpe:'I'},
+        {name:'ケーブルトライセプスプッシュダウン',reps:'12-15',part:'三頭',rpe:'I'}]},
+      LOWER:{name:'LOWER',focus:'下半身補強',color:'#1D9E75',exercises:[
+        {name:'レッグエクステンション',reps:'12-15',part:'四頭',rpe:'I'},
+        {name:'ワンレッグレッグカール',reps:'12-15',part:'ハム',rpe:'I'},
+        {name:'マシンアダクター',reps:'12-15',part:'内転筋',rpe:'I'},
+        {name:'ハイパーエクステンション',reps:'12-15',part:'脊柱起立筋',rpe:'C'},
+        {name:'ハンギングレッグレイズ',reps:'AMRAP',part:'腹',rpe:'I'},
+        {name:'マシンアブクランチ',reps:'AMRAP',part:'腹',rpe:'I'}]}},
+    cycle:['PUSH','PULL','LEGS','UPPER','LOWER'],schedule:{5:'PUSH・PULL・LEGS・UPPER・LOWER・休・休',6:'PUSH・PULL・LEGS・UPPER・LOWER・PUSH・休'}},
+  UL:{
+    name:'UPPER / LOWER',label:'UL',desc:'週4回・上半身/下半身の2分割。各部位週2回。',
+    color:'#22c55e',icon:'▲',
+    sessions:{
+      UPPER_A:{name:'UPPER A',focus:'プレス優先・上半身',color:'#ff4560',exercises:[
+        {name:'スミスマシン インクラインプレス',reps:'6-10',part:'胸',rpe:'C'},
+        {name:'マシンフラットチェストプレス',reps:'8-12',part:'胸',rpe:'M'},
+        {name:'ワイドグリップラットプルダウン',reps:'8-12',part:'背中',rpe:'M'},
+        {name:'チェストサポーテッド T-BARロウ',reps:'8-12',part:'背中',rpe:'M'},
+        {name:'マシンショルダープレス',reps:'8-12',part:'肩',rpe:'M'},
+        {name:'マシン サイドレイズ',reps:'12-20',part:'肩',rpe:'I'},
+        {name:'S/A DBプリチャーカール',reps:'10-15',part:'二頭',rpe:'I'},
+        {name:'ケーブルトライセプスプッシュダウン',reps:'12-15',part:'三頭',rpe:'I'}]},
+      LOWER_A:{name:'LOWER A',focus:'スクワット優先・下半身',color:'#22c55e',exercises:[
+        {name:'スミスマシン スクワット',reps:'8-12',part:'四頭',rpe:'C'},
+        {name:'45°レッグプレス',reps:'10-15',part:'脚全体',rpe:'M'},
+        {name:'レッグエクステンション',reps:'12-15',part:'四頭',rpe:'I'},
+        {name:'レッグカール',reps:'10-15',part:'ハム',rpe:'M'},
+        {name:'マシンヒッププレス',reps:'10-15',part:'臀部',rpe:'M'},
+        {name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'},
+        {name:'ハンギングレッグレイズ',reps:'AMRAP',part:'腹',rpe:'I'}]},
+      UPPER_B:{name:'UPPER B',focus:'プル優先・上半身',color:'#4a9eff',exercises:[
+        {name:'ワイドグリップチンニング（広背筋）',reps:'6-10',part:'背中',rpe:'C'},
+        {name:'S/Aケーブルプルダウン',reps:'10-15',part:'背中',rpe:'I'},
+        {name:'ケーブルYレイズ',reps:'12-15',part:'肩後部',rpe:'I'},
+        {name:'HSプレートロードインクラインプレス',reps:'8-12',part:'胸',rpe:'C'},
+        {name:'HSマシンペックフライ',reps:'10-15',part:'胸',rpe:'I'},
+        {name:'インクラインDBカール',reps:'10-12',part:'二頭',rpe:'I'},
+        {name:'ハンマーカール',reps:'10-12',part:'二頭',rpe:'I'},
+        {name:'EZバープッシュダウン',reps:'12-15',part:'三頭',rpe:'I'}]},
+      LOWER_B:{name:'LOWER B',focus:'ヒンジ優先・下半身',color:'#1D9E75',exercises:[
+        {name:'ハイパーエクステンション',reps:'10-15',part:'脊柱起立筋',rpe:'C'},
+        {name:'マシンヒッププレス',reps:'10-15',part:'臀部',rpe:'M'},
+        {name:'ワンレッグレッグカール',reps:'12-15',part:'ハム',rpe:'I'},
+        {name:'マシンアダクター',reps:'12-15',part:'内転筋',rpe:'I'},
+        {name:'ワンレッグレッグエクステンション',reps:'12-15',part:'四頭',rpe:'I'},
+        {name:'カーフレイズ',reps:'15-20',part:'カーフ',rpe:'I'},
+        {name:'マシンアブクランチ',reps:'AMRAP',part:'腹',rpe:'I'}]}},
+    cycle:['UPPER_A','LOWER_A','UPPER_B','LOWER_B'],schedule:{4:'UA・LA・休・UB・LB・休・休'}},
+};
+
+function getCurrentProgram(){return DB.get('pf_current_program')||'FBS';}
+function getCurrentProgramData(){
+  const pid=getCurrentProgram();
+  const prog=PROGRAMS_MASTER[pid];
+  if(!prog)return PROGRAMS_MASTER['FBS'];
+  // カスタム種目上書きをマージ
+  const custom=DB.get('pf_custom_exercises')||{};
+  const merged=JSON.parse(JSON.stringify(prog));
+  Object.keys(merged.sessions).forEach(sid=>{
+    const key=`${pid}_${sid}`;
+    if(custom[key])merged.sessions[sid].exercises=custom[key];
+  });
+  return merged;
+}
+
+function showProgramSelector(){
+  const el=document.getElementById('prog-selector');
+  if(!el)return;
+  el.style.display=el.style.display==='none'?'block':'none';
+  if(el.style.display==='none')return;
+  const cur=getCurrentProgram();
+  const grid=document.getElementById('prog-selector-grid');
+  if(!grid)return;
+  grid.innerHTML=Object.entries(PROGRAMS_MASTER).map(([id,p])=>`
+    <div onclick="selectProgram('${id}')" style="cursor:pointer;padding:14px;border-radius:var(--rs);border:2px solid ${id===cur?p.color:'var(--border)'};background:${id===cur?p.color+'15':'var(--bg3)'};transition:all 0.15s">
+      <div style="font-size:20px;margin-bottom:6px;font-family:var(--font-display)">${p.icon}</div>
+      <div style="font-weight:700;font-size:13px;color:${id===cur?p.color:'var(--text)'};margin-bottom:3px">${p.label}</div>
+      <div style="font-size:11px;color:var(--text3);line-height:1.5">${p.desc}</div>
+      ${id===cur?'<div style="font-size:10px;color:'+p.color+';margin-top:6px;font-weight:500">✓ 現在選択中</div>':''}
+    </div>`).join('');
+}
+function selectProgram(id){
+  DB.set('pf_current_program',id);
+  document.getElementById('prog-selector').style.display='none';
+  initProgramPage();
+}
+
+function initProgramPage(){
+  const prog=getCurrentProgramData();
+  const pid=getCurrentProgram();
+  const p=PROGRAMS_MASTER[pid];
+  // ラベル更新
+  const lbl=document.getElementById('prog-program-label');
+  if(lbl)lbl.textContent=prog.name+' — '+Object.keys(prog.sessions).length+'セッション';
+  // セッションボタン描画
+  const sgrid=document.getElementById('prog-session-grid');
+  if(!sgrid)return;
+  const last=DB.get('lastSession');
+  const nextMap={};const cycle=prog.cycle||Object.keys(prog.sessions);
+  cycle.forEach((s,i)=>nextMap[s]=cycle[(i+1)%cycle.length]);
+  const recommended=last&&nextMap[last]?nextMap[last]:cycle[0];
+  // サイクルヒント
+  const hint=document.getElementById('prog-cycle-hint');
+  if(hint&&last){const lname=(prog.sessions[last]||{}).name||last;const rname=(prog.sessions[recommended]||{}).name||recommended;hint.textContent=`前回: ${lname} → 次回推奨: ${rname}`;}
+  else if(hint){hint.textContent='最初のセッションを選択してください';}
+  sgrid.innerHTML=Object.entries(prog.sessions).map(([sid,s])=>{
+    const isRec=sid===recommended;
+    return`<div id="prog-btn-${sid}" onclick="selectSession('${sid}')" style="cursor:pointer;padding:16px 12px;border-radius:var(--rs);border:2px solid ${isRec?s.color:'var(--border)'};background:${isRec?s.color+'18':'var(--bg3)'};transition:all 0.2s;text-align:center">
+      <div style="font-weight:700;color:${s.color};font-size:15px;margin-bottom:4px">${s.name.replace(/FULL BODY |UPPER |LOWER /,'')}</div>
+      <div style="font-size:11px;color:var(--text2)">${s.focus}</div>
+      ${isRec?'<div style="font-size:10px;color:'+s.color+';margin-top:5px;font-weight:600">← 次回推奨</div>':''}
+      <div style="font-size:10px;color:var(--text3);margin-top:4px">${s.exercises.length}種目</div>
+    </div>`;
+  }).join('');
+  // 週次スケジュール更新
+  updateWeeklyScheduleTable(prog);
+  // 前回セッションがあれば自動で選択
+  if(recommended)selectSession(recommended);
+}
+
+function updateWeeklyScheduleTable(prog){
+  const tbl=document.querySelector('#page-program .card:last-child table tbody');
+  if(!tbl||!prog.schedule)return;
+  tbl.innerHTML=Object.entries(prog.schedule).map(([days,sched])=>
+    `<tr><td class="muted">週${days}回</td><td colspan="7" style="font-size:12px;color:var(--text2)">${sched}</td></tr>`
+  ).join('');
+}
+
+// Exercise Customizer
+let customizerSession=null;
+let customizerDraft=[];
+
+function openExerciseCustomizer(){
+  if(!currentSession)return;
+  const prog=getCurrentProgramData();
+  const pid=getCurrentProgram();
+  customizerSession=currentSession;
+  customizerDraft=JSON.parse(JSON.stringify(prog.sessions[currentSession]?.exercises||[]));
+  renderCustomizerList();
+  renderPartFilterRow();
+  populateExDatalist();
+  document.getElementById('exercise-customizer').style.display='block';
+  document.getElementById('exercise-customizer').scrollIntoView({behavior:'smooth'});
+}
+function closeExerciseCustomizer(){
+  document.getElementById('exercise-customizer').style.display='none';
+}
+function renderPartFilterRow(){
+  const parts=[...new Set(customizerDraft.map(e=>e.part))];
+  const el=document.getElementById('part-filter-row');
+  if(!el)return;
+  el.innerHTML=`<span class="badge badge-blue" style="cursor:pointer" onclick="renderCustomizerList('')">全て</span>`+
+    parts.map(p=>`<span class="badge badge-gray" style="cursor:pointer" onclick="renderCustomizerList('${p}')">${p}</span>`).join('');
+}
+function renderCustomizerList(filterPart=''){
+  const el=document.getElementById('customizer-ex-list');if(!el)return;
+  const list=filterPart?customizerDraft.filter(e=>e.part===filterPart):customizerDraft;
+  const typeBg={C:'rgba(255,69,96,0.12)',M:'rgba(74,158,255,0.12)',I:'rgba(167,139,250,0.12)'};
+  const typeCol={C:'#ff4560',M:'#4a9eff',I:'#a78bfa'};
+  const typeShort={C:'CF',M:'CM',I:'ISO'};
+  el.innerHTML=list.map((e,i)=>{
+    const realIdx=customizerDraft.indexOf(e);
+    return`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:${typeBg[e.rpe||'I']};color:${typeCol[e.rpe||'I']}">${typeShort[e.rpe||'I']}</span>
+      <span style="flex:1;font-size:13px">${e.name}</span>
+      <span style="font-size:11px;color:var(--text3)">${e.part}</span>
+      <span class="mono" style="font-size:11px;color:var(--text3)">${e.reps}</span>
+      <button class="btn btn-sm btn-danger" style="padding:3px 8px;font-size:11px" onclick="removeCustomEx(${realIdx})">削除</button>
+    </div>`;
+  }).join('')||'<div class="muted">種目がありません。下から追加してください。</div>';
+}
+function removeCustomEx(idx){
+  customizerDraft.splice(idx,1);
+  renderCustomizerList();
+  renderPartFilterRow();
+}
+function addCustomExercise(){
+  const name=document.getElementById('custom-ex-name').value.trim();
+  const part=document.getElementById('custom-ex-part').value;
+  const reps=document.getElementById('custom-ex-reps').value||'8-12';
+  const rpe=document.getElementById('custom-ex-type').value;
+  if(!name){alert('種目名を入力してください');return}
+  customizerDraft.push({name,part,reps,rpe});
+  document.getElementById('custom-ex-name').value='';
+  renderCustomizerList();
+  renderPartFilterRow();
+}
+function saveCustomExercises(){
+  const pid=getCurrentProgram();
+  const key=`${pid}_${customizerSession}`;
+  const custom=DB.get('pf_custom_exercises')||{};
+  custom[key]=customizerDraft;
+  DB.set('pf_custom_exercises',custom);
+  closeExerciseCustomizer();
+  selectSession(customizerSession);
+  alert('種目構成を保存しました。');
+}
+function populateExDatalist(){
+  const dl=document.getElementById('ex-datalist');if(!dl)return;
+  const allEx=new Set();
+  Object.values(PROGRAMS_MASTER).forEach(p=>Object.values(p.sessions).forEach(s=>s.exercises.forEach(e=>allEx.add(e.name))));
+  dl.innerHTML=[...allEx].map(n=>`<option value="${n}">`).join('');
 }
 
 function init(){
