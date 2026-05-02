@@ -1069,6 +1069,39 @@ input[type=range]:focus{border:none;box-shadow:none}
 <div class="page" id="page-analysis">
   <div class="h2">分析レポート</div>
 
+  <!-- ===== 長期コンディション分析 ===== -->
+  <div class="card card-accent" style="margin-bottom:18px">
+    <div class="card-header-bar"></div>
+    <div class="row-between" style="margin-bottom:10px">
+      <div>
+        <div class="h3">コンディション長期分析</div>
+        <div class="muted" style="font-size:12px;margin-top:3px">睡眠・トレーニング・栄養・勤務疲労の複合スコア推移</div>
+      </div>
+      <div class="row" style="gap:8px">
+        <select id="cond-range" style="width:auto;font-size:12px;padding:5px 10px" onchange="renderConditionAnalysis()">
+          <option value="30">30日</option>
+          <option value="90" selected>90日</option>
+          <option value="180">6ヶ月</option>
+          <option value="365">1年</option>
+        </select>
+      </div>
+    </div>
+    <!-- 総合スコア推移グラフ -->
+    <div class="chart-wrap" style="height:200px;margin-bottom:14px"><canvas id="cond-trend-chart" role="img" aria-label="コンディションスコア長期推移"></canvas></div>
+    <!-- 4軸ブレイクダウン -->
+    <div class="grid4" style="margin-bottom:14px" id="cond-axis-grid">
+      <div class="metric"><div class="metric-label">睡眠</div><div class="metric-val" id="ca-sleep">—</div></div>
+      <div class="metric"><div class="metric-label">回復(TSB)</div><div class="metric-val" id="ca-tsb">—</div></div>
+      <div class="metric"><div class="metric-label">ウェルネス</div><div class="metric-val" id="ca-wellness">—</div></div>
+      <div class="metric"><div class="metric-label">栄養</div><div class="metric-val" id="ca-nutrition">—</div></div>
+    </div>
+    <!-- ヒートマップ（週単位）-->
+    <div class="label" style="margin-bottom:8px">週単位ヒートマップ（各軸の平均）</div>
+    <div id="cond-heatmap" style="overflow-x:auto;margin-bottom:14px"></div>
+    <!-- 改善提案 -->
+    <div id="cond-suggestions"></div>
+  </div>
+
   <!-- 週平均体重モニター -->
   <div class="card card-blue" style="margin-bottom:18px">
     <div class="card-header-bar blue"></div>
@@ -1381,7 +1414,7 @@ function showPage(id){
   closeSidebar();
   if(id==='dashboard')renderDashboard();
   if(id==='program')initProgramPage();
-  if(id==='analysis'){renderAnalysis();updateWeeklyWeightPanel();updateMiniCut();initWeightTracker();}
+  if(id==='analysis'){renderAnalysis();updateWeeklyWeightPanel();updateMiniCut();initWeightTracker();renderConditionAnalysis();}
   if(id==='nutrition'){updateNutritionGoals();updateSmartNutrition();renderMealLog();updateNutritionTotals();}
   if(id==='sleep')renderSleepCharts();
   if(id==='shift')renderShiftPage();
@@ -1483,14 +1516,42 @@ function renderDashboard(){
   }
   // TSBスコア（x0.3）— TSBは通常 -30〜+20の範囲
   const tsbNorm=Math.min(100,Math.max(0,Math.round((tsb+25)/45*100)));
-  scoreTsb=tsbNorm;
+  scoreTsb=tsbNorm; // TSBスコアは常に設定
   // ウェルネススコア（x0.3）
   if(avgWellness){
-    scoreTsb=tsbNorm; // keep
     scoreWell=Math.round((avgWellness-1)/9*100);
   }
-  let score=Math.round(scoreSleep*0.4+scoreTsb*0.3+scoreWell*0.3);
+  // 栄養スコア（本日のカロリー達成率から算出）
+  const todayMealsScore=DB.arr('meals').filter(m=>m.date===today());
+  const todayCalScore=todayMealsScore.reduce((a,m)=>a+(m.cal||0),0);
+  const cfgScore=cfg();const calTargetScore=getCalTarget(cfgScore.goalmode||'maintain');
+  const calRate=calTargetScore>0?todayCalScore/calTargetScore:0;
+  const scoreNutrition=Math.round(Math.min(100,Math.max(0,(1-Math.abs(1-calRate))*100)));
+  // 勤務由来疲労（シフトデータ）
+  const shiftDataScore=DB.get('pf_shift_data')||{};
+  const todayShiftScore=shiftDataScore[today()];
+  const shiftLoad=todayShiftScore?getShiftLoad(todayShiftScore):0;
+  const scoreFatigue=Math.max(0,100-Math.round(shiftLoad/8)); // 負荷800→スコア0、0→100
+  // 総合スコア: 睡眠40% + TSB20% + ウェルネス25% + 栄養10% + 勤務疲労5%
+  let score=Math.round(scoreSleep*0.40+scoreTsb*0.20+scoreWell*0.25+scoreNutrition*0.10+scoreFatigue*0.05);
   score=Math.max(0,Math.min(100,score));
+  // 日次スコアを保存（長期トレンド用）
+  const dailyScores=DB.get('pf_daily_scores')||{};
+  dailyScores[today()]={
+    condScore:score,
+    sleepScore:Math.round(scoreSleep),
+    tsb:Math.round(tsb),
+    wellScore:Math.round(scoreWell),
+    nutritionScore:Math.round(scoreNutrition),
+    fatigue:Math.round(100-scoreFatigue),
+    avgSleep:avgSleep||0,
+    avgWellness:avgWellness||0
+  };
+  // 最大2年分のみ保持
+  const cutoff=new Date();cutoff.setFullYear(cutoff.getFullYear()-2);
+  const cutoffStr=cutoff.toISOString().slice(0,10);
+  Object.keys(dailyScores).forEach(k=>{if(k<cutoffStr)delete dailyScores[k];});
+  DB.set('pf_daily_scores',dailyScores);
   document.getElementById('d-condition').textContent=score;
   const todayMeals=DB.arr('meals').filter(m=>m.date===today());
   const todayCal=todayMeals.reduce((a,m)=>a+(m.cal||0),0);
@@ -3125,6 +3186,207 @@ function initWeightTracker(){
   if(el&&all.length>0){
     el.innerHTML=all.slice(0,10).map(n=>`<span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="selectTrackerEx('${n.replace(/'/g,"\\'")}')"> ${n}</span>`).join('');
   }
+}
+
+// ============================================================
+// 長期コンディション分析エンジン
+// ============================================================
+let condTrendChart=null;
+
+function getConditionHistory(days){
+  const scores=DB.get('pf_daily_scores')||{};
+  const now=new Date();
+  const result=[];
+  for(let i=days-1;i>=0;i--){
+    const d=new Date(now);d.setDate(now.getDate()-i);
+    const ds=d.toISOString().slice(0,10);
+    result.push({date:ds,data:scores[ds]||null});
+  }
+  return result;
+}
+
+function getWeekKey(dateStr){
+  const d=new Date(dateStr);
+  const dow=d.getDay()===0?6:d.getDay()-1;
+  const mon=new Date(d);mon.setDate(d.getDate()-dow);
+  return mon.toISOString().slice(0,10);
+}
+
+function renderConditionAnalysis(){
+  const days=parseInt(document.getElementById('cond-range')?.value||90);
+  const history=getConditionHistory(days);
+  const filled=history.filter(h=>h.data);
+
+  if(filled.length<3){
+    const el=document.getElementById('cond-suggestions');
+    if(el)el.innerHTML='<div class="alert alert-info">まだデータが少ないです。毎日の睡眠・回復を記録すると長期分析が表示されます。</div>';
+    return;
+  }
+
+  // グラフ描画
+  if(condTrendChart)condTrendChart.destroy();
+  const ctx=document.getElementById('cond-trend-chart');
+  if(ctx){
+    // 週平均データで滑らかに
+    const weekMap={};
+    filled.forEach(h=>{
+      const wk=getWeekKey(h.date);
+      if(!weekMap[wk])weekMap[wk]={sum:0,n:0,sleep:0,tsb:0,well:0,nutr:0,fat:0};
+      const d=h.data;
+      weekMap[wk].sum+=d.condScore||0;
+      weekMap[wk].sleep+=d.sleepScore||0;
+      weekMap[wk].tsb+=Math.max(0,(d.tsb+25)/45*100)||50;
+      weekMap[wk].well+=d.wellScore||50;
+      weekMap[wk].nutr+=d.nutritionScore||50;
+      weekMap[wk].fat+=100-(d.fatigue||0);
+      weekMap[wk].n++;
+    });
+    const wks=Object.keys(weekMap).sort();
+    const labels=wks.map(w=>w.slice(5));
+    const condData=wks.map(w=>Math.round(weekMap[w].sum/weekMap[w].n));
+    const sleepData=wks.map(w=>Math.round(weekMap[w].sleep/weekMap[w].n));
+    const wellData=wks.map(w=>Math.round(weekMap[w].well/weekMap[w].n));
+
+    condTrendChart=new Chart(ctx,{
+      type:'line',
+      data:{
+        labels,
+        datasets:[
+          {label:'総合スコア',data:condData,borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,0.08)',tension:0.4,fill:true,borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#a78bfa'},
+          {label:'睡眠',data:sleepData,borderColor:'#4a9eff',backgroundColor:'transparent',tension:0.3,borderWidth:1.5,pointRadius:0,borderDash:[4,3]},
+          {label:'ウェルネス',data:wellData,borderColor:'#22c55e',backgroundColor:'transparent',tension:0.3,borderWidth:1.5,pointRadius:0,borderDash:[2,2]},
+        ]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:true,position:'top',labels:{color:'#888',font:{size:10},boxWidth:12,padding:12}},
+          tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y}`}}
+        },
+        scales:{
+          x:{ticks:{color:'#5a5a78',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},
+          y:{min:0,max:100,ticks:{color:'#5a5a78',font:{size:10},callback:v=>v},grid:{color:'rgba(255,255,255,0.04)'}}
+        }
+      }
+    });
+
+    // 週別ヒートマップ
+    renderCondHeatmap(weekMap,wks);
+    // 4軸平均
+    const n=filled.length;
+    const avgCond=Math.round(filled.reduce((a,h)=>a+(h.data.condScore||0),0)/n);
+    const avgSl=Math.round(filled.reduce((a,h)=>a+(h.data.sleepScore||0),0)/n);
+    const avgTsb=Math.round(filled.reduce((a,h)=>a+((h.data.tsb+25)/45*100||50),0)/n);
+    const avgWl=Math.round(filled.reduce((a,h)=>a+(h.data.wellScore||50),0)/n);
+    const avgNu=Math.round(filled.reduce((a,h)=>a+(h.data.nutritionScore||50),0)/n);
+    document.getElementById('ca-sleep').textContent=avgSl;
+    document.getElementById('ca-tsb').textContent=avgTsb;
+    document.getElementById('ca-wellness').textContent=avgWl;
+    document.getElementById('ca-nutrition').textContent=avgNu;
+    // 色
+    ['ca-sleep','ca-tsb','ca-wellness','ca-nutrition'].forEach((id,i)=>{
+      const val=[avgSl,avgTsb,avgWl,avgNu][i];
+      const el=document.getElementById(id);
+      if(el)el.style.color=val>=70?'var(--accent4)':val>=50?'var(--accent2)':'var(--accent)';
+    });
+    // 改善提案
+    renderCondSuggestions(filled,{avgSl,avgTsb,avgWl,avgNu});
+  }
+}
+
+function renderCondHeatmap(weekMap,wks){
+  const el=document.getElementById('cond-heatmap');if(!el)return;
+  const axes=[
+    {key:'sleep',label:'睡眠',color:'#4a9eff'},
+    {key:'tsb',label:'回復',color:'#a78bfa'},
+    {key:'well',label:'WL',color:'#22c55e'},
+    {key:'nutr',label:'栄養',color:'#f5a623'},
+    {key:'fat',label:'勤務',color:'#ff4560'},
+  ];
+  const scoreColor=(v)=>{
+    if(v>=75)return'rgba(34,197,94,0.7)';
+    if(v>=55)return'rgba(74,158,255,0.5)';
+    if(v>=40)return'rgba(245,166,35,0.5)';
+    return'rgba(255,69,96,0.6)';
+  };
+  let html2=`<div style="display:flex;gap:2px;align-items:flex-end;min-width:${wks.length*44}px">`;
+  wks.forEach(wk=>{
+    const d=weekMap[wk];const n=d.n;
+    const vals={
+      sleep:Math.round(d.sleep/n),
+      tsb:Math.round(d.tsb/n),
+      well:Math.round(d.well/n),
+      nutr:Math.round(d.nutr/n),
+      fat:Math.round(d.fat/n),
+    };
+    html2+=`<div style="display:flex;flex-direction:column;gap:2px;width:40px">`;
+    axes.forEach(ax=>{
+      const v=vals[ax.key];
+      html2+=`<div title="${ax.label}: ${v}" style="height:18px;border-radius:3px;background:${scoreColor(v)};display:flex;align-items:center;justify-content:center"><span style="font-size:9px;color:#fff;font-family:var(--font-mono)">${v}</span></div>`;
+    });
+    html2+=`<div style="font-size:9px;color:var(--text3);text-align:center;margin-top:2px">${wk.slice(5)}</div>`;
+    html2+='</div>';
+  });
+  html2+='</div>';
+  html2+=`<div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">${axes.map(a=>`<span style="font-size:10px;color:var(--text2);display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:${a.color};display:inline-block"></span>${a.label}</span>`).join('')}</div>`;
+  el.innerHTML=html2;
+}
+
+function renderCondSuggestions(history,avgs){
+  const el=document.getElementById('cond-suggestions');if(!el)return;
+  const suggestions=[];
+
+  // 直近2週間と全期間の比較でトレンド判定
+  const recent=history.slice(-14).filter(h=>h.data);
+  const older=history.slice(0,-14).filter(h=>h.data);
+  const recentAvg=recent.length?Math.round(recent.reduce((a,h)=>a+(h.data.condScore||0),0)/recent.length):null;
+  const olderAvg=older.length?Math.round(older.reduce((a,h)=>a+(h.data.condScore||0),0)/older.length):null;
+
+  // トレンド判定
+  if(recentAvg&&olderAvg){
+    const diff=recentAvg-olderAvg;
+    if(diff<=-10)suggestions.push({type:'warn',icon:'📉',title:`直近2週間のコンディションが${Math.abs(diff)}pt低下しています`,body:'睡眠・勤務パターン・トレーニング強度のどれが変化したか確認してください。'});
+    else if(diff>=10)suggestions.push({type:'good',icon:'📈',title:`直近2週間で${diff}pt改善しています`,body:'この調子を維持しましょう。'});
+  }
+
+  // 軸別の弱点分析
+  if(avgs.avgSl<55)suggestions.push({type:'danger',icon:'😴',title:'睡眠スコアが低い（平均'+avgs.avgSl+'）',body:'就寝時間を30分早めることが最も即効性のある改善策です。マグネシウム（就寝前200mg）・スクリーンオフ（就寝1時間前）・就寝前のアルコール禁止（REM睡眠を抑制）を試してください。'});
+  else if(avgs.avgSl<70)suggestions.push({type:'warn',icon:'😴',title:'睡眠スコアが改善の余地あり（平均'+avgs.avgSl+'）',body:'7〜8時間の確保を目標に。勤務明けは仮眠（90分サイクル）を優先してください。'});
+
+  if(avgs.avgTsb<40)suggestions.push({type:'danger',icon:'🔋',title:'慢性的な疲労蓄積（TSBスコア平均'+avgs.avgTsb+'）',body:'トレーニング負荷を1〜2週間削減（ボリューム40%カット）してください。ATL>CTLが続いており、怪我・免疫低下のリスクが高い状態です。'});
+  else if(avgs.avgTsb<55)suggestions.push({type:'warn',icon:'🔋',title:'回復が追いついていない可能性（TSBスコア平均'+avgs.avgTsb+'）',body:'週1回の完全休養日を必ず設けてください。高RPEセッションの頻度を減らすことを検討してください。'});
+
+  if(avgs.avgWl<50)suggestions.push({type:'danger',icon:'🧠',title:'ウェルネス指標が低水準（平均'+avgs.avgWl+'）',body:'疲労・筋肉痛・モチベーション・気分の複合スコアが低い状態が続いています。ストレス源の特定、社会的サポートの確保、必要に応じて一時的な負荷削減を検討してください。'});
+
+  if(avgs.avgNu<50)suggestions.push({type:'warn',icon:'🍽️',title:'栄養達成率が低い（平均'+avgs.avgNu+'）',body:'カロリー目標の達成が安定していません。食品プリセットを活用してトレ後の食事を事前に準備することで改善できます。タンパク質が特に不足している場合はプロテインで補助してください。'});
+
+  // 24h勤務パターン分析
+  const shiftData=DB.get('pf_shift_data')||{};
+  const recentShifts=history.filter(h=>shiftData[h.date]);
+  const duty24count=recentShifts.filter(h=>getShiftType(shiftData[h.date])==='24h').length;
+  if(duty24count>=6){
+    suggestions.push({type:'info',icon:'🚒',title:`分析期間中に${duty24count}回の24h勤務があります`,body:'24h勤務後2日間のコンディションスコアを確認してください。回復に72時間以上かかるパターンが見られる場合は、非番の活動量を減らすことが必要です。'});
+  }
+
+  if(!suggestions.length){
+    suggestions.push({type:'good',icon:'✓',title:'全軸でバランスが取れています',body:'この状態を維持することが最優先です。変化を感じたら早めにデータを確認してください。'});
+  }
+
+  const typeStyle={
+    danger:{bg:'rgba(255,69,96,0.06)',border:'rgba(255,69,96,0.3)',color:'var(--accent)'},
+    warn:{bg:'rgba(245,166,35,0.06)',border:'rgba(245,166,35,0.3)',color:'var(--accent3)'},
+    good:{bg:'rgba(34,197,94,0.06)',border:'rgba(34,197,94,0.3)',color:'var(--accent4)'},
+    info:{bg:'rgba(74,158,255,0.06)',border:'rgba(74,158,255,0.3)',color:'var(--accent2)'},
+  };
+
+  el.innerHTML=`<div class="label" style="margin-bottom:10px">改善提案（データに基づく自動分析）</div>`+
+    suggestions.map(s=>{
+      const st=typeStyle[s.type]||typeStyle.info;
+      return`<div style="padding:10px 14px;background:${st.bg};border:1px solid ${st.border};border-radius:var(--rs);margin-bottom:8px">
+        <div style="font-size:13px;font-weight:600;color:${st.color};margin-bottom:4px">${s.icon} ${s.title}</div>
+        <div class="muted" style="font-size:12px;line-height:1.6">${s.body}</div>
+      </div>`;
+    }).join('');
 }
 
 function init(){
