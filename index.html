@@ -487,9 +487,29 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="grid3" id="smart-targets" style="margin-bottom:14px"></div>
     <div id="smart-advice-box"></div>
     <div class="divider"></div>
-    <div class="row-between">
-      <div><div class="label">今日のセッション</div><div class="row" style="gap:10px"><label style="font-size:13px;display:flex;align-items:center;gap:7px;cursor:pointer"><input type="radio" name="today-session" id="today-training" value="training" onchange="updateSmartNutrition()" checked>トレーニング日</label><label style="font-size:13px;display:flex;align-items:center;gap:7px;cursor:pointer"><input type="radio" name="today-session" id="today-off" value="off" onchange="updateSmartNutrition()">オフ日</label></div></div>
-      <div><div class="label">体脂肪率（任意）</div><div class="row" style="gap:6px"><input type="number" id="n-bodyfat" placeholder="15" min="3" max="40" step="0.1" style="max-width:85px" oninput="updateSmartNutrition()"><span class="muted">%</span></div></div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div>
+        <div class="label" style="margin-bottom:6px">今日のセッション</div>
+        <div style="display:flex;gap:0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;max-width:280px">
+          <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;cursor:pointer;font-size:13px;font-weight:500;transition:background 0.15s" id="label-training">
+            <input type="radio" name="today-session" id="today-training" value="training" onchange="updateSmartNutrition();updateSessionLabel()" checked style="display:none">
+            💪 トレ日
+          </label>
+          <div style="width:1px;background:var(--border)"></div>
+          <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;cursor:pointer;font-size:13px;font-weight:500;transition:background 0.15s" id="label-off">
+            <input type="radio" name="today-session" id="today-off" value="off" onchange="updateSmartNutrition();updateSessionLabel()" style="display:none">
+            🛌 オフ日
+          </label>
+        </div>
+      </div>
+      <div>
+        <div class="label" style="margin-bottom:6px">体脂肪率（任意）</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input type="number" id="n-bodyfat" placeholder="15" min="3" max="40" step="0.1"
+            style="max-width:90px" oninput="updateSmartNutrition()">
+          <span class="muted">%</span>
+        </div>
+      </div>
     </div>
   </div>
   <div class="card card-blue" style="margin-bottom:18px">
@@ -1519,7 +1539,7 @@ function showPage(id){
   if(id==='dashboard')renderDashboard();
   if(id==='program')initProgramPage();
   if(id==='analysis'){renderAnalysis();updateWeeklyWeightPanel();updateMiniCut();initWeightTracker();renderConditionAnalysis();renderBodyComposition();}
-  if(id==='nutrition'){updateNutritionGoals();updateSmartNutrition();renderMealLog();updateNutritionTotals();const tmplEl=document.getElementById('meal-template-btns');if(tmplEl)tmplEl.innerHTML=getMealTemplateButtonsHTML();}
+  if(id==='nutrition'){updateNutritionGoals();updateSmartNutrition();updateSessionLabel();renderMealLog();updateNutritionTotals();const tmplEl=document.getElementById('meal-template-btns');if(tmplEl)tmplEl.innerHTML=getMealTemplateButtonsHTML();}
   if(id==='sleep')renderSleepCharts();
   if(id==='shift')renderShiftPage();
   if(id==='gut')renderGutPage();
@@ -3587,6 +3607,20 @@ function saveMeal(){const food=document.getElementById('n-food').value;const cal
 function updateNutritionTotals(){const meals=DB.arr('meals').filter(m=>m.date===today());const cal=meals.reduce((a,m)=>a+(m.cal||0),0),p=meals.reduce((a,m)=>a+(m.protein||0),0),c2=meals.reduce((a,m)=>a+(m.carb||0),0),f=meals.reduce((a,m)=>a+(m.fat||0),0);document.getElementById('n-today-cal').textContent=cal;document.getElementById('n-today-p').textContent=p;document.getElementById('n-today-c').textContent=c2;document.getElementById('n-today-f').textContent=f;const mode=document.getElementById('n-goal-mode')?.value||'maintain';const target=getCalTarget(mode);const rem=target-cal;const remEl=document.getElementById('n-remaining-alert');if(rem>0)remEl.innerHTML=`<div class="alert alert-info">あと <strong>${rem}kcal</strong> 摂取可能（達成率 ${Math.round(cal/target*100)}%）</div>`;else if(rem===0)remEl.innerHTML=`<div class="alert alert-success">目標カロリーに到達しました！</div>`;else remEl.innerHTML=`<div class="alert alert-warn">目標を <strong>${Math.abs(rem)}kcal</strong> オーバーしています</div>`;}
 
 function renderMealLog(){const meals=DB.arr('meals').filter(m=>m.date===today()).reverse();const el=document.getElementById('n-meal-list');if(!meals.length){el.innerHTML='<div class="muted">今日の食事記録がありません</div>';return}el.innerHTML='<table><thead><tr><th>タイミング</th><th>食品</th><th>kcal</th><th>P</th><th>C</th><th>F</th></tr></thead><tbody>'+meals.map(m=>`<tr><td>${mealLabel[m.meal]||m.meal}</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.food}</td><td class="mono">${m.cal}</td><td class="mono">${m.protein}g</td><td class="mono">${m.carb}g</td><td class="mono">${m.fat}g</td></tr>`).join('')+'</tbody></table>';}
+
+
+// セッション切替ラベルのアクティブスタイル更新
+function updateSessionLabel() {
+  const isTr = document.getElementById('today-training')?.checked;
+  const lTr = document.getElementById('label-training');
+  const lOff = document.getElementById('label-off');
+  if (lTr) lTr.style.cssText = isTr
+    ? 'flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;cursor:pointer;font-size:13px;font-weight:600;background:rgba(74,158,255,0.18);color:var(--accent2);transition:background 0.15s'
+    : 'flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:background 0.15s';
+  if (lOff) lOff.style.cssText = !isTr
+    ? 'flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;cursor:pointer;font-size:13px;font-weight:600;background:rgba(167,139,250,0.18);color:#c4b5fd;transition:background 0.15s'
+    : 'flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:background 0.15s';
+}
 
 function updateSmartNutrition(){const c=cfg();const isTr=document.getElementById('today-training')?.checked??true;const bf=parseFloat(document.getElementById('n-bodyfat')?.value)||null;const mode=document.getElementById('n-goal-mode')?.value||c.goalmode||'maintain';let autoMode=mode;let bfAlert=null;if(bf){if(bf>=18){autoMode='cut';bfAlert={t:'alert-danger',m:`体脂肪率${bf}% → ミニカット推奨。`};}else if(bf>=15){autoMode='cut';bfAlert={t:'alert-warn',m:`体脂肪率${bf}% → ミニカット検討ゾーン。`};}else if(bf<=12){bfAlert={t:'alert-success',m:`体脂肪率${bf}% → バルクアップ最適ゾーン。`};}}const baseT=getCalTarget(autoMode);const baseAdjusted=getShiftAdjustedTarget(baseT);const offCal=isTr?baseAdjusted:Math.round(baseAdjusted*0.93);const macros=getMacros(offCal,c.tdeeweight||70);const carbT=Math.round(macros.carb*(isTr?1.0:0.80));const fatT=Math.round(macros.fat*(isTr?1.0:1.10));['n-cal-target','n-protein-t','n-carb-t','n-fat-t'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[offCal,macros.protein,carbT,fatT][i];});const w=parseFloat(c.tdeeweight)||70;const tEl=document.getElementById('smart-targets');if(tEl)tEl.innerHTML=`<div class="card-sm"><div class="label">トレ前目安</div><div style="font-size:13px">炭水化物: <strong>${Math.round(w*1.15)}g</strong></div><div style="font-size:13px">タンパク質: <strong>${Math.round(w*0.6)}g</strong></div><div class="muted" style="font-size:11px;margin-top:5px">脂質0〜15g・2〜3h前</div></div><div class="card-sm"><div class="label">トレ後（最重要）</div><div style="font-size:13px">炭水化物: <strong style="color:var(--accent4)">${Math.round(w*2.0)}g</strong></div><div style="font-size:13px">タンパク質: <strong>20g以上</strong></div><div class="muted" style="font-size:11px;margin-top:5px">脂質最小・2h以内</div></div><div class="card-sm"><div class="label">${isTr?'トレ日':'オフ日'}合計</div><div style="font-size:13px">カロリー: <strong>${offCal}kcal</strong></div><div style="font-size:13px">炭水化物: <strong>${carbT}g</strong>${isTr?'':' <span style="font-size:11px;color:var(--accent3)">(-20%)</span>'}</div></div>`;
   const bEl=document.getElementById('smart-badges');if(bEl){const mc={maintain:'badge-blue',cut:'badge-amber',bulk:'badge-green'};const ml={maintain:'維持',cut:'減量',bulk:'増量'};bEl.innerHTML=`<span class="badge ${mc[autoMode]}">${ml[autoMode]}モード</span>${isTr?'<span class="badge badge-blue">トレ日</span>':'<span class="badge badge-gray">オフ日</span>'}`;}
