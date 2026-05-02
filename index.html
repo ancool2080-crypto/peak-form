@@ -218,7 +218,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="nav-item" onclick="showPage('analysis')"><span class="nav-icon">∿</span>分析レポート</div>
     <div class="nav-item" onclick="showPage('settings')"><span class="nav-icon">⊙</span>設定</div>
   </nav>
-  <div class="sidebar-footer"><div class="version">PEAK FORM v2.7</div><div class="version" style="margin-top:2px;opacity:0.5">based on sports science</div></div>
+  <div class="sidebar-footer"><div class="version">PEAK FORM v2.8</div><div class="version" style="margin-top:2px;opacity:0.5">based on sports science</div></div>
 </aside>
 <main class="main">
 <div class="topbar">
@@ -2752,14 +2752,19 @@ function addExRow(nameVal, setsData){
       ${prevHint ? `<div class="ex-prev-hint" id="${eid}-hint">${prevHint}</div>` : `<div class="ex-prev-hint" id="${eid}-hint"></div>`}
       <button class="btn btn-sm btn-ghost" style="margin-left:auto;color:var(--accent)" onclick="document.getElementById('${eid}').remove()">✕</button>
     </div>
-    <div style="display:grid;grid-template-columns:28px 1fr 1fr auto;gap:6px;align-items:center;margin-bottom:6px">
-      <span style="font-size:10px;color:var(--text3);text-align:center">SET</span>
-      <span style="font-size:10px;color:var(--text3);text-align:center">重量 (kg)</span>
-      <span style="font-size:10px;color:var(--text3);text-align:center">回数</span>
+    <div style="display:grid;grid-template-columns:22px 1fr 1fr 60px 36px;gap:5px;align-items:center;margin-bottom:4px;padding:0 4px">
+      <span style="font-size:9px;color:var(--text3);text-align:center">SET</span>
+      <span style="font-size:9px;color:var(--text3);text-align:center">重量 kg</span>
+      <span style="font-size:9px;color:var(--text3);text-align:center">回数</span>
+      <span style="font-size:9px;color:var(--text3);text-align:center">RPE</span>
       <span></span>
     </div>
     <div class="set-rows" id="${eid}-sets"></div>
-    <button class="btn btn-sm" style="width:100%;margin-top:6px;font-size:12px" onclick="addSetRow('${eid}')">+ セット追加</button>
+    <div style="display:flex;gap:6px;margin-top:6px">
+      <button class="btn btn-sm" style="flex:1;font-size:12px" onclick="addSetRow('${eid}')">+ 作業セット</button>
+      <button class="btn btn-sm" style="font-size:12px;background:rgba(90,90,120,0.2);border-color:var(--border2)" onclick="addSetRow('${eid}','','',true)">W ウォームアップ</button>
+      <button class="btn btn-sm" style="font-size:12px;color:var(--accent2);border-color:rgba(74,158,255,0.3)" onclick="startRestTimer('${eid}')">⏱ 休憩</button>
+    </div>
   `;
 
   document.getElementById('exercise-list').appendChild(div);
@@ -2769,20 +2774,47 @@ function addExRow(nameVal, setsData){
 }
 
 // セット行を追加
-function addSetRow(eid, weightVal, repsVal){
+function addSetRow(eid, weightVal, repsVal, isWarmup, rpeVal){
   const container = document.getElementById(eid + '-sets');
   if (!container) return;
   const setNum = container.children.length + 1;
   const row = document.createElement('div');
-  row.className = 'set-row';
-  row.style.cssText = 'display:grid;grid-template-columns:28px 1fr 1fr auto;gap:6px;align-items:center;margin-bottom:4px';
+  row.className = 'set-row' + (isWarmup ? ' warmup-row' : '');
+  
+  // 1RM推定（Epley式）
+  const w = parseFloat(weightVal)||0, r = parseInt(repsVal)||0;
+  const rm1 = (w>0&&r>0&&r<30) ? Math.round(w*(1+r/30)*10)/10 : 0;
+  const rm1Text = rm1 > 0 ? `<span style="font-size:9px;color:var(--text3);font-family:var(--font-mono)">=1RM ${rm1}kg</span>` : '';
+  
+  const bgColor = isWarmup ? 'rgba(90,90,120,0.15)' : 'transparent';
+  const warmupLabel = isWarmup ? '<span style="font-size:8px;color:var(--text3);background:var(--bg4);padding:1px 4px;border-radius:2px">W</span>' : '';
+  
+  row.style.cssText = `background:${bgColor};border-radius:4px;padding:3px 4px;margin-bottom:3px`;
   row.innerHTML = `
-    <span style="font-size:11px;color:var(--text3);text-align:center;font-family:var(--font-mono)">${setNum}</span>
-    <input type="number" class="set-weight" placeholder="kg" value="${weightVal||''}" min="0" max="500" step="0.5"
-      style="text-align:center" oninput="updateSetRowHint(this)">
-    <input type="number" class="set-reps" placeholder="回" value="${repsVal||''}" min="1" max="100"
-      style="text-align:center">
-    <button class="btn btn-sm btn-ghost" style="padding:4px 8px;color:var(--text3)" onclick="this.parentElement.remove();reNumberSets('${eid}')">✕</button>
+    <div style="display:grid;grid-template-columns:22px 1fr 1fr 60px 36px;gap:5px;align-items:center">
+      <div style="text-align:center">
+        <span style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">${warmupLabel||setNum}</span>
+      </div>
+      <input type="number" class="set-weight" placeholder="kg" value="${weightVal||''}" min="0" max="500" step="0.5"
+        style="text-align:center;font-size:13px;padding:7px 4px" oninput="onSetWeightInput(this,'${eid}')">
+      <input type="number" class="set-reps" placeholder="rep" value="${repsVal||''}" min="1" max="100"
+        style="text-align:center;font-size:13px;padding:7px 4px" onchange="onSetComplete(this,'${eid}')">
+      <select class="set-rpe" style="font-size:11px;padding:5px 2px;text-align:center">
+        <option value="">RPE</option>
+        <option value="6" ${rpeVal=='6'?'selected':''}>6</option>
+        <option value="6.5" ${rpeVal=='6.5'?'selected':''}>6.5</option>
+        <option value="7" ${rpeVal=='7'?'selected':''}>7</option>
+        <option value="7.5" ${rpeVal=='7.5'?'selected':''}>7.5</option>
+        <option value="8" ${rpeVal=='8'?'selected':''}>8</option>
+        <option value="8.5" ${rpeVal=='8.5'?'selected':''}>8.5</option>
+        <option value="9" ${rpeVal=='9'?'selected':''}>9</option>
+        <option value="9.5" ${rpeVal=='9.5'?'selected':''}>9.5</option>
+        <option value="10" ${rpeVal=='10'?'selected':''}>10</option>
+      </select>
+      <button class="btn btn-sm btn-ghost" style="padding:3px 6px;color:var(--text3);font-size:11px"
+        onclick="this.closest('.set-row').remove();reNumberSets('${eid}')">✕</button>
+    </div>
+    <div class="set-rm-hint" style="font-size:9px;color:var(--text3);text-align:right;padding-right:40px;min-height:12px">${rm1Text}</div>
   `;
   container.appendChild(row);
 }
@@ -2829,6 +2861,7 @@ function onExNameInput(nameInput, eid){
       if (wEl && !wEl.value) wEl.value = kg || '';
       if (rEl && !rEl.value) rEl.value = reps || '';
     }
+  renderProgressionHint(eid);
   } else {
     hintEl.innerHTML = `<span style="font-size:11px;color:var(--text3);padding:2px 6px;background:var(--bg4);border-radius:4px">初回</span>`;
   }
@@ -2869,7 +2902,9 @@ function saveTraining(){
       block.querySelectorAll('.set-row').forEach(row => {
         const w = parseFloat(row.querySelector('.set-weight')?.value) || 0;
         const r = parseInt(row.querySelector('.set-reps')?.value) || 0;
-        if (w > 0 || r > 0) sets.push({ weight: w, reps: r });
+        const rpe = row.querySelector('.set-rpe')?.value || '';
+        const isWarmup = row.classList.contains('warmup-row');
+        if (w > 0 || r > 0) sets.push({ weight: w, reps: r, rpe, warmup: isWarmup });
       });
       if (sets.length) {
         // 後方互換のため最大重量のセットを代表値として保存
@@ -2995,16 +3030,29 @@ function renderTrainingLog(){
         }
 
         const sets = e.setData || [{weight:e.weight, reps:e.reps}];
-        const setStr = sets.map((s,i) =>
-          `<span style="font-size:11px;font-family:var(--font-mono);padding:2px 6px;background:var(--bg4);border-radius:3px">${parseFloat(s.weight)||'—'}kg×${parseInt(s.reps)||'—'}</span>`
-        ).join('');
+        // ウォームアップ除外した作業セット
+        const workSets = sets.filter(s => !s.warmup);
+        const allSets = sets;
+        const setStr = allSets.map((s,i) => {
+          const wLabel = s.warmup ? 'W' : (i+1);
+          const rpeStr = s.rpe ? ` <span style="font-size:8px;color:var(--text3)">@${s.rpe}</span>` : '';
+          const bg = s.warmup ? 'rgba(90,90,120,0.2)' : 'var(--bg4)';
+          return `<span style="font-size:11px;font-family:var(--font-mono);padding:2px 6px;background:${bg};border-radius:3px;opacity:${s.warmup?0.6:1}">${wLabel}:${parseFloat(s.weight)||'—'}kg×${parseInt(s.reps)||'—'}${rpeStr}</span>`;
+        }).join('');
+        // 1RM推定（最大重量×最大セット）
+        const maxRm1 = workSets.reduce((mx, s) => {
+          const w = parseFloat(s.weight)||0, r = parseInt(s.reps)||0;
+          const rm = (w>0&&r>0&&r<30) ? Math.round(w*(1+r/30)*10)/10 : w;
+          return rm > mx ? rm : mx;
+        }, 0);
 
         htmlStr += `<div style="padding:6px 8px;background:var(--bg3);border-radius:var(--rs);border-left:2px solid var(--border2)">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
             <span style="font-size:12px;font-weight:500">${e.name}</span>
             <span style="font-size:11px;color:var(--text3)">${sets.length}セット${diffBadge}</span>
           </div>
-          <div style="display:flex;flex-wrap:wrap;gap:4px">${setStr}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:3px">${setStr}</div>
+          ${maxRm1 > 0 ? `<div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">推定1RM: <span style="color:var(--accent2)">${maxRm1}kg</span></div>` : ''}
         </div>`;
       });
       htmlStr += '</div>';
@@ -3057,6 +3105,270 @@ function getTodayShiftCalBonus(){
 }
 function getShiftAdjustedTarget(baseTarget){
   return baseTarget+getTodayShiftCalBonus().bonus;
+}
+
+
+// ============================================================
+// ① セット間タイマー
+// ============================================================
+let _timerInterval = null;
+let _timerSeconds = 0;
+let _timerEid = null;
+
+function startRestTimer(eid, seconds) {
+  // デフォルト: 90秒（コンパウンド）
+  const secs = seconds || getDefaultRestTime(eid);
+  _timerEid = eid;
+  _timerSeconds = secs;
+  
+  // タイマーUI表示
+  showRestTimerUI(secs);
+  
+  // カウントダウン開始
+  if (_timerInterval) clearInterval(_timerInterval);
+  _timerInterval = setInterval(function() {
+    _timerSeconds--;
+    updateRestTimerUI(_timerSeconds);
+    if (_timerSeconds <= 0) {
+      clearInterval(_timerInterval);
+      _timerInterval = null;
+      onRestTimerComplete();
+    }
+  }, 1000);
+}
+
+function getDefaultRestTime(eid) {
+  // 種目タイプでデフォルト休憩時間を決める
+  const nameEl = document.querySelector('#' + eid + ' .ex-name');
+  const name = nameEl ? nameEl.value : '';
+  const prog = getCurrentProgramData();
+  let exType = 'I';
+  Object.values(prog.sessions).forEach(s => {
+    const ex = s.exercises.find(e => e.name === name);
+    if (ex) exType = ex.rpe || 'I';
+  });
+  return exType === 'C' ? 180 : exType === 'M' ? 120 : 90;
+}
+
+function showRestTimerUI(seconds) {
+  let panel = document.getElementById('rest-timer-panel');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'rest-timer-panel';
+    panel.style.cssText = 'position:fixed;bottom:80px;right:16px;background:var(--bg2);border:2px solid var(--accent2);border-radius:var(--r);padding:16px 20px;z-index:500;text-align:center;min-width:160px;box-shadow:0 8px 32px rgba(0,0,0,0.5)';
+    document.body.appendChild(panel);
+  }
+  panel.style.display = 'block';
+  panel.innerHTML = `
+    <div style="font-size:10px;color:var(--text3);letter-spacing:2px;margin-bottom:6px">REST TIMER</div>
+    <div id="rest-timer-display" style="font-family:var(--font-mono);font-size:42px;font-weight:500;color:var(--accent2);line-height:1">${formatTime(seconds)}</div>
+    <div style="height:4px;background:var(--bg4);border-radius:2px;margin:10px 0;overflow:hidden">
+      <div id="rest-timer-bar" style="height:100%;background:var(--accent2);border-radius:2px;width:100%;transition:width 1s linear"></div>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:8px;justify-content:center">
+      <button class="btn btn-sm" onclick="addRestTime(30)" style="font-size:11px">+30s</button>
+      <button class="btn btn-sm" onclick="addRestTime(-30)" style="font-size:11px">-30s</button>
+      <button class="btn btn-sm btn-danger" onclick="stopRestTimer()" style="font-size:11px">✕</button>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:4px;justify-content:center">
+      <button class="btn btn-sm btn-ghost" onclick="startRestTimer(_timerEid,60)" style="font-size:10px">60s</button>
+      <button class="btn btn-sm btn-ghost" onclick="startRestTimer(_timerEid,90)" style="font-size:10px">90s</button>
+      <button class="btn btn-sm btn-ghost" onclick="startRestTimer(_timerEid,180)" style="font-size:10px">3m</button>
+    </div>
+  `;
+  panel._totalSecs = seconds;
+}
+
+function updateRestTimerUI(seconds) {
+  const disp = document.getElementById('rest-timer-display');
+  const bar = document.getElementById('rest-timer-bar');
+  const panel = document.getElementById('rest-timer-panel');
+  if (disp) {
+    disp.textContent = formatTime(Math.max(0, seconds));
+    const color = seconds <= 10 ? 'var(--accent)' : seconds <= 30 ? 'var(--accent3)' : 'var(--accent2)';
+    disp.style.color = color;
+    if (bar && panel) {
+      const pct = Math.max(0, seconds / (panel._totalSecs||90) * 100);
+      bar.style.width = pct + '%';
+      bar.style.background = color;
+    }
+  }
+}
+
+function onRestTimerComplete() {
+  updateRestTimerUI(0);
+  const panel = document.getElementById('rest-timer-panel');
+  if (panel) {
+    panel.style.borderColor = 'var(--accent4)';
+    panel.innerHTML = '<div style="font-size:28px;margin-bottom:8px">✓</div><div style="font-size:14px;font-weight:600;color:var(--accent4)">GO!</div><div style="font-size:11px;color:var(--text3);margin-top:4px">次のセットを開始</div><button class="btn btn-sm" onclick="stopRestTimer()" style="margin-top:10px;width:100%">閉じる</button>';
+  }
+  // バイブレーション（スマホ）
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  // 音（Web Audio API）
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [440, 550, 660].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.15 + 0.3);
+      osc.start(ctx.currentTime + i * 0.15);
+      osc.stop(ctx.currentTime + i * 0.15 + 0.3);
+    });
+  } catch(e) {}
+}
+
+function addRestTime(secs) {
+  _timerSeconds = Math.max(1, _timerSeconds + secs);
+  const panel = document.getElementById('rest-timer-panel');
+  if (panel) panel._totalSecs = Math.max(panel._totalSecs||90, _timerSeconds);
+  updateRestTimerUI(_timerSeconds);
+}
+
+function stopRestTimer() {
+  if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
+  const panel = document.getElementById('rest-timer-panel');
+  if (panel) panel.style.display = 'none';
+}
+
+function formatTime(secs) {
+  const m = Math.floor(Math.abs(secs) / 60);
+  const s = Math.abs(secs) % 60;
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+// セット完了時に自動タイマー開始
+function onSetComplete(repsInput, eid) {
+  const r = parseInt(repsInput.value);
+  if (r > 0) {
+    // 作業セットの場合のみ自動タイマー
+    const row = repsInput.closest('.set-row');
+    if (row && !row.classList.contains('warmup-row')) {
+      startRestTimer(eid);
+    }
+  }
+}
+
+// 重量入力時に1RM更新
+function onSetWeightInput(weightInput, eid) {
+  const row = weightInput.closest('.set-row');
+  if (!row) return;
+  const repsEl = row.querySelector('.set-reps');
+  const w = parseFloat(weightInput.value)||0;
+  const r = parseInt(repsEl?.value)||0;
+  const hintEl = row.querySelector('.set-rm-hint');
+  if (hintEl) {
+    if (w > 0 && r > 0 && r < 30) {
+      const rm = Math.round(w*(1+r/30)*10)/10;
+      hintEl.innerHTML = `<span style="font-size:9px;color:var(--text3);font-family:var(--font-mono)">=1RM ${rm}kg</span>`;
+    } else if (w > 0) {
+      hintEl.innerHTML = `<span style="font-size:9px;color:var(--text3);font-family:var(--font-mono)">${w}kg</span>`;
+    }
+  }
+}
+
+// ============================================================
+// ⑤ プログレッション自動提案（Double Progression + 重量提案）
+// ============================================================
+function getProgressionSuggestion(exName) {
+  const all = DB.arr('trainings').filter(t => t.type === 'strength');
+  if (all.length < 2) return null;
+  
+  // 最新2セッションのデータを取得
+  const sessions = [];
+  for (const t of [...all].reverse()) {
+    if (!t.exercises) continue;
+    const ex = t.exercises.find(e => e.name === exName);
+    if (!ex) continue;
+    sessions.push({ date: t.date, ex });
+    if (sessions.length >= 3) break;
+  }
+  if (sessions.length < 1) return null;
+  
+  const latest = sessions[0];
+  const sets = latest.ex.setData || [{ weight: latest.ex.weight, reps: latest.ex.reps }];
+  const workSets = sets.filter(s => !s.warmup && parseFloat(s.weight) > 0);
+  if (!workSets.length) return null;
+  
+  const maxW = Math.max(...workSets.map(s => parseFloat(s.weight)));
+  const maxR = Math.max(...workSets.filter(s => parseFloat(s.weight) === maxW).map(s => parseInt(s.reps)||0));
+  
+  // レップ範囲を種目から取得
+  const prog = getCurrentProgramData();
+  let repRange = { min: 8, max: 12 };
+  Object.values(prog.sessions).forEach(s => {
+    const ex = s.exercises.find(e => e.name === exName);
+    if (ex && ex.reps) {
+      const m = ex.reps.match(/(\d+)-(\d+)/);
+      if (m) repRange = { min: parseInt(m[1]), max: parseInt(m[2]) };
+    }
+  });
+  
+  // Double Progression判定
+  const allSetsAtMax = workSets.every(s => parseInt(s.reps) >= repRange.max);
+  
+  if (allSetsAtMax) {
+    // 全セット上限達成 → 重量アップ提案
+    const increment = maxW >= 60 ? 2.5 : 1.25;
+    const nextW = maxW + increment;
+    const nextR = repRange.min;
+    return {
+      type: 'weightup',
+      message: `↑ 重量UP: ${nextW}kg × ${nextR}rep から開始`,
+      detail: `全セット${repRange.max}rep達成 → +${increment}kg`,
+      color: 'var(--accent4)',
+      nextWeight: nextW,
+      nextReps: nextR,
+    };
+  } else {
+    // 未達 → 同重量で回数を増やす
+    const avgReps = Math.round(workSets.reduce((a,s)=>a+(parseInt(s.reps)||0),0)/workSets.length);
+    return {
+      type: 'repup',
+      message: `→ 同重量継続: ${maxW}kg で${repRange.max}repを目指す`,
+      detail: `現在平均${avgReps}rep / 目標${repRange.max}rep`,
+      color: 'var(--accent2)',
+      nextWeight: maxW,
+      nextReps: repRange.max,
+    };
+  }
+}
+
+function renderProgressionHint(eid) {
+  const nameEl = document.querySelector('#' + eid + ' .ex-name');
+  if (!nameEl || !nameEl.value.trim()) return;
+  
+  const suggestion = getProgressionSuggestion(nameEl.value.trim());
+  if (!suggestion) return;
+  
+  const hintContainer = document.getElementById(eid + '-progression');
+  if (!hintContainer) return;
+  
+  hintContainer.innerHTML = `
+    <div style="padding:6px 10px;background:rgba(0,0,0,0.2);border-radius:var(--rs);border-left:3px solid ${suggestion.color};margin-bottom:6px">
+      <div style="font-size:11px;font-weight:600;color:${suggestion.color}">${suggestion.message}</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:2px">${suggestion.detail}</div>
+    </div>`;
+  
+  // 次回推奨値をセット行に反映するボタン
+  hintContainer.innerHTML += `<button class="btn btn-sm btn-ghost" style="font-size:10px;color:${suggestion.color};margin-bottom:4px"
+    onclick="applyProgression('${eid}',${suggestion.nextWeight},${suggestion.nextReps})">
+    この値をセットに適用
+  </button>`;
+}
+
+function applyProgression(eid, weight, reps) {
+  const container = document.getElementById(eid + '-sets');
+  if (!container) return;
+  container.querySelectorAll('.set-row:not(.warmup-row)').forEach(row => {
+    const wEl = row.querySelector('.set-weight');
+    const rEl = row.querySelector('.set-reps');
+    if (wEl) wEl.value = weight;
+    if (rEl) rEl.value = reps;
+  });
 }
 
 // ============================================================
