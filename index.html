@@ -398,12 +398,55 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="card" style="margin-bottom:18px">
     <div class="card-header-bar blue"></div>
     <div class="h3" style="margin-bottom:16px">本日のセッション</div>
-    <div class="grid2"><div class="field"><label class="label">日付</label><input type="date" id="t-date"></div><div class="field"><label class="label">種別</label><select id="t-type"><option value="strength">筋力トレーニング</option><option value="hiit">HIIT</option><option value="cardio">有酸素</option><option value="functional">機能的トレーニング</option><option value="mobility">モビリティ・回復</option><option value="firefighting">消防訓練</option></select></div></div>
+    <div class="grid2"><div class="field"><label class="label">日付</label><input type="date" id="t-date"></div><div class="field"><label class="label">種別</label><select id="t-type" onchange="onTrainingTypeChange()"><option value="strength">筋力トレーニング</option><option value="hiit">HIIT</option><option value="cardio">有酸素</option><option value="functional">機能的トレーニング</option><option value="mobility">モビリティ・回復</option><option value="firefighting">消防訓練</option></select></div></div>
     <div class="grid3"><div class="field"><label class="label">時間（分）</label><input type="number" id="t-duration" placeholder="60"></div><div class="field"><label class="label">RPE（1〜10）</label><input type="number" id="t-rpe" placeholder="7" min="1" max="10"></div><div class="field"><label class="label">水分（mL）</label><input type="number" id="t-water" placeholder="2000"></div></div>
-    <div class="divider"></div>
-    <div class="h3" style="margin-bottom:12px">種目記録</div>
-    <div id="exercise-list"></div>
-    <button class="btn btn-sm" onclick="addExRow()" style="margin-bottom:16px">+ 種目を追加</button>
+
+    <!-- 有酸素専用フィールド（cardio/hiit時のみ表示） -->
+    <div id="cardio-fields" style="display:none">
+      <div class="divider"></div>
+      <div class="h3" style="margin-bottom:12px">有酸素の詳細</div>
+      <div class="grid2" style="margin-bottom:10px">
+        <div class="field">
+          <label class="label">種目</label>
+          <select id="t-cardio-type">
+            <option value="crosstrainer">クロストレーナー（推奨）</option>
+            <option value="bike">バイク</option>
+            <option value="treadmill_walk">傾斜ウォーク</option>
+            <option value="treadmill_run">ランニング</option>
+            <option value="rowing">ローイング</option>
+            <option value="stairmaster">ステアマスター</option>
+            <option value="swim">水泳</option>
+            <option value="outdoor_run">屋外ランニング</option>
+            <option value="cycling">サイクリング</option>
+            <option value="walk">ウォーキング</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label">心拍ゾーン</label>
+          <select id="t-cardio-zone" onchange="updateCardioZoneHint()">
+            <option value="2">ゾーン2（最大心拍60〜70%）— 推奨</option>
+            <option value="3">ゾーン3（70〜80%）— 有酸素強化</option>
+            <option value="4">ゾーン4（80〜90%）— 閾値トレーニング</option>
+            <option value="hiit">HIIT（90%以上 + インターバル）</option>
+            <option value="1">ゾーン1（〜60%）— アクティブリカバリー</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid3" style="margin-bottom:10px">
+        <div class="field"><label class="label">距離（km）任意</label><input type="number" id="t-cardio-distance" placeholder="5.0" step="0.1" min="0"></div>
+        <div class="field"><label class="label">平均心拍（bpm）任意</label><input type="number" id="t-cardio-hr" placeholder="135" min="50" max="220"></div>
+        <div class="field"><label class="label">消費kcal（任意）</label><input type="number" id="t-cardio-kcal" placeholder="300" min="0"></div>
+      </div>
+      <div id="cardio-zone-hint" class="alert alert-info" style="font-size:12px;margin-bottom:10px">ゾーン2は脂肪燃焼効率が高く、筋トレパフォーマンスへの影響が最小。Pelland et al. 推奨のゾーン2を基本とし、週1〜2回のみ高強度（ゾーン3〜4）を取り入れましょう。</div>
+    </div>
+
+    <!-- 筋力トレーニング種目リスト -->
+    <div id="strength-fields">
+      <div class="divider"></div>
+      <div class="h3" style="margin-bottom:12px">種目記録</div>
+      <div id="exercise-list"></div>
+      <button class="btn btn-sm" onclick="addExRow()" style="margin-bottom:16px">+ 種目を追加</button>
+    </div>
     <div class="field"><label class="label">メモ</label><textarea id="t-notes" rows="2" placeholder="体調、気づき、怪我の有無など"></textarea></div>
     <button class="btn btn-primary" onclick="saveTraining()">記録する</button>
   </div>
@@ -487,17 +530,68 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="row-between" style="margin-bottom:10px;flex-wrap:wrap;gap:8px">
       <div class="row" style="gap:6px;flex-wrap:wrap">
         <span style="font-size:11px;font-weight:500;color:var(--text2)">タップして登録：</span>
-        <span class="badge badge-red" style="cursor:pointer" id="shift-mode-24" onclick="setShiftMode('24h')">24h勤務</span>
-        <span class="badge badge-gray" style="cursor:pointer" id="shift-mode-off" onclick="setShiftMode('off')">非番</span>
-        <span class="badge badge-blue" style="cursor:pointer" id="shift-mode-rest" onclick="setShiftMode('rest')">週休</span>
-        <span class="badge badge-green" style="cursor:pointer" id="shift-mode-train" onclick="setShiftMode('gym')">ジム</span>
-        <span class="badge badge-amber" style="cursor:pointer" id="shift-mode-cardio" onclick="setShiftMode('cardio')">有酸素</span>
-        <span class="badge badge-gray" style="cursor:pointer" id="shift-mode-clear" onclick="setShiftMode('clear')">クリア</span>
+        <span class="badge badge-red" style="cursor:pointer" id="shift-mode-24" onclick="setShiftMode('24h')">🔥 24h勤務</span>
+        <span class="badge badge-gray" style="cursor:pointer" id="shift-mode-off" onclick="setShiftMode('off')">💤 非番</span>
+        <span class="badge badge-amber" style="cursor:pointer" id="shift-mode-off-work" onclick="setShiftMode('off-work')">⚡ 非番出勤</span>
+        <span class="badge badge-blue" style="cursor:pointer" id="shift-mode-rest" onclick="setShiftMode('rest')">🏠 週休</span>
+        <span class="badge badge-purple" style="cursor:pointer" id="shift-mode-rest-work" onclick="setShiftMode('rest-work')">🚨 週休出勤</span>
+        <span class="badge badge-green" style="cursor:pointer" id="shift-mode-gym" onclick="setShiftMode('gym')">💪 ジム</span>
+        <span class="badge" style="cursor:pointer;background:rgba(29,158,117,0.15);color:#34d399;border:1px solid rgba(29,158,117,0.3)" id="shift-mode-cardio" onclick="setShiftMode('cardio')">🏃 有酸素</span>
+        <span class="badge badge-gray" style="cursor:pointer" id="shift-mode-clear" onclick="setShiftMode('clear')">✕ クリア</span>
       </div>
       <div class="badge badge-blue" id="shift-cur-mode-label">モード: 24h勤務</div>
     </div>
     <div class="week-row" style="margin-bottom:4px"><div></div><div class="day-header">月</div><div class="day-header">火</div><div class="day-header">水</div><div class="day-header">木</div><div class="day-header">金</div><div class="day-header">土</div><div class="day-header">日</div></div>
     <div id="shift-calendar-grid"></div>
+  </div>
+  <!-- 特別出勤 詳細入力モーダル -->
+  <div id="extra-work-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center">
+    <div class="card" style="width:min(420px,92vw);max-height:90vh;overflow-y:auto;background:var(--bg2)">
+      <div class="card-header-bar amber"></div>
+      <div class="row-between" style="margin-bottom:14px">
+        <div><div class="h3" id="extra-work-title">出勤詳細</div><div class="muted" id="extra-work-date" style="font-size:12px;margin-top:2px"></div></div>
+        <button class="btn btn-sm btn-ghost" onclick="closeExtraWorkModal()">✕</button>
+      </div>
+      <div class="field">
+        <label class="label">勤務時間（時間）</label>
+        <div class="row" style="gap:8px;align-items:center">
+          <input type="number" id="extra-hours" min="0.5" max="24" step="0.5" value="4" style="max-width:90px">
+          <span class="muted">時間</span>
+          <div class="row" style="gap:6px;flex-wrap:wrap">
+            <button class="btn btn-sm" onclick="document.getElementById('extra-hours').value=2">2h</button>
+            <button class="btn btn-sm" onclick="document.getElementById('extra-hours').value=4">4h</button>
+            <button class="btn btn-sm" onclick="document.getElementById('extra-hours').value=8">8h</button>
+            <button class="btn btn-sm" onclick="document.getElementById('extra-hours').value=12">12h</button>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">勤務内容</label>
+        <select id="extra-content" onchange="updateExtraLoad()">
+          <option value="training" data-intensity="3">訓練・演習（強度：中）</option>
+          <option value="lecture" data-intensity="1">会議・講義・デスクワーク（強度：低）</option>
+          <option value="inspection" data-intensity="1.5">点検・現場確認（強度：低〜中）</option>
+          <option value="emergency" data-intensity="5">緊急出動・救助活動（強度：高）</option>
+          <option value="ceremony" data-intensity="0.5">式典・広報活動（強度：最低）</option>
+          <option value="custom" data-intensity="2">その他</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="label">メモ（任意）</label>
+        <input type="text" id="extra-note" placeholder="例: 水難救助訓練、安全管理委員会など">
+      </div>
+      <div class="card-sm" style="margin-bottom:14px;border-color:rgba(245,166,35,0.3)">
+        <div class="label" style="margin-bottom:4px">推定ACWR負荷</div>
+        <div id="extra-load-preview" style="font-size:22px;font-weight:500;font-family:var(--font-mono);color:var(--accent3)">—</div>
+        <div class="muted" style="font-size:11px;margin-top:3px">時間 × 強度係数 × 100</div>
+      </div>
+      <div class="row" style="gap:8px">
+        <button class="btn btn-primary" style="flex:1" onclick="saveExtraWork()">保存</button>
+        <button class="btn btn-danger btn-sm" onclick="clearExtraWork()">この日の出勤を削除</button>
+      </div>
+    </div>
+  </div>
+  <div style="display:none"><!-- modal placeholder --></div>
   </div>
   <div class="grid2" style="margin-bottom:18px">
     <div class="card card-blue">
@@ -509,7 +603,7 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="card-header-bar amber"></div>
       <div class="h3" style="margin-bottom:12px">ACWR計算（負荷管理）</div>
       <div id="shift-acwr"></div>
-      <div class="muted" style="font-size:11px;margin-top:10px;line-height:1.6">24h勤務 = 負荷800 / 非番 = 150 / ジム = 記録値 / 有酸素 = 200。ACWR 0.8〜1.3がスイートスポット（Firefighter Nation 2024）。</div>
+      <div class="muted" style="font-size:11px;margin-top:10px;line-height:1.6">24h勤務 = 800 / 週休出勤 = 700 / 非番出勤 = 600 / 有酸素 = 200 / 非番 = 100 / 週休 = 0。ACWR 0.8〜1.3がスイートスポット（Firefighter Nation 2024）。</div>
     </div>
   </div>
   <div class="card">
@@ -1039,6 +1133,34 @@ input[type=range]:focus{border:none;box-shadow:none}
     </div>
   </div>
 
+  <!-- 重量推移トラッカー -->
+  <div class="card card-accent" style="margin-bottom:18px">
+    <div class="card-header-bar"></div>
+    <div class="row-between" style="margin-bottom:14px">
+      <div class="h3">重量推移トラッカー</div>
+      <div class="row" style="gap:8px">
+        <label style="font-size:12px;display:flex;align-items:center;gap:5px;cursor:pointer">
+          <input type="checkbox" id="tracker-use-1rm" onchange="renderWeightTracker()">
+          <span>1RM換算表示</span>
+        </label>
+      </div>
+    </div>
+    <div class="row" style="gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <input type="text" id="tracker-search" placeholder="種目名で検索（例: スクワット）" style="flex:1;min-width:160px" oninput="searchTrackerExercises()">
+      <select id="tracker-range" style="width:auto" onchange="renderWeightTracker()">
+        <option value="30">30日</option>
+        <option value="60" selected>60日</option>
+        <option value="90">90日</option>
+        <option value="180">180日</option>
+        <option value="0">全期間</option>
+      </select>
+    </div>
+    <div id="tracker-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+    <div id="tracker-selected-ex" class="muted" style="font-size:12px;margin-bottom:8px">種目を選択してください</div>
+    <div class="chart-wrap" style="height:220px"><canvas id="tracker-chart"></canvas></div>
+    <div id="tracker-stats" style="margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
+  </div>
+
   <!-- グラフ群 -->
   <div class="grid2" style="margin-bottom:18px">
     <div class="card"><div class="card-header-bar blue"></div><div class="h3" style="margin-bottom:14px">週次負荷（8週）</div><div class="chart-wrap" style="height:180px"><canvas id="a-weekly-chart"></canvas></div></div>
@@ -1103,7 +1225,7 @@ function showPage(id){
   closeSidebar();
   if(id==='dashboard')renderDashboard();
   if(id==='program')initProgramPage();
-  if(id==='analysis'){renderAnalysis();updateWeeklyWeightPanel();updateMiniCut();}
+  if(id==='analysis'){renderAnalysis();updateWeeklyWeightPanel();updateMiniCut();initWeightTracker();}
   if(id==='nutrition'){updateNutritionGoals();updateSmartNutrition();renderMealLog();updateNutritionTotals();}
   if(id==='sleep')renderSleepCharts();
   if(id==='shift')renderShiftPage();
@@ -1232,9 +1354,30 @@ function renderDashboard(){
   if(tsb>10){intensity='高強度推奨';ic='var(--accent4)'}else if(tsb>-5){intensity='通常強度';ic='var(--accent2)'}else if(tsb>-15){intensity='やや抑えめ';ic='var(--accent3)'}else{intensity='回復優先';ic='var(--accent)'}
   document.getElementById('d-rec-intensity').innerHTML=`<span style="color:${ic};font-size:13px;font-weight:600">${intensity}</span>`;
   const alerts=document.getElementById('dash-alerts');alerts.innerHTML='';
+  // シフトデータから今日・明日の予定を確認
+  const shiftData=DB.get('pf_shift_data')||{};
+  const todayShiftEntry=shiftData[today()];
+  const todayShift=getShiftType(todayShiftEntry);
+  const tomorrowD=new Date();tomorrowD.setDate(tomorrowD.getDate()+1);
+  const tomorrowShiftEntry=shiftData[tomorrowD.toISOString().slice(0,10)];
+  const tomorrowShift=getShiftType(tomorrowShiftEntry);
+  // 特別出勤の場合は時間数と内容も取得してアラートに反映
+  const todayExtraHours=typeof todayShiftEntry==='object'?todayShiftEntry.hours:null;
+  const todayExtraLabel=typeof todayShiftEntry==='object'?todayShiftEntry.label||'':null;
+  if(todayShift==='off-work'){
+    const detail=todayExtraHours?` (${todayExtraHours}h${todayExtraLabel?' · '+todayExtraLabel:''})`:' ';
+    alerts.innerHTML+=`<div class="alert alert-warn">⚡ 今日は<strong>非番出勤</strong>${detail}です。全種目RIRを+2して強度を落としてください。</div>`;
+  }
+  if(todayShift==='rest-work'){
+    const detail=todayExtraHours?` (${todayExtraHours}h${todayExtraLabel?' · '+todayExtraLabel:''})`:' ';
+    const heavy=todayExtraHours&&todayExtraHours>=6;
+    alerts.innerHTML+=`<div class="alert alert-danger">🚨 今日は<strong>週休出勤</strong>${detail}です。${heavy?'長時間勤務のため筋トレ中止・完全回復を推奨します。':'筋トレは有酸素またはモビリティのみ推奨します。'}</div>`;
+  }
+  if(tomorrowShift==='24h')alerts.innerHTML+=`<div class="alert alert-info">🔥 明日は24h勤務です。今日のトレーニングは軽めにして翌日のパフォーマンスを確保しましょう。</div>`;
+  if(tomorrowShift==='rest-work')alerts.innerHTML+=`<div class="alert alert-warn">🚨 明日は週休出勤です。今日は完全回復優先（筋トレ中止またはデロード）を推奨します。</div>`;
   if(tsb<-15)alerts.innerHTML+=`<div class="alert alert-warn">⚠ 疲労蓄積が高い状態（TSB: ${tsb}）。今日は軽負荷またはアクティブリカバリーを推奨します。</div>`;
   if(avgSleep&&avgSleep<6)alerts.innerHTML+=`<div class="alert alert-warn">⚠ 直近7日の平均睡眠が${fmt1(avgSleep)}時間です。7時間以上の確保を優先してください。</div>`;
-  if(score>=80)alerts.innerHTML+=`<div class="alert alert-success">✓ コンディション良好（${score}/100）。高強度トレーニングに最適な状態です。</div>`;
+  if(score>=80&&!todayShift?.includes('work'))alerts.innerHTML+=`<div class="alert alert-success">✓ コンディション良好（${score}/100）。高強度トレーニングに最適な状態です。</div>`;
   const pk=DB.get('peaking');
   if(pk){const startD=new Date(pk.start);const todayD=new Date(today());const weekNum=Math.floor((todayD-startD)/(7*86400000));const phase=pk.phases.find(p=>weekNum>=p.startWeek&&weekNum<p.startWeek+p.weeks);if(phase){const colors={accumulate:'badge-blue',intensify:'badge-amber',convert:'badge-red',taper:'badge-green'};const phaseNames={accumulate:'蓄積期',intensify:'強化期',convert:'変換期',taper:'テーパー期'};document.getElementById('dash-phase-badge').innerHTML=`<span class="badge ${colors[phase.type]}">${phaseNames[phase.type]} W${weekNum+1}</span>`;}}
   const recent=DB.arr('trainings').slice(-5).reverse();const rEl=document.getElementById('d-recent-trainings');
@@ -1336,7 +1479,41 @@ function fillPrevOnNameInput(nameInput,rowId){
     if(sp)sp.innerHTML='<span style="padding:2px 5px;background:var(--bg4);color:var(--text3);border-radius:4px">初回</span>';
   }
 }
-function saveTraining(){const date=document.getElementById('t-date').value;const dur=parseInt(document.getElementById('t-duration').value)||0;const rpe=parseInt(document.getElementById('t-rpe').value)||5;if(!date||!dur){alert('日付と時間は必須です');return}const exercises=[];document.querySelectorAll('#exercise-list .input-row').forEach(row=>{const ins=row.querySelectorAll('input');if(ins[0].value)exercises.push({name:ins[0].value,sets:ins[1].value,reps:ins[2].value,weight:ins[3].value})});DB.push('trainings',{date,type:document.getElementById('t-type').value,duration:dur,rpe,water:parseInt(document.getElementById('t-water').value)||0,notes:document.getElementById('t-notes').value,exercises,id:Date.now()});['t-duration','t-rpe','t-water','t-notes'].forEach(id=>document.getElementById(id).value='');document.getElementById('exercise-list').innerHTML='';renderTrainingLog();alert('記録しました！');}
+function saveTraining(){
+  const date=document.getElementById('t-date').value;
+  const dur=parseInt(document.getElementById('t-duration').value)||0;
+  const rpe=parseInt(document.getElementById('t-rpe').value)||5;
+  const type=document.getElementById('t-type').value;
+  if(!date||!dur){alert('日付と時間は必須です');return}
+  const isCardio=type==='cardio'||type==='hiit';
+  let cardioData=null;
+  if(isCardio){
+    cardioData={
+      cardioType:document.getElementById('t-cardio-type')?.value||'crosstrainer',
+      zone:document.getElementById('t-cardio-zone')?.value||'2',
+      distance:parseFloat(document.getElementById('t-cardio-distance')?.value)||0,
+      hr:parseInt(document.getElementById('t-cardio-hr')?.value)||0,
+      kcal:parseInt(document.getElementById('t-cardio-kcal')?.value)||0,
+    };
+  }
+  const exercises=[];
+  if(!isCardio){
+    document.querySelectorAll('#exercise-list .input-row').forEach(row=>{
+      const ins=row.querySelectorAll('input');
+      if(ins[0].value)exercises.push({name:ins[0].value,sets:ins[1].value,reps:ins[2].value,weight:ins[3].value});
+    });
+  }
+  DB.push('trainings',{date,type,duration:dur,rpe,
+    water:parseInt(document.getElementById('t-water').value)||0,
+    notes:document.getElementById('t-notes').value,
+    exercises,cardioData,id:Date.now()});
+  ['t-duration','t-rpe','t-water','t-notes','t-cardio-distance','t-cardio-hr','t-cardio-kcal'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  document.getElementById('exercise-list').innerHTML='';
+  renderTrainingLog();
+  alert('記録しました！');
+}
 function renderTrainingLog(){
   const log=DB.arr('trainings').slice(-20).reverse();
   const el=document.getElementById('training-log-table');
@@ -1382,6 +1559,18 @@ function renderTrainingLog(){
         html+=`<div style="font-size:11px;color:var(--text2);padding:3px 6px;background:var(--bg3);border-radius:4px;display:flex;justify-content:space-between;gap:4px"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${e.name}</span><span class="mono" style="color:var(--text);white-space:nowrap">${kg?kg+'kg':'—'}×${reps||e.reps} ${diff}</span></div>`;
       });
       html+='</div>';
+    }
+    // 有酸素詳細
+    if(t.cardioData&&t.cardioData.cardioType){
+      const cd=t.cardioData;
+      const ctLabel=CARDIO_TYPES[cd.cardioType]?.label||cd.cardioType;
+      const zoneLabel={1:'Z1',2:'Z2',3:'Z3',4:'Z4',hiit:'HIIT'}[cd.zone]||cd.zone;
+      const zoneCol={1:'var(--text2)',2:'var(--accent4)',3:'var(--accent2)',4:'var(--accent3)',hiit:'var(--accent)'}[cd.zone]||'var(--text2)';
+      let cdInfo=`<span style="font-weight:500">${ctLabel}</span> / <span style="color:${zoneCol};font-weight:600">${zoneLabel}</span>`;
+      if(cd.distance)cdInfo+=` / ${cd.distance}km`;
+      if(cd.hr)cdInfo+=` / 平均${cd.hr}bpm`;
+      if(cd.kcal)cdInfo+=` / ${cd.kcal}kcal`;
+      html+=`<div style="font-size:12px;color:var(--text2);margin-top:6px;padding:5px 8px;background:rgba(34,197,94,0.08);border-radius:4px;border-left:2px solid var(--accent4)">🏃 ${cdInfo}</div>`;
     }
     if(t.notes)html+=`<div class="muted" style="font-size:11px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">📝 ${t.notes}</div>`;
     html+='</div>';
@@ -1633,16 +1822,26 @@ function loadProgramToTraining(){
 // ============================================================
 let shiftMonthDelta=0,currentShiftMode='24h';
 const SHIFT_TYPES={
-  '24h':{label:'24h勤務',bg:'rgba(255,69,96,0.25)',border:'rgba(255,69,96,0.6)',text:'#ff6b7a',icon:'🔥',load:800},
-  'off':{label:'非番',bg:'rgba(90,90,120,0.25)',border:'rgba(90,90,120,0.5)',text:'var(--text2)',icon:'💤',load:100},
-  'rest':{label:'週休',bg:'rgba(74,158,255,0.2)',border:'rgba(74,158,255,0.5)',text:'#6baaff',icon:'🏠',load:0},
-  'gym':{label:'ジム',bg:'rgba(34,197,94,0.2)',border:'rgba(34,197,94,0.5)',text:'#4ade80',icon:'💪',load:0},
-  'cardio':{label:'有酸素',bg:'rgba(167,139,250,0.2)',border:'rgba(167,139,250,0.5)',text:'#c4b5fd',icon:'🏃',load:200},
+  '24h':    {label:'24h勤務',   bg:'rgba(255,69,96,0.25)',  border:'rgba(255,69,96,0.6)',  text:'#ff6b7a',icon:'🔥',load:800},
+  'off':    {label:'非番',      bg:'rgba(90,90,120,0.25)',  border:'rgba(90,90,120,0.5)',  text:'var(--text2)',icon:'💤',load:100},
+  'off-work':{label:'非番出勤', bg:'rgba(245,166,35,0.28)', border:'rgba(245,166,35,0.7)', text:'#fbbf24',icon:'⚡',load:600},
+  'rest':   {label:'週休',      bg:'rgba(74,158,255,0.2)',  border:'rgba(74,158,255,0.5)', text:'#6baaff',icon:'🏠',load:0},
+  'rest-work':{label:'週休出勤',bg:'rgba(167,139,250,0.28)',border:'rgba(167,139,250,0.7)',text:'#c4b5fd',icon:'🚨',load:700},
+  'gym':    {label:'ジム',      bg:'rgba(34,197,94,0.2)',   border:'rgba(34,197,94,0.5)',  text:'#4ade80',icon:'💪',load:0},
+  'cardio': {label:'有酸素',    bg:'rgba(29,158,117,0.2)',  border:'rgba(29,158,117,0.5)', text:'#34d399',icon:'🏃',load:200},
 };
+// 非番→非番出勤、週休→週休出勤 のサイクルマップ
+const SHIFT_CYCLE={'off':'off-work','off-work':'off','rest':'rest-work','rest-work':'rest'};
 function getShiftData(){return DB.get('pf_shift_data')||{};}
+function getShiftType(entry){return typeof entry==='object'?entry.type:entry;}
+function getShiftLoad(entry){
+  if(typeof entry==='object'&&entry.load!=null)return entry.load;
+  const t=SHIFT_TYPES[typeof entry==='object'?entry.type:entry];
+  return t?t.load:0;
+}
 function setShiftMode(mode){
   currentShiftMode=mode;
-  const modeLabels={'24h':'24h勤務','off':'非番','rest':'週休','gym':'ジム','cardio':'有酸素','clear':'クリア'};
+  const modeLabels={'24h':'24h勤務','off':'非番','off-work':'非番出勤','rest':'週休','rest-work':'週休出勤','gym':'ジム','cardio':'有酸素','clear':'クリア'};
   const el=document.getElementById('shift-cur-mode-label');
   if(el)el.textContent='モード: '+(modeLabels[mode]||mode);
   document.querySelectorAll('[id^="shift-mode-"]').forEach(b=>b.style.opacity='0.4');
@@ -1650,11 +1849,101 @@ function setShiftMode(mode){
   const cur2=document.getElementById('shift-mode-'+mode);
   if(cur)cur.style.opacity='1';if(cur2)cur2.style.opacity='1';
 }
+let extraWorkTarget=null;
 function toggleShiftDay(dateStr){
   const data=getShiftData();
-  if(currentShiftMode==='clear')delete data[dateStr];
-  else data[dateStr]=currentShiftMode;
+  if(currentShiftMode==='clear'){
+    delete data[dateStr];
+    DB.set('pf_shift_data',data);
+    renderShiftPage();
+    return;
+  }
+  // 特別出勤はモーダルを開く
+  if(currentShiftMode==='off-work'||currentShiftMode==='rest-work'){
+    openExtraWorkModal(dateStr, currentShiftMode, data[dateStr]);
+    return;
+  }
+  // 既に特別出勤として登録済みの日に別モードで上書き
+  const current=data[dateStr];
+  const currentType=getShiftType(current);
+  if((currentType==='off-work'||currentType==='rest-work')&&currentShiftMode!==currentType){
+    if(!confirm(`${dateStr} は${SHIFT_TYPES[currentType].label}として登録済みです。${SHIFT_TYPES[currentShiftMode].label}に変更しますか？`))return;
+  }
+  // 通常シフト: 同じ→サイクル
+  if(currentType===currentShiftMode&&SHIFT_CYCLE[currentShiftMode]){
+    data[dateStr]=SHIFT_CYCLE[currentShiftMode];
+  } else if(currentType===currentShiftMode){
+    delete data[dateStr];
+  } else {
+    if(currentType==='24h'&&currentShiftMode!=='24h'){
+      if(!confirm(`${dateStr} は24h勤務として登録済みです。変更しますか？`))return;
+    }
+    data[dateStr]=currentShiftMode;
+  }
   DB.set('pf_shift_data',data);
+  renderShiftPage();
+}
+function openExtraWorkModal(dateStr, type, existing){
+  extraWorkTarget={dateStr,type};
+  const title=document.getElementById('extra-work-title');
+  const dateEl=document.getElementById('extra-work-date');
+  if(title)title.textContent=SHIFT_TYPES[type].icon+' '+SHIFT_TYPES[type].label+' 詳細入力';
+  if(dateEl)dateEl.textContent=dateStr;
+  // 既存データがあれば復元
+  if(existing&&typeof existing==='object'&&existing.type===type){
+    document.getElementById('extra-hours').value=existing.hours||4;
+    document.getElementById('extra-content').value=existing.content||'training';
+    document.getElementById('extra-note').value=existing.note||'';
+  } else {
+    document.getElementById('extra-hours').value=4;
+    document.getElementById('extra-content').value='training';
+    document.getElementById('extra-note').value='';
+  }
+  updateExtraLoad();
+  const modal=document.getElementById('extra-work-modal');
+  if(modal){modal.style.display='flex';}
+}
+function closeExtraWorkModal(){
+  const modal=document.getElementById('extra-work-modal');
+  if(modal)modal.style.display='none';
+  extraWorkTarget=null;
+}
+function updateExtraLoad(){
+  const hours=parseFloat(document.getElementById('extra-hours').value)||0;
+  const sel=document.getElementById('extra-content');
+  const intensity=parseFloat(sel.options[sel.selectedIndex]?.dataset.intensity||2);
+  const load=Math.round(hours*intensity*100);
+  const el=document.getElementById('extra-load-preview');
+  if(el){
+    el.textContent=load;
+    const color=load<200?'var(--accent4)':load<500?'var(--accent3)':'var(--accent)';
+    el.style.color=color;
+  }
+}
+function saveExtraWork(){
+  if(!extraWorkTarget)return;
+  const hours=parseFloat(document.getElementById('extra-hours').value)||0;
+  const sel=document.getElementById('extra-content');
+  const content=sel.value;
+  const intensity=parseFloat(sel.options[sel.selectedIndex]?.dataset.intensity||2);
+  const note=document.getElementById('extra-note').value;
+  const load=Math.round(hours*intensity*100);
+  const data=getShiftData();
+  data[extraWorkTarget.dateStr]={
+    type:extraWorkTarget.type,
+    hours,content,note,load,
+    label:sel.options[sel.selectedIndex]?.text||content
+  };
+  DB.set('pf_shift_data',data);
+  closeExtraWorkModal();
+  renderShiftPage();
+}
+function clearExtraWork(){
+  if(!extraWorkTarget)return;
+  const data=getShiftData();
+  delete data[extraWorkTarget.dateStr];
+  DB.set('pf_shift_data',data);
+  closeExtraWorkModal();
   renderShiftPage();
 }
 function shiftMonthOffset(delta){
@@ -1681,12 +1970,18 @@ function renderShiftPage(){
   let col=startDow;
   for(let d=1;d<=lastDay.getDate();d++){
     const dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const type=data[dateStr];const t=SHIFT_TYPES[type];
+    const entry=data[dateStr];
+    const type=getShiftType(entry);const t=SHIFT_TYPES[type];
     const isToday=dateStr===todayStr;
     const style=t?`background:${t.bg};border:1px solid ${t.border};color:${t.text}`:'background:var(--bg3);border:1px solid var(--border)';
+    // 特別出勤の場合は時間数を表示
+    const extraHint=(typeof entry==='object'&&entry.hours)
+      ? `<span style="font-size:8px;opacity:0.9;font-family:var(--font-mono)">${entry.hours}h</span>`
+      : '';
     weekHtml+=`<div class="day-cell${isToday?' today-cell':''}" style="${style};cursor:pointer;flex-direction:column;gap:1px" onclick="toggleShiftDay('${dateStr}')">
-      <span style="font-size:13px">${t?t.icon:''}</span>
+      <span style="font-size:12px">${t?t.icon:''}</span>
       <span style="font-size:9px;font-family:var(--font-mono)">${d}</span>
+      ${extraHint}
     </div>`;
     col++;
     if(col===7){weekHtml+='</div>';html2+=weekHtml;weekHtml=`<div class="week-row"><div class="week-label"></div>`;col=0;}
@@ -1696,11 +1991,27 @@ function renderShiftPage(){
   // Summary
   const monthKeys=Object.keys(data).filter(k=>k.startsWith(`${year}-${String(month+1).padStart(2,'0')}`));
   const counts={};Object.values(SHIFT_TYPES).forEach(t=>counts[t.label]=0);
-  monthKeys.forEach(k=>{const t=SHIFT_TYPES[data[k]];if(t)counts[t.label]=(counts[t.label]||0)+1;});
+  monthKeys.forEach(k=>{
+    const entry=data[k];const type=getShiftType(entry);const t=SHIFT_TYPES[type];
+    if(t){
+      counts[t.label]=(counts[t.label]||0)+1;
+      // 特別出勤は時間も集計
+      if((type==='off-work'||type==='rest-work')&&typeof entry==='object'&&entry.hours){
+        const hKey=t.label+'_hours';counts[hKey]=(counts[hKey]||0)+entry.hours;
+      }
+    }
+  });
   const sumEl=document.getElementById('shift-summary');
-  if(sumEl)sumEl.innerHTML=Object.entries(counts).filter(([,v])=>v>0).map(([k,v])=>
-    `<div class="row-between" style="padding:5px 0;border-bottom:1px solid var(--border)"><span class="muted">${k}</span><span class="mono">${v}日</span></div>`
-  ).join('')||'<div class="muted">登録なし</div>';
+  if(sumEl){
+    const rows=Object.entries(counts)
+      .filter(([k,v])=>v>0&&!k.endsWith('_hours'))
+      .map(([k,v])=>{
+        const hKey=k+'_hours';const hrs=counts[hKey];
+        const hrsStr=hrs?` <span style="font-size:11px;color:var(--text3)">(合計${hrs}h)</span>`:'';
+        return`<div class="row-between" style="padding:5px 0;border-bottom:1px solid var(--border)"><span class="muted">${k}${hrsStr}</span><span class="mono">${v}日</span></div>`;
+      });
+    sumEl.innerHTML=rows.join('')||'<div class="muted">登録なし</div>';
+  }
   // ACWR
   renderShiftACWR(data);
 }
@@ -1712,11 +2023,9 @@ function renderShiftACWR(data){
   for(let i=0;i<28;i++){
     const d=new Date(nowD);d.setDate(nowD.getDate()-i);
     const ds=d.toISOString().slice(0,10);
-    const stype=data[ds];
-    let load=0;
-    if(stype==='24h')load=800;
-    else if(stype==='cardio')load=200;
-    else if(stype==='off')load=100;
+    const entry_acwr=data[ds];
+    let load=getShiftLoad(entry_acwr);
+    // 通常シフトのデフォルト負荷は SHIFT_TYPES で管理済み
     // トレーニング記録があればそれを使う
     const tr=trainings.filter(t=>t.date===ds);
     if(tr.length)load=Math.max(load,tr.reduce((a,t)=>(parseInt(t.duration)||0)*(parseInt(t.rpe)||5)+a,0));
@@ -2089,6 +2398,180 @@ function populateExDatalist(){
   dl.innerHTML=[...allEx].map(n=>`<option value="${n}">`).join('');
 }
 
+// ============================================================
+// 有酸素フィールド切替
+// ============================================================
+const CARDIO_TYPES={
+  crosstrainer:{label:'クロストレーナー',kcalPerMin:8},
+  bike:{label:'バイク',kcalPerMin:7},
+  treadmill_walk:{label:'傾斜ウォーク',kcalPerMin:5},
+  treadmill_run:{label:'ランニング',kcalPerMin:10},
+  rowing:{label:'ローイング',kcalPerMin:9},
+  stairmaster:{label:'ステアマスター',kcalPerMin:9},
+  swim:{label:'水泳',kcalPerMin:8},
+  outdoor_run:{label:'屋外ランニング',kcalPerMin:10},
+  cycling:{label:'サイクリング',kcalPerMin:7},
+  walk:{label:'ウォーキング',kcalPerMin:4},
+};
+const ZONE_HINTS={
+  '1':'ゾーン1（〜60%）: アクティブリカバリー。筋肉痛の軽減・血流促進が目的。翌日の筋トレへの影響なし。',
+  '2':'ゾーン2（60〜70%）: 脂肪燃焼効率が最高・ミトコンドリア増加。クロストレーナー推奨。Pelland et al.が基本として推奨する強度。',
+  '3':'ゾーン3（70〜80%）: 有酸素能力強化。週1〜2回まで。消防での持久力向上に有効。筋トレ後に配置すること。',
+  '4':'ゾーン4（80〜90%）: 閾値トレーニング。週1回まで。筋トレと同日は避ける。翌日の筋トレパフォーマンスに影響が出やすい。',
+  'hiit':'HIIT（90%以上）: 短時間で高い負荷。週1回まで。必ず筋トレとは別日に実施。神経疲労が48時間持続する点に注意。',
+};
+function onTrainingTypeChange(){
+  const type=document.getElementById('t-type').value;
+  const isCardio=type==='cardio'||type==='hiit';
+  const cf=document.getElementById('cardio-fields');
+  const sf=document.getElementById('strength-fields');
+  if(cf)cf.style.display=isCardio?'block':'none';
+  if(sf)sf.style.display=isCardio?'none':'block';
+  if(isCardio&&type==='hiit'){
+    const zoneEl=document.getElementById('t-cardio-zone');
+    if(zoneEl)zoneEl.value='hiit';
+    updateCardioZoneHint();
+  }
+}
+function updateCardioZoneHint(){
+  const zone=document.getElementById('t-cardio-zone').value;
+  const el=document.getElementById('cardio-zone-hint');
+  if(el){
+    el.textContent=ZONE_HINTS[zone]||'';
+    el.className='alert '+(zone==='1'||zone==='2'?'alert-success':zone==='3'?'alert-info':'alert-warn');
+  }
+}
+
+// ============================================================
+// 重量推移トラッカー
+// ============================================================
+let trackerChart=null;
+let trackerCurrentEx=null;
+
+function getAllExerciseNames(){
+  const names=new Set();
+  DB.arr('trainings').forEach(t=>{
+    if(t.exercises)t.exercises.forEach(e=>{if(e.name&&parseFloat(e.weight)>0)names.add(e.name);});
+  });
+  return [...names].sort();
+}
+
+function searchTrackerExercises(){
+  const q=(document.getElementById('tracker-search').value||'').trim().toLowerCase();
+  const all=getAllExerciseNames();
+  const filtered=q?all.filter(n=>n.toLowerCase().includes(q)):all.slice(0,12);
+  const el=document.getElementById('tracker-suggestions');
+  if(!el)return;
+  el.innerHTML=filtered.map(n=>`<span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="selectTrackerEx('${n.replace(/'/g,"\\'")}')">
+    ${n==='trackerCurrentEx'?'✓ ':''} ${n}
+  </span>`).join('');
+  if(filtered.length===0)el.innerHTML='<span class="muted">記録がありません</span>';
+}
+
+function selectTrackerEx(name){
+  trackerCurrentEx=name;
+  document.getElementById('tracker-search').value=name;
+  const el=document.getElementById('tracker-selected-ex');
+  if(el)el.textContent='表示中：'+name;
+  searchTrackerExercises();
+  renderWeightTracker();
+}
+
+function calc1RM(weight,reps){
+  // Epley式: 1RM = weight × (1 + reps/30)
+  if(reps<=0||weight<=0)return weight;
+  if(reps===1)return weight;
+  return Math.round(weight*(1+reps/30)*10)/10;
+}
+
+function renderWeightTracker(){
+  if(!trackerCurrentEx)return;
+  const use1RM=document.getElementById('tracker-use-1rm')?.checked||false;
+  const rangeDays=parseInt(document.getElementById('tracker-range')?.value||60);
+  const trainings=DB.arr('trainings');
+  const cutoff=rangeDays>0?new Date(Date.now()-rangeDays*86400000):new Date(0);
+  // 種目ごとのセッション最大重量を収集
+  const dataPoints=[];
+  trainings.forEach(t=>{
+    if(!t.exercises||!t.date)return;
+    const d=new Date(t.date);
+    if(d<cutoff)return;
+    t.exercises.forEach(e=>{
+      if(e.name!==trackerCurrentEx)return;
+      const w=parseFloat(e.weight)||0;
+      const r=parseInt(e.reps)||1;
+      if(w<=0)return;
+      const val=use1RM?calc1RM(w,r):w;
+      // 同日の場合は最大値を使う
+      const existing=dataPoints.find(p=>p.date===t.date);
+      if(existing){if(val>existing.val)existing.val=val;}
+      else dataPoints.push({date:t.date,val,weight:w,reps:r});
+    });
+  });
+  dataPoints.sort((a,b)=>a.date.localeCompare(b.date));
+  if(!dataPoints.length){
+    const el=document.getElementById('tracker-selected-ex');
+    if(el)el.textContent=`"${trackerCurrentEx}" の記録が見つかりません`;
+    return;
+  }
+  // グラフ描画
+  if(trackerChart)trackerChart.destroy();
+  const co={color:'#5a5a78',font:{size:10}};
+  const ctx=document.getElementById('tracker-chart');
+  if(!ctx)return;
+  trackerChart=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:dataPoints.map(p=>p.date.slice(5)),
+      datasets:[{
+        label:use1RM?'推定1RM (kg)':'最高重量 (kg)',
+        data:dataPoints.map(p=>p.val),
+        borderColor:'#ff4560',
+        backgroundColor:'rgba(255,69,96,0.08)',
+        tension:0.3,fill:true,borderWidth:2,
+        pointRadius:4,pointBackgroundColor:'#ff4560',
+        pointHoverRadius:6,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.y}kg`}}},
+      scales:{
+        x:{ticks:{...co},grid:{color:'rgba(255,255,255,0.04)'}},
+        y:{ticks:{...co,callback:v=>v+'kg'},grid:{color:'rgba(255,255,255,0.04)'}},
+      }
+    }
+  });
+  // 統計表示
+  const vals=dataPoints.map(p=>p.val);
+  const first=vals[0],last=vals[vals.length-1];
+  const max=Math.max(...vals),min=Math.min(...vals);
+  const change=Math.round((last-first)*10)/10;
+  const pct=first>0?Math.round((last-first)/first*100):0;
+  const statsEl=document.getElementById('tracker-stats');
+  if(statsEl){
+    const statCard=(label,val,sub,col)=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:10px;text-align:center">
+      <div style="font-size:10px;color:var(--text3);letter-spacing:1px;margin-bottom:4px">${label}</div>
+      <div style="font-size:20px;font-weight:500;font-family:var(--font-mono);color:${col||'var(--text)'}">${val}</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:2px">${sub}</div>
+    </div>`;
+    statsEl.innerHTML=
+      statCard('最高記録',max+'kg',use1RM?'推定1RM':'実重量','var(--accent)')+
+      statCard('現在',last+'kg',dataPoints[dataPoints.length-1].date.slice(5),'var(--accent2)')+
+      statCard('変化量',(change>=0?'+':'')+change+'kg','全期間',change>=0?'var(--accent4)':'var(--accent)')+
+      statCard('進捗率',(pct>=0?'+':'')+pct+'%',dataPoints.length+'セッション',pct>=0?'var(--accent4)':'var(--accent)');
+  }
+}
+
+function initWeightTracker(){
+  // よく使う種目を自動提案
+  const all=getAllExerciseNames();
+  const el=document.getElementById('tracker-suggestions');
+  if(el&&all.length>0){
+    el.innerHTML=all.slice(0,10).map(n=>`<span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="selectTrackerEx('${n.replace(/'/g,"\\'")}')"> ${n}</span>`).join('');
+  }
+}
+
 function init(){
   const t=today();['t-date','n-date','s-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=t});
   document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'short'});
@@ -2098,6 +2581,7 @@ function init(){
   const existing=DB.get('peaking');if(existing)document.getElementById('peaking-result').style.display='block';
   updateNutritionGoals();updateSmartNutrition();
   autoCleanOldData();
+  onTrainingTypeChange();
 }
 init();
 </script>
