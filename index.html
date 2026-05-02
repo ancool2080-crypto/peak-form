@@ -194,7 +194,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="nav-item" onclick="showPage('analysis')"><span class="nav-icon">∿</span>分析レポート</div>
     <div class="nav-item" onclick="showPage('settings')"><span class="nav-icon">⊙</span>設定</div>
   </nav>
-  <div class="sidebar-footer"><div class="version">PEAK FORM v2.5</div><div class="version" style="margin-top:2px;opacity:0.5">based on sports science</div></div>
+  <div class="sidebar-footer"><div class="version">PEAK FORM v2.6</div><div class="version" style="margin-top:2px;opacity:0.5">based on sports science</div></div>
 </aside>
 <main class="main">
 <div class="topbar">
@@ -477,6 +477,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="card" style="margin-bottom:18px">
     <div class="card-header-bar"></div>
     <div class="h3" style="margin-bottom:16px">食事記録</div>
+    <div id="meal-template-btns"></div>
     <div class="grid2"><div class="field"><label class="label">日付</label><input type="date" id="n-date"></div><div class="field"><label class="label">タイミング</label><select id="n-meal"><option value="breakfast">朝食</option><option value="preworkout">トレ前</option><option value="postworkout">トレ後</option><option value="lunch">昼食</option><option value="dinner">夕食</option><option value="snack">間食</option></select></div></div>
 
     <!-- 食品プリセット -->
@@ -1316,6 +1317,39 @@ input[type=range]:focus{border:none;box-shadow:none}
     </div>
   </div>
 
+
+  <!-- 週次トレーニングサマリー -->
+  <div class="card card-purple" style="margin-bottom:18px">
+    <div class="card-header-bar purple"></div>
+    <div class="row-between" style="margin-bottom:14px">
+      <div>
+        <div class="h3">週次トレーニングサマリー</div>
+        <div class="muted" style="font-size:12px;margin-top:3px">直近8週のボリューム・DP達成率・種目別最高重量</div>
+      </div>
+    </div>
+    <div class="grid2" style="margin-bottom:14px">
+      <div>
+        <div class="label" style="margin-bottom:6px">週次セット数推移</div>
+        <div class="chart-wrap" style="height:140px"><canvas id="weekly-summary-vol-chart"></canvas></div>
+        <div style="display:flex;gap:10px;margin-top:6px;font-size:10px;flex-wrap:wrap">
+          <span style="color:var(--accent4)">■ 10+セット（高ボリューム）</span>
+          <span style="color:var(--accent2)">■ 6〜9セット（標準）</span>
+          <span style="color:var(--accent3)">■ 〜5セット（低）</span>
+        </div>
+      </div>
+      <div>
+        <div class="label" style="margin-bottom:6px">Double Progression達成率（週）</div>
+        <div class="chart-wrap" style="height:140px"><canvas id="weekly-summary-dp-chart"></canvas></div>
+        <div style="font-size:10px;color:var(--text3);margin-top:6px">70%以上: 理想的な進歩 / 40〜69%: 一部停滞 / 39%以下: 重量・回数の見直しを</div>
+      </div>
+    </div>
+    <div id="weekly-rpe-summary" class="alert alert-info" style="font-size:12px;margin-bottom:12px"></div>
+    <div>
+      <div class="label" style="margin-bottom:8px">種目別 最高重量記録（全期間）</div>
+      <div id="weekly-summary-maxes" style="max-height:200px;overflow-y:auto"></div>
+    </div>
+    <div id="weekly-summary-content"></div>
+  </div>
   <!-- 重量推移トラッカー -->
   <div class="card card-accent" style="margin-bottom:18px">
     <div class="card-header-bar"></div>
@@ -1421,7 +1455,7 @@ function showPage(id){
   if(id==='dashboard')renderDashboard();
   if(id==='program')initProgramPage();
   if(id==='analysis'){renderAnalysis();updateWeeklyWeightPanel();updateMiniCut();initWeightTracker();renderConditionAnalysis();}
-  if(id==='nutrition'){updateNutritionGoals();updateSmartNutrition();renderMealLog();updateNutritionTotals();}
+  if(id==='nutrition'){updateNutritionGoals();updateSmartNutrition();renderMealLog();updateNutritionTotals();const tmplEl=document.getElementById('meal-template-btns');if(tmplEl)tmplEl.innerHTML=getMealTemplateButtonsHTML();}
   if(id==='sleep')renderSleepCharts();
   if(id==='shift')renderShiftPage();
   if(id==='gut')renderGutPage();
@@ -1615,6 +1649,117 @@ const FOOD_PRESETS={
 
 let selectedPreset=null;
 let selectedPresetAmount=100;
+
+
+// ============================================================
+// ③ 食事テンプレート（トレ前/トレ後・フェーズ連動）
+// ============================================================
+
+// トレ前・トレ後テンプレートを栄養記録に一括展開
+function loadMealTemplate(timing){
+  const c = cfg();
+  const bw = parseFloat(c.tdeeweight) || 70;
+  const mode = c.goalmode || 'maintain';
+
+  // ピーキングフェーズを取得
+  const pk = DB.get('peaking');
+  let phase = 'accumulate';
+  if (pk) {
+    const sD = new Date(pk.start);
+    const tD = new Date(today());
+    const wN = Math.floor((tD - sD) / (7 * 86400000));
+    const ph = pk.phases?.find(p => wN >= p.startWeek && wN < p.startWeek + p.weeks);
+    if (ph) phase = ph.type;
+  }
+
+  // フェーズ別・モード別テンプレート
+  const templates = {
+    preworkout: {
+      // バルクアップガイド 体重×1〜1.3g炭水化物 + 体重×0.5〜0.7gタンパク質
+      accumulate: { carb: Math.round(bw * 1.3), protein: Math.round(bw * 0.6), fat: 10,
+                    foods: `バナナ1本 + おにぎり1個 + ゆで卵2個（体重${bw}kg基準）` },
+      intensify:  { carb: Math.round(bw * 1.2), protein: Math.round(bw * 0.6), fat: 10,
+                    foods: `白米150g + 鶏ささみ80g（体重${bw}kg基準）` },
+      convert:    { carb: Math.round(bw * 1.0), protein: Math.round(bw * 0.5), fat: 8,
+                    foods: `さつまいも100g + ゆで卵2個（変換期・少なめ）` },
+      taper:      { carb: Math.round(bw * 1.5), protein: Math.round(bw * 0.5), fat: 5,
+                    foods: `白米200g + バナナ1本（テーパー期・グリコーゲン充填）` },
+    },
+    postworkout: {
+      // トレ後: 高炭水化物優先・脂質最小化（グリコーゲン回復）
+      accumulate: { carb: Math.round(bw * 2.0), protein: 30, fat: 5,
+                    foods: `白米250g + ホエイ25g + バナナ1本` },
+      intensify:  { carb: Math.round(bw * 1.8), protein: 35, fat: 5,
+                    foods: `白米220g + 鶏むね肉150g（強化期）` },
+      convert:    { carb: Math.round(bw * 1.5), protein: 40, fat: 5,
+                    foods: `白米200g + ホエイ30g + 鶏むね肉120g（変換期・高タンパク）` },
+      taper:      { carb: Math.round(bw * 2.5), protein: 30, fat: 3,
+                    foods: `白米300g + ホエイ25g + バナナ1本（テーパー期・最大充填）` },
+    }
+  };
+
+  // モード補正
+  const modeCarb = { maintain: 1.0, cut: 0.8, bulk: 1.2 };
+  const modeProtein = { maintain: 1.0, cut: 1.1, bulk: 1.1 };
+
+  const tmpl = templates[timing]?.[phase] || templates[timing]?.['accumulate'];
+  if (!tmpl) { alert('テンプレートが見つかりません'); return; }
+
+  const adjCarb = Math.round(tmpl.carb * (modeCarb[mode] || 1.0));
+  const adjProtein = Math.round(tmpl.protein * (modeProtein[mode] || 1.0));
+  const cal = Math.round(adjProtein * 4 + adjCarb * 4 + tmpl.fat * 9);
+
+  // フォームに入力
+  const timingLabel = { preworkout: 'トレ前', postworkout: 'トレ後' };
+  const phaseLabel = { accumulate: '蓄積期', intensify: '強化期', convert: '変換期', taper: 'テーパー期' };
+
+  const foodEl = document.getElementById('n-food');
+  const calEl = document.getElementById('n-cal');
+  const pEl = document.getElementById('n-protein');
+  const cEl = document.getElementById('n-carb');
+  const fEl = document.getElementById('n-fat');
+  const mealEl = document.getElementById('n-meal');
+
+  if (foodEl) foodEl.value = `${tmpl.foods}（${phaseLabel[phase]}${mode !== 'maintain' ? '・'+{cut:'減量',bulk:'増量'}[mode] : ''}）`;
+  if (calEl) calEl.value = cal;
+  if (pEl) pEl.value = adjProtein;
+  if (cEl) cEl.value = adjCarb;
+  if (fEl) fEl.value = tmpl.fat;
+  if (mealEl) mealEl.value = timing;
+
+  // プレビューアラート
+  const msg = `${timingLabel[timing]}テンプレート（${phaseLabel[phase]}・${bw}kg基準）を入力しました\n\n${tmpl.foods}\nカロリー: ${cal}kcal / タンパク質: ${adjProtein}g / 炭水化物: ${adjCarb}g / 脂質: ${tmpl.fat}g\n\n確認して「記録する」ボタンを押してください`;
+  alert(msg);
+}
+
+// トレ前後テンプレートボタンのHTML生成
+function getMealTemplateButtonsHTML(){
+  const pk = DB.get('peaking');
+  let phaseLabel = '（フェーズ未設定）';
+  if (pk) {
+    const sD = new Date(pk.start);
+    const tD = new Date(today());
+    const wN = Math.floor((tD - sD) / (7 * 86400000));
+    const ph = pk.phases?.find(p => wN >= p.startWeek && wN < p.startWeek + p.weeks);
+    const names = {accumulate:'蓄積期',intensify:'強化期',convert:'変換期',taper:'テーパー期'};
+    if (ph) phaseLabel = `（${names[ph.type]}）`;
+  }
+  return `
+    <div style="background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.2);border-radius:var(--rs);padding:12px;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--accent2);font-weight:600;margin-bottom:8px;letter-spacing:1px">⚡ 食事テンプレート ${phaseLabel} — ワンタップで入力</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="loadMealTemplate('preworkout')"
+          style="background:rgba(245,166,35,0.12);border-color:rgba(245,166,35,0.4);color:#fbbf24">
+          🍌 トレ前食テンプレート
+        </button>
+        <button class="btn btn-sm" onclick="loadMealTemplate('postworkout')"
+          style="background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.4);color:#4ade80">
+          🍚 トレ後食テンプレート
+        </button>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:6px">体重・ピーキングフェーズ・目標モードに基づいて自動算出</div>
+    </div>`;
+}
 
 function showPresetCategory(cat){
   const grid=document.getElementById('preset-grid');
@@ -1944,7 +2089,7 @@ function renderDashboard(){
   document.getElementById('d-condition').textContent=score;
   const todayMeals=DB.arr('meals').filter(m=>m.date===today());
   const todayCal=todayMeals.reduce((a,m)=>a+(m.cal||0),0);
-  const c=cfg();const mode=c.goalmode||'maintain';const calT=getCalTarget(mode);const macros=getMacros(calT,c.tdeeweight||70);
+  const c=cfg();const mode=c.goalmode||'maintain';const calT=getShiftAdjustedTarget(getCalTarget(mode));const macros=getMacros(calT,c.tdeeweight||70);
   document.getElementById('d-cal-target').textContent=calT+'kcal';
   document.getElementById('d-cal-today').textContent=todayCal+'kcal';
   document.getElementById('d-cal-bar').style.width=Math.min(100,Math.round(todayCal/calT*100))+'%';
@@ -2037,6 +2182,13 @@ function renderDashboard(){
 function computeLoad(){
   const s=DB.arr('trainings');const days={};
   s.forEach(t=>{const l=(parseInt(t.duration)||0)*(parseInt(t.rpe)||5);days[t.date]=(days[t.date]||0)+l});
+  // シフト負荷を統合（消防訓練日の疲労をATL/CTLに反映）
+  const shiftData=DB.get('pf_shift_data')||{};
+  Object.entries(shiftData).forEach(([date,entry])=>{
+    const shiftLoad=getShiftLoad(entry);
+    if(shiftLoad>0&&!days[date])days[date]=shiftLoad; // トレーニング記録がない日のみ追加
+    else if(shiftLoad>0)days[date]=Math.max(days[date],shiftLoad); // 高い方を採用
+  });
   if(!Object.keys(days).length)return{atl:0,ctl:0,tsb:0,history:[]};
   let atl=0,ctl=0;const all=[];
   const start=new Date(Object.keys(days).sort()[0]);const end=new Date(today());
@@ -2463,7 +2615,7 @@ function getPrevRecord(exName){
   for(const t of all){
     if(!t.exercises)continue;
     const ex=t.exercises.find(e=>e.name===exName&&(parseFloat(e.weight)||0)>0);
-    if(ex)return{date:t.date,sets:ex.sets,reps:ex.reps,weight:ex.weight};
+    if(ex)return{date:t.date,sets:ex.sets,reps:ex.reps,weight:ex.weight,setData:ex.setData||null};
   }
   return null;
 }
@@ -2813,6 +2965,36 @@ function renderTrainingLog(){
   el.innerHTML = htmlStr;
 }
 
+
+// ============================================================
+// ① シフト連動TDEE自動補正（Ruby 2023準拠）
+// ============================================================
+function getTodayShiftCalBonus(){
+  const shiftData=DB.get('pf_shift_data')||{};
+  const entry=shiftData[today()];
+  if(!entry)return{bonus:0,label:'シフト未登録',color:'var(--text3)'};
+  const type=getShiftType(entry);
+  const bonusMap={
+    '24h':      {bonus:700,label:'24h勤務',  color:'var(--accent)'},
+    'off-work': {bonus:400,label:'非番出勤', color:'var(--accent3)'},
+    'rest-work':{bonus:600,label:'週休出勤', color:'var(--accent5)'},
+    'gym':      {bonus:300,label:'ジム',     color:'var(--accent4)'},
+    'cardio':   {bonus:250,label:'有酸素',   color:'var(--accent4)'},
+    'off':      {bonus:0,  label:'非番',     color:'var(--text2)'},
+    'rest':     {bonus:0,  label:'週休',     color:'var(--text2)'},
+  };
+  if(typeof entry==='object'&&entry.hours&&(type==='off-work'||type==='rest-work')){
+    const hrs=parseFloat(entry.hours)||4;
+    const rate=type==='rest-work'?75:60;
+    const bonus=Math.round(hrs*rate);
+    return{bonus,label:`${SHIFT_TYPES[type]?.label||type} (${hrs}h)`,color:bonusMap[type]?.color||'var(--accent3)'};
+  }
+  return bonusMap[type]||{bonus:0,label:type,color:'var(--text3)'};
+}
+function getShiftAdjustedTarget(baseTarget){
+  return baseTarget+getTodayShiftCalBonus().bonus;
+}
+
 // ============================================================
 // SHIFT MANAGEMENT
 // ============================================================
@@ -3005,7 +3187,24 @@ let condTrendChart=null;
 
 
 // ===== nutrition-core.js =====
-function updateNutritionGoals(){const mode=document.getElementById('n-goal-mode')?.value||'maintain';const c=cfg();const calT=getCalTarget(mode);const macros=getMacros(calT,c.tdeeweight||70);['n-cal-target','n-protein-t','n-carb-t','n-fat-t'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[calT,macros.protein,macros.carb,macros.fat][i];});const hintEl=document.getElementById('n-mode-hint');if(hintEl)hintEl.textContent={maintain:'維持: TDEEと同等。筋肉量を保ちながら体組成を安定させます',cut:'減量: TDEE-15%。週0.4〜0.5kg減が目安。タンパク質は高めを維持',bulk:'増量: TDEE+10%。リーンバルクで週0.25〜0.5kg増が目標'}[mode]||'';}
+function updateNutritionGoals(){
+  const mode=document.getElementById('n-goal-mode')?.value||'maintain';
+  const c=cfg();
+  const baseT=getCalTarget(mode);
+  const calT=getShiftAdjustedTarget(baseT);
+  const macros=getMacros(calT,c.tdeeweight||70);
+  ['n-cal-target','n-protein-t','n-carb-t','n-fat-t'].forEach((id,i)=>{
+    const el=document.getElementById(id);if(el)el.textContent=[calT,macros.protein,macros.carb,macros.fat][i];
+  });
+  // シフト補正バッジ
+  const {bonus,label,color}=getTodayShiftCalBonus();
+  const hintEl=document.getElementById('n-mode-hint');
+  if(hintEl){
+    const modeText={maintain:'維持: TDEEと同等。筋肉量を保ちながら体組成を安定させます',cut:'減量: TDEE-15%。週0.4〜0.5kg減が目安。タンパク質は高めを維持',bulk:'増量: TDEE+10%。リーンバルクで週0.25〜0.5kg増が目標'}[mode]||'';
+    const shiftText=bonus>0?` ／ <span style="color:${color};font-weight:600">🔥 ${label} +${bonus}kcal自動補正</span>`:'';
+    hintEl.innerHTML=modeText+shiftText;
+  }
+}
 
 function saveMeal(){const food=document.getElementById('n-food').value;const cal=parseInt(document.getElementById('n-cal').value)||0;if(!food||!cal){alert('食品名とカロリーは必須です');return}DB.push('meals',{date:document.getElementById('n-date').value,meal:document.getElementById('n-meal').value,food,cal,protein:parseInt(document.getElementById('n-protein').value)||0,carb:parseInt(document.getElementById('n-carb').value)||0,fat:parseInt(document.getElementById('n-fat').value)||0,id:Date.now()});['n-food','n-cal','n-protein','n-carb','n-fat'].forEach(id=>document.getElementById(id).value='');renderMealLog();updateNutritionTotals();}
 
@@ -3013,7 +3212,7 @@ function updateNutritionTotals(){const meals=DB.arr('meals').filter(m=>m.date===
 
 function renderMealLog(){const meals=DB.arr('meals').filter(m=>m.date===today()).reverse();const el=document.getElementById('n-meal-list');if(!meals.length){el.innerHTML='<div class="muted">今日の食事記録がありません</div>';return}el.innerHTML='<table><thead><tr><th>タイミング</th><th>食品</th><th>kcal</th><th>P</th><th>C</th><th>F</th></tr></thead><tbody>'+meals.map(m=>`<tr><td>${mealLabel[m.meal]||m.meal}</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.food}</td><td class="mono">${m.cal}</td><td class="mono">${m.protein}g</td><td class="mono">${m.carb}g</td><td class="mono">${m.fat}g</td></tr>`).join('')+'</tbody></table>';}
 
-function updateSmartNutrition(){const c=cfg();const isTr=document.getElementById('today-training')?.checked??true;const bf=parseFloat(document.getElementById('n-bodyfat')?.value)||null;const mode=document.getElementById('n-goal-mode')?.value||c.goalmode||'maintain';let autoMode=mode;let bfAlert=null;if(bf){if(bf>=18){autoMode='cut';bfAlert={t:'alert-danger',m:`体脂肪率${bf}% → ミニカット推奨。`};}else if(bf>=15){autoMode='cut';bfAlert={t:'alert-warn',m:`体脂肪率${bf}% → ミニカット検討ゾーン。`};}else if(bf<=12){bfAlert={t:'alert-success',m:`体脂肪率${bf}% → バルクアップ最適ゾーン。`};}}const baseT=getCalTarget(autoMode);const offCal=isTr?baseT:Math.round(baseT*0.93);const macros=getMacros(offCal,c.tdeeweight||70);const carbT=Math.round(macros.carb*(isTr?1.0:0.80));const fatT=Math.round(macros.fat*(isTr?1.0:1.10));['n-cal-target','n-protein-t','n-carb-t','n-fat-t'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[offCal,macros.protein,carbT,fatT][i];});const w=parseFloat(c.tdeeweight)||70;const tEl=document.getElementById('smart-targets');if(tEl)tEl.innerHTML=`<div class="card-sm"><div class="label">トレ前目安</div><div style="font-size:13px">炭水化物: <strong>${Math.round(w*1.15)}g</strong></div><div style="font-size:13px">タンパク質: <strong>${Math.round(w*0.6)}g</strong></div><div class="muted" style="font-size:11px;margin-top:5px">脂質0〜15g・2〜3h前</div></div><div class="card-sm"><div class="label">トレ後（最重要）</div><div style="font-size:13px">炭水化物: <strong style="color:var(--accent4)">${Math.round(w*2.0)}g</strong></div><div style="font-size:13px">タンパク質: <strong>20g以上</strong></div><div class="muted" style="font-size:11px;margin-top:5px">脂質最小・2h以内</div></div><div class="card-sm"><div class="label">${isTr?'トレ日':'オフ日'}合計</div><div style="font-size:13px">カロリー: <strong>${offCal}kcal</strong></div><div style="font-size:13px">炭水化物: <strong>${carbT}g</strong>${isTr?'':' <span style="font-size:11px;color:var(--accent3)">(-20%)</span>'}</div></div>`;
+function updateSmartNutrition(){const c=cfg();const isTr=document.getElementById('today-training')?.checked??true;const bf=parseFloat(document.getElementById('n-bodyfat')?.value)||null;const mode=document.getElementById('n-goal-mode')?.value||c.goalmode||'maintain';let autoMode=mode;let bfAlert=null;if(bf){if(bf>=18){autoMode='cut';bfAlert={t:'alert-danger',m:`体脂肪率${bf}% → ミニカット推奨。`};}else if(bf>=15){autoMode='cut';bfAlert={t:'alert-warn',m:`体脂肪率${bf}% → ミニカット検討ゾーン。`};}else if(bf<=12){bfAlert={t:'alert-success',m:`体脂肪率${bf}% → バルクアップ最適ゾーン。`};}}const baseT=getCalTarget(autoMode);const baseAdjusted=getShiftAdjustedTarget(baseT);const offCal=isTr?baseAdjusted:Math.round(baseAdjusted*0.93);const macros=getMacros(offCal,c.tdeeweight||70);const carbT=Math.round(macros.carb*(isTr?1.0:0.80));const fatT=Math.round(macros.fat*(isTr?1.0:1.10));['n-cal-target','n-protein-t','n-carb-t','n-fat-t'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[offCal,macros.protein,carbT,fatT][i];});const w=parseFloat(c.tdeeweight)||70;const tEl=document.getElementById('smart-targets');if(tEl)tEl.innerHTML=`<div class="card-sm"><div class="label">トレ前目安</div><div style="font-size:13px">炭水化物: <strong>${Math.round(w*1.15)}g</strong></div><div style="font-size:13px">タンパク質: <strong>${Math.round(w*0.6)}g</strong></div><div class="muted" style="font-size:11px;margin-top:5px">脂質0〜15g・2〜3h前</div></div><div class="card-sm"><div class="label">トレ後（最重要）</div><div style="font-size:13px">炭水化物: <strong style="color:var(--accent4)">${Math.round(w*2.0)}g</strong></div><div style="font-size:13px">タンパク質: <strong>20g以上</strong></div><div class="muted" style="font-size:11px;margin-top:5px">脂質最小・2h以内</div></div><div class="card-sm"><div class="label">${isTr?'トレ日':'オフ日'}合計</div><div style="font-size:13px">カロリー: <strong>${offCal}kcal</strong></div><div style="font-size:13px">炭水化物: <strong>${carbT}g</strong>${isTr?'':' <span style="font-size:11px;color:var(--accent3)">(-20%)</span>'}</div></div>`;
   const bEl=document.getElementById('smart-badges');if(bEl){const mc={maintain:'badge-blue',cut:'badge-amber',bulk:'badge-green'};const ml={maintain:'維持',cut:'減量',bulk:'増量'};bEl.innerHTML=`<span class="badge ${mc[autoMode]}">${ml[autoMode]}モード</span>${isTr?'<span class="badge badge-blue">トレ日</span>':'<span class="badge badge-gray">オフ日</span>'}`;}
   const aEl=document.getElementById('smart-advice-box');if(aEl&&bfAlert)aEl.innerHTML=`<div class="alert ${bfAlert.t}">${bfAlert.m}</div>`;else if(aEl)aEl.innerHTML='';
   updateNutritionTotals();}
@@ -3285,6 +3484,163 @@ function renderAnalysis(){
   const sleeps=DB.arr('sleeps').filter(s=>s.weight>0).slice(-30);if(aWeight)aWeight.destroy();if(sleeps.length){aWeight=new Chart(document.getElementById('a-weight-chart'),{type:'line',data:{labels:sleeps.map(s=>s.date.slice(5)),datasets:[{data:sleeps.map(s=>s.weight),borderColor:'#4a9eff',backgroundColor:'rgba(74,158,255,0.08)',tension:0.4,fill:true,borderWidth:2,pointRadius:3}]},options:co});}
   const meals=DB.arr('meals');const mbd={};meals.forEach(m=>{if(!mbd[m.date])mbd[m.date]={cal:0};mbd[m.date].cal+=m.cal||0});const mDates=Object.keys(mbd).sort().slice(-14);const calT=getCalTarget(cfg().goalmode||'maintain');if(aNutr)aNutr.destroy();if(mDates.length){aNutr=new Chart(document.getElementById('a-nutrition-chart'),{type:'bar',data:{labels:mDates.map(d=>d.slice(5)),datasets:[{data:mDates.map(d=>mbd[d].cal),backgroundColor:'rgba(245,166,35,0.45)',borderColor:'#f5a623',borderWidth:1,borderRadius:4},{data:mDates.map(()=>calT),type:'line',borderColor:'rgba(255,69,96,0.6)',borderDash:[5,3],borderWidth:1.5,pointRadius:0}]},options:co});}
   const sl14=DB.arr('sleeps').slice(-14);if(aWell)aWell.destroy();if(sl14.length){aWell=new Chart(document.getElementById('a-wellness-chart'),{type:'line',data:{labels:sl14.map(s=>s.date.slice(5)),datasets:[{data:sl14.map(s=>s.wellness||0),borderColor:'#f5a623',tension:0.4,borderWidth:2,fill:false,pointRadius:3},{data:sl14.map(s=>s.duration||0),borderColor:'#4a9eff',tension:0.4,borderWidth:1.5,fill:false,pointRadius:0,borderDash:[3,3]}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:0,max:10}}}});}
+  renderWeeklySummary();
+}
+
+
+// ============================================================
+// ② 週次トレーニングサマリー
+// ============================================================
+let weeklyChart = null;
+let dpChart = null;
+
+function renderWeeklySummary(){
+  // --- 直近8週のDouble Progression達成率 ---
+  const trainings = DB.arr('trainings').filter(t => t.type === 'strength' && t.exercises?.length);
+  if (!trainings.length) {
+    const el = document.getElementById('weekly-summary-content');
+    if (el) el.innerHTML = '<div class="muted">トレーニング記録がありません</div>';
+    return;
+  }
+
+  // 週ごとにグループ化
+  function getMonday(dateStr) {
+    const d = new Date(dateStr);
+    const dow = d.getDay() === 0 ? 6 : d.getDay() - 1;
+    d.setDate(d.getDate() - dow);
+    return d.toISOString().slice(0, 10);
+  }
+  const byWeek = {};
+  trainings.forEach(t => {
+    const wk = getMonday(t.date);
+    if (!byWeek[wk]) byWeek[wk] = [];
+    byWeek[wk].push(t);
+  });
+  const weeks = Object.keys(byWeek).sort().slice(-8);
+  if (!weeks.length) return;
+
+  // DP達成率計算
+  const dpRates = weeks.map(wk => {
+    const wkTrains = byWeek[wk];
+    let dpCount = 0, exTotal = 0;
+    wkTrains.forEach(t => {
+      t.exercises.forEach(e => {
+        if (!e.name || !parseFloat(e.weight)) return;
+        exTotal++;
+        const prev = DB.arr('trainings').slice().reverse().find(s =>
+          s.date < t.date && s.exercises?.find(ex => ex.name === e.name && parseFloat(ex.weight) > 0)
+        );
+        if (prev) {
+          const pEx = prev.exercises.find(ex => ex.name === e.name);
+          if (pEx && (parseFloat(e.weight) > parseFloat(pEx.weight) || parseInt(e.reps) > parseInt(pEx.reps))) dpCount++;
+        }
+      });
+    });
+    return exTotal > 0 ? Math.round(dpCount / exTotal * 100) : 0;
+  });
+
+  // 週次ボリューム（セット数）
+  const weeklyVols = weeks.map(wk => {
+    let total = 0;
+    byWeek[wk].forEach(t => { total += (t.exercises?.length || 0); });
+    return total;
+  });
+
+  // グラフ描画
+  const coOpts = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#5a5a78', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+      y: { ticks: { color: '#5a5a78', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
+    }
+  };
+  const labels = weeks.map(w => w.slice(5));
+
+  if (weeklyChart) weeklyChart.destroy();
+  const ctx1 = document.getElementById('weekly-summary-vol-chart');
+  if (ctx1) {
+    weeklyChart = new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          data: weeklyVols,
+          backgroundColor: weeklyVols.map(v => v >= 10 ? 'rgba(34,197,94,0.5)' : v >= 6 ? 'rgba(74,158,255,0.5)' : 'rgba(245,166,35,0.5)'),
+          borderColor: weeklyVols.map(v => v >= 10 ? '#22c55e' : v >= 6 ? '#4a9eff' : '#f5a623'),
+          borderWidth: 1, borderRadius: 4,
+        }]
+      },
+      options: { ...coOpts, scales: { ...coOpts.scales, y: { ...coOpts.scales.y, beginAtZero: true } } }
+    });
+  }
+
+  if (dpChart) dpChart.destroy();
+  const ctx2 = document.getElementById('weekly-summary-dp-chart');
+  if (ctx2) {
+    dpChart = new Chart(ctx2, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          data: dpRates,
+          borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,0.08)',
+          tension: 0.4, fill: true, borderWidth: 2,
+          pointRadius: 4, pointBackgroundColor: dpRates.map(v => v >= 70 ? '#22c55e' : v >= 40 ? '#4a9eff' : '#ff4560'),
+        }]
+      },
+      options: {
+        ...coOpts,
+        scales: {
+          ...coOpts.scales,
+          y: { ...coOpts.scales.y, min: 0, max: 100, ticks: { ...coOpts.scales.y.ticks, callback: v => v + '%' } }
+        }
+      }
+    });
+  }
+
+  // 種目別最高重量（上位8種目）
+  const exMaxMap = {};
+  trainings.forEach(t => {
+    t.exercises.forEach(e => {
+      const w = parseFloat(e.weight);
+      if (!e.name || !w) return;
+      if (!exMaxMap[e.name] || w > exMaxMap[e.name].max) {
+        exMaxMap[e.name] = { max: w, date: t.date, sets: e.sets || 1, reps: e.reps || 0 };
+      }
+    });
+  });
+  const topEx = Object.entries(exMaxMap)
+    .sort((a, b) => b[1].max - a[1].max)
+    .slice(0, 8);
+
+  const el = document.getElementById('weekly-summary-maxes');
+  if (el && topEx.length) {
+    el.innerHTML = topEx.map(([name, data]) => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${name}</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-family:var(--font-mono);font-size:13px;color:var(--accent);font-weight:500">${data.max}kg</span>
+          <span style="font-size:10px;color:var(--text3)">${data.date.slice(5)}</span>
+        </div>
+      </div>`).join('');
+  }
+
+  // 現在のセッションの平均RPE推移
+  const avgRpes = weeks.map(wk => {
+    const wkT = byWeek[wk];
+    const rpes = wkT.map(t => parseInt(t.rpe)||0).filter(r => r > 0);
+    return rpes.length ? Math.round(rpes.reduce((a,b)=>a+b,0)/rpes.length*10)/10 : null;
+  });
+  const rpeEl = document.getElementById('weekly-rpe-summary');
+  if (rpeEl) {
+    const latest = avgRpes.filter(r => r !== null).slice(-3);
+    const trend = latest.length >= 2 ? latest[latest.length-1] - latest[0] : 0;
+    const trendText = trend > 0.5 ? `<span style="color:var(--accent)">↑ 強度上昇中（疲労注意）</span>` :
+                      trend < -0.5 ? `<span style="color:var(--accent4)">↓ 強度低下（回復中）</span>` :
+                      `<span style="color:var(--accent2)">→ 安定</span>`;
+    rpeEl.innerHTML = `直近3週の平均RPE推移: ${latest.join(' → ')} ${trendText}`;
+  }
 }
 
 function updateWeeklyWeightPanel(){
