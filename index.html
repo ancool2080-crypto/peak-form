@@ -2502,125 +2502,253 @@ function selectSession(id){
   DB.set('lastSession',id);
 }
 
-function loadProgramToTraining(){
-  if(!currentSession)return;
-  const prog=getCurrentProgramData();
-  const s=prog.sessions[currentSession];if(!s)return;
-  document.getElementById('t-type').value='strength';
-  document.getElementById('t-date').value=today();
-  document.getElementById('exercise-list').innerHTML='';
-  exCount=0;
-  s.exercises.forEach(e=>{
-    exCount++;
-    const did='ex'+exCount;
-    const prev=getPrevRecord(e.name);
-    const prevKg=prev?parseFloat(prev.weight):null;
-    const prevReps=prev?parseInt(prev.reps):null;
-    const prevHint=prev
-      ? `<span style="font-size:10px;color:var(--accent4);padding:2px 6px;background:rgba(34,197,94,0.12);border-radius:4px;white-space:nowrap">前回:${prevKg}kg×${prevReps}rep (${prev.date.slice(5)})</span>`
-      : `<span style="font-size:10px;color:var(--text3);padding:2px 6px;background:var(--bg4);border-radius:4px">初回</span>`;
-    const div=document.createElement('div');
-    div.className='input-row';div.id=did;
-    div.style.cssText='margin-bottom:10px;flex-wrap:wrap;gap:6px;align-items:center';
-    div.innerHTML=`<input type="text" value="${e.name}" style="flex:2;min-width:140px"><input type="number" value="1" min="1" max="30" style="max-width:65px" placeholder="セット"><input type="number" value="${prevReps||''}" min="1" max="100" style="max-width:65px" placeholder="回数"><input type="number" value="${prevKg||''}" min="0" max="500" step="0.5" style="max-width:75px" placeholder="kg">${prevHint}<button class="btn btn-sm btn-ghost" onclick="document.getElementById('${did}').remove()">✕</button>`;
-    document.getElementById('exercise-list').appendChild(div);
-  });
-  showPage('training');
-}
+
+
 
 
 // ============================================================
-// SHIFT MANAGEMENT
+// トレーニング記録 - セット別重量・回数記録システム
 // ============================================================
-let shiftMonthDelta=0,currentShiftMode='24h';
 
-// ===== training.js =====
-function addExRow(){
-  exCount++;const id='ex'+exCount;
-  const div=document.createElement('div');div.className='input-row';div.id=id;
-  div.style.cssText='margin-bottom:10px;flex-wrap:wrap;gap:6px;align-items:center';
-  div.innerHTML=`<input type="text" placeholder="種目名" style="flex:2;min-width:140px" oninput="fillPrevOnNameInput(this,'${id}')"><input type="number" placeholder="セット" min="1" max="30" style="max-width:65px"><input type="number" placeholder="回数" min="1" max="100" style="max-width:65px"><input type="number" placeholder="kg" min="0" max="500" step="0.5" style="max-width:75px"><span id="${id}-prev" style="font-size:10px;color:var(--text3)"></span><button class="btn btn-sm btn-ghost" onclick="document.getElementById('${id}').remove()">✕</button>`;
+// 種目ブロックを追加（種目名+セット行）
+function addExRow(nameVal, setsData){
+  exCount++;
+  const eid = 'ex' + exCount;
+  const div = document.createElement('div');
+  div.id = eid;
+  div.className = 'ex-block';
+  div.style.cssText = 'background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:12px;margin-bottom:10px';
+
+  // 前回記録を取得
+  const prev = nameVal ? getPrevRecord(nameVal) : null;
+  const prevHint = prev
+    ? `<span style="font-size:11px;color:var(--accent4);padding:2px 8px;background:rgba(34,197,94,0.1);border-radius:4px">前回: ${parseFloat(prev.weight)}kg × ${parseInt(prev.reps)}rep (${prev.date.slice(5)})</span>`
+    : nameVal ? `<span style="font-size:11px;color:var(--text3);padding:2px 6px;background:var(--bg4);border-radius:4px">初回</span>` : '';
+
+  // デフォルトセットデータ
+  const defaultSets = setsData || (prev ? [{weight: parseFloat(prev.weight)||'', reps: parseInt(prev.reps)||''}] : [{weight:'', reps:''}]);
+
+  div.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+      <input type="text" class="ex-name" placeholder="種目名" value="${nameVal||''}"
+        style="flex:2;min-width:160px;font-weight:500"
+        oninput="onExNameInput(this,'${eid}')">
+      ${prevHint ? `<div class="ex-prev-hint" id="${eid}-hint">${prevHint}</div>` : `<div class="ex-prev-hint" id="${eid}-hint"></div>`}
+      <button class="btn btn-sm btn-ghost" style="margin-left:auto;color:var(--accent)" onclick="document.getElementById('${eid}').remove()">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:28px 1fr 1fr auto;gap:6px;align-items:center;margin-bottom:6px">
+      <span style="font-size:10px;color:var(--text3);text-align:center">SET</span>
+      <span style="font-size:10px;color:var(--text3);text-align:center">重量 (kg)</span>
+      <span style="font-size:10px;color:var(--text3);text-align:center">回数</span>
+      <span></span>
+    </div>
+    <div class="set-rows" id="${eid}-sets"></div>
+    <button class="btn btn-sm" style="width:100%;margin-top:6px;font-size:12px" onclick="addSetRow('${eid}')">+ セット追加</button>
+  `;
+
   document.getElementById('exercise-list').appendChild(div);
+
+  // デフォルトセットを追加
+  defaultSets.forEach(s => addSetRow(eid, s.weight, s.reps));
 }
 
-function fillPrevOnNameInput(nameInput,rowId){
-  const name=nameInput.value.trim();
-  if(!name)return;
-  const prev=getPrevRecord(name);
-  const row=document.getElementById(rowId);if(!row)return;
-  const ins=row.querySelectorAll('input');
-  const sp=document.getElementById(rowId+'-prev');
-  if(prev){
-    if(!ins[2].value)ins[2].value=prev.reps;
-    if(!ins[3].value)ins[3].value=prev.weight;
-    if(sp)sp.innerHTML=`<span style="padding:2px 6px;background:rgba(34,197,94,0.12);color:var(--accent4);border-radius:4px">前回:${prev.weight}kg×${prev.reps}rep (${prev.date.slice(5)})</span>`;
-  }else{
-    if(sp)sp.innerHTML='<span style="padding:2px 5px;background:var(--bg4);color:var(--text3);border-radius:4px">初回</span>';
+// セット行を追加
+function addSetRow(eid, weightVal, repsVal){
+  const container = document.getElementById(eid + '-sets');
+  if (!container) return;
+  const setNum = container.children.length + 1;
+  const row = document.createElement('div');
+  row.className = 'set-row';
+  row.style.cssText = 'display:grid;grid-template-columns:28px 1fr 1fr auto;gap:6px;align-items:center;margin-bottom:4px';
+  row.innerHTML = `
+    <span style="font-size:11px;color:var(--text3);text-align:center;font-family:var(--font-mono)">${setNum}</span>
+    <input type="number" class="set-weight" placeholder="kg" value="${weightVal||''}" min="0" max="500" step="0.5"
+      style="text-align:center" oninput="updateSetRowHint(this)">
+    <input type="number" class="set-reps" placeholder="回" value="${repsVal||''}" min="1" max="100"
+      style="text-align:center">
+    <button class="btn btn-sm btn-ghost" style="padding:4px 8px;color:var(--text3)" onclick="this.parentElement.remove();reNumberSets('${eid}')">✕</button>
+  `;
+  container.appendChild(row);
+}
+
+// セット番号を振り直す
+function reNumberSets(eid){
+  const container = document.getElementById(eid + '-sets');
+  if (!container) return;
+  Array.from(container.children).forEach((row, i) => {
+    const numEl = row.querySelector('span');
+    if (numEl) numEl.textContent = i + 1;
+  });
+}
+
+// 重量入力時にkgのヒント表示
+function updateSetRowHint(input){
+  // 1RM推定をツールチップで表示
+  const row = input.closest('.set-row');
+  if (!row) return;
+  const repsEl = row.querySelector('.set-reps');
+  const w = parseFloat(input.value), r = parseInt(repsEl?.value);
+  if (w > 0 && r > 0 && r < 30) {
+    const rm = Math.round(w * (1 + r/30) * 10) / 10;
+    input.title = `推定1RM: ${rm}kg`;
   }
 }
 
+// 種目名入力時に前回記録を更新
+function onExNameInput(nameInput, eid){
+  const name = nameInput.value.trim();
+  const hintEl = document.getElementById(eid + '-hint');
+  if (!hintEl) return;
+  if (!name) { hintEl.innerHTML = ''; return; }
+  const prev = getPrevRecord(name);
+  if (prev) {
+    const kg = parseFloat(prev.weight), reps = parseInt(prev.reps);
+    hintEl.innerHTML = `<span style="font-size:11px;color:var(--accent4);padding:2px 8px;background:rgba(34,197,94,0.1);border-radius:4px">前回: ${kg}kg × ${reps}rep (${prev.date.slice(5)})</span>`;
+    // セット行が空なら前回値を自動入力
+    const setsContainer = document.getElementById(eid + '-sets');
+    if (setsContainer && setsContainer.children.length === 1) {
+      const row = setsContainer.children[0];
+      const wEl = row.querySelector('.set-weight');
+      const rEl = row.querySelector('.set-reps');
+      if (wEl && !wEl.value) wEl.value = kg || '';
+      if (rEl && !rEl.value) rEl.value = reps || '';
+    }
+  } else {
+    hintEl.innerHTML = `<span style="font-size:11px;color:var(--text3);padding:2px 6px;background:var(--bg4);border-radius:4px">初回</span>`;
+  }
+}
+
+// fillPrevOnNameInput (後方互換)
+function fillPrevOnNameInput(nameInput, rowId){
+  onExNameInput(nameInput, rowId);
+}
+
+// トレーニングを保存（種目×セット構造）
 function saveTraining(){
-  const date=document.getElementById('t-date').value;
-  const dur=parseInt(document.getElementById('t-duration').value)||0;
-  const rpe=parseInt(document.getElementById('t-rpe').value)||5;
-  const type=document.getElementById('t-type').value;
-  if(!date||!dur){alert('日付と時間は必須です');return}
-  const isCardio=type==='cardio'||type==='hiit';
-  let cardioData=null;
-  if(isCardio){
-    cardioData={
-      cardioType:document.getElementById('t-cardio-type')?.value||'crosstrainer',
-      zone:document.getElementById('t-cardio-zone')?.value||'2',
-      distance:parseFloat(document.getElementById('t-cardio-distance')?.value)||0,
-      hr:parseInt(document.getElementById('t-cardio-hr')?.value)||0,
-      kcal:parseInt(document.getElementById('t-cardio-kcal')?.value)||0,
+  const date = document.getElementById('t-date').value;
+  const dur = parseInt(document.getElementById('t-duration').value) || 0;
+  const rpe = parseInt(document.getElementById('t-rpe').value) || 5;
+  const type = document.getElementById('t-type').value;
+  if (!date || !dur) { alert('日付と時間は必須です'); return; }
+
+  const isCardio = type === 'cardio' || type === 'hiit';
+  let cardioData = null;
+  if (isCardio) {
+    cardioData = {
+      cardioType: document.getElementById('t-cardio-type')?.value || 'crosstrainer',
+      zone: document.getElementById('t-cardio-zone')?.value || '2',
+      distance: parseFloat(document.getElementById('t-cardio-distance')?.value) || 0,
+      hr: parseInt(document.getElementById('t-cardio-hr')?.value) || 0,
+      kcal: parseInt(document.getElementById('t-cardio-kcal')?.value) || 0,
     };
   }
-  const exercises=[];
-  if(!isCardio){
-    document.querySelectorAll('#exercise-list .input-row').forEach(row=>{
-      const ins=row.querySelectorAll('input');
-      if(ins[0].value)exercises.push({name:ins[0].value,sets:ins[1].value,reps:ins[2].value,weight:ins[3].value});
+
+  const exercises = [];
+  if (!isCardio) {
+    document.querySelectorAll('#exercise-list .ex-block').forEach(block => {
+      const nameEl = block.querySelector('.ex-name');
+      if (!nameEl || !nameEl.value.trim()) return;
+      const name = nameEl.value.trim();
+      const sets = [];
+      block.querySelectorAll('.set-row').forEach(row => {
+        const w = parseFloat(row.querySelector('.set-weight')?.value) || 0;
+        const r = parseInt(row.querySelector('.set-reps')?.value) || 0;
+        if (w > 0 || r > 0) sets.push({ weight: w, reps: r });
+      });
+      if (sets.length) {
+        // 後方互換のため最大重量のセットを代表値として保存
+        const maxSet = sets.reduce((a, b) => (b.weight >= a.weight ? b : a), sets[0]);
+        exercises.push({
+          name,
+          sets: sets.length,
+          reps: maxSet.reps,
+          weight: maxSet.weight,
+          setData: sets  // 全セットデータ
+        });
+      }
     });
   }
-  DB.push('trainings',{date,type,duration:dur,rpe,
-    water:parseInt(document.getElementById('t-water').value)||0,
-    notes:document.getElementById('t-notes').value,
-    exercises,cardioData,id:Date.now()});
-  ['t-duration','t-rpe','t-water','t-notes','t-cardio-distance','t-cardio-hr','t-cardio-kcal'].forEach(id=>{
-    const el=document.getElementById(id);if(el)el.value='';
+
+  DB.push('trainings', {
+    date, type, duration: dur, rpe,
+    water: parseInt(document.getElementById('t-water').value) || 0,
+    notes: document.getElementById('t-notes').value,
+    exercises, cardioData, id: Date.now()
   });
-  document.getElementById('exercise-list').innerHTML='';
+
+  // フォームリセット
+  ['t-duration','t-rpe','t-water','t-notes','t-cardio-distance','t-cardio-hr','t-cardio-kcal'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('exercise-list').innerHTML = '';
+  exCount = 0;
   renderTrainingLog();
   alert('記録しました！');
 }
 
-function renderTrainingLog(){
-  const log=DB.arr('trainings').slice(-20).reverse();
-  const el=document.getElementById('training-log-table');
-  if(!log.length){el.innerHTML='<div class="muted">まだ記録がありません</div>';return}
-  // 前セッション比較用: key=種目名, val=最新記録
-  const prevMap={};
-  DB.arr('trainings').forEach(t=>{if(t.exercises)t.exercises.forEach(e=>{if(e.name&&parseFloat(e.weight))prevMap[e.name]={w:parseFloat(e.weight),r:parseInt(e.reps),date:t.date}});});
+// プログラムから種目を読み込む（複数セット対応）
+function loadProgramToTraining(){
+  if (!currentSession) return;
+  const prog = getCurrentProgramData();
+  const s = prog.sessions[currentSession];
+  if (!s) return;
 
-  let html='<div style="display:flex;flex-direction:column;gap:12px">';
-  log.forEach((t,ti)=>{
-    // Double Progression check: 各種目で前回より重量or回数が上がっているか
-    let dpCount=0,exCount2=0;
-    const prevSession=DB.arr('trainings').slice().reverse().find(s=>s.date<t.date&&s.exercises&&s.exercises.length>0);
-    if(t.exercises&&t.exercises.length){
-      t.exercises.forEach(e=>{
-        if(!e.name||!parseFloat(e.weight))return;
-        exCount2++;
-        // 同種目の直前記録
-        const prev2=DB.arr('trainings').slice().reverse().find(s=>s.date<t.date&&s.exercises&&s.exercises.find(ex=>ex.name===e.name&&parseFloat(ex.weight)>0));
-        if(prev2){const prevEx=prev2.exercises.find(ex=>ex.name===e.name);if(prevEx&&(parseFloat(e.weight)>parseFloat(prevEx.weight)||parseInt(e.reps)>parseInt(prevEx.reps)))dpCount++;}
+  document.getElementById('t-type').value = 'strength';
+  document.getElementById('t-date').value = today();
+  document.getElementById('exercise-list').innerHTML = '';
+  exCount = 0;
+
+  s.exercises.forEach(e => {
+    const prev = getPrevRecord(e.name);
+    // 前回のセットデータがあればそれを使う、なければ3セット分の空枠
+    let setsData;
+    if (prev && prev.setData) {
+      setsData = prev.setData;
+    } else if (prev) {
+      // 前回が旧形式（sets数だけある）なら同じ重量×回数を繰り返す
+      const n = parseInt(prev.sets) || 3;
+      setsData = Array(n).fill(null).map(() => ({weight: parseFloat(prev.weight)||'', reps: parseInt(prev.reps)||''}));
+    } else {
+      // 初回は3セット分の空枠
+      setsData = [{weight:'',reps:''},{weight:'',reps:''},{weight:'',reps:''}];
+    }
+    addExRow(e.name, setsData);
+  });
+
+  showPage('training');
+}
+
+// トレーニング記録一覧（セット別対応）
+function renderTrainingLog(){
+  const log = DB.arr('trainings').slice(-20).reverse();
+  const el = document.getElementById('training-log-table');
+  if (!log.length) { el.innerHTML = '<div class="muted">まだ記録がありません</div>'; return; }
+
+  let htmlStr = '<div style="display:flex;flex-direction:column;gap:12px">';
+  log.forEach(t => {
+    // DP達成率計算
+    let dpCount = 0, exTotal = 0;
+    if (t.exercises && t.exercises.length) {
+      t.exercises.forEach(e => {
+        if (!e.name || !parseFloat(e.weight)) return;
+        exTotal++;
+        const prev2 = DB.arr('trainings').slice().reverse().find(s =>
+          s.date < t.date && s.exercises &&
+          s.exercises.find(ex => ex.name === e.name && parseFloat(ex.weight) > 0)
+        );
+        if (prev2) {
+          const prevEx = prev2.exercises.find(ex => ex.name === e.name);
+          if (prevEx && (parseFloat(e.weight) > parseFloat(prevEx.weight) || parseInt(e.reps) > parseInt(prevEx.reps))) dpCount++;
+        }
       });
     }
-    const dpRate=exCount2>0?Math.round(dpCount/exCount2*100):null;
-    const dpBadge=dpRate!==null?`<span class="badge ${dpRate>=70?'badge-green':dpRate>=40?'badge-amber':'badge-gray'}" style="font-size:10px">${dpRate>=70?'↑PO':''}${dpRate}%達成</span>`:''
-    html+=`<div class="card-sm" style="padding:12px">
-      <div class="row-between" style="margin-bottom:8px">
+    const dpRate = exTotal > 0 ? Math.round(dpCount / exTotal * 100) : null;
+    const dpBadge = dpRate !== null
+      ? `<span class="badge ${dpRate>=70?'badge-green':dpRate>=40?'badge-amber':'badge-gray'}" style="font-size:10px">${dpRate>=70?'↑PO ':''}${dpRate}%</span>`
+      : '';
+
+    htmlStr += `<div class="card-sm" style="padding:12px">
+      <div class="row-between" style="margin-bottom:10px">
         <div class="row" style="gap:8px;flex-wrap:wrap">
           <span class="mono" style="font-size:13px;font-weight:500">${t.date}</span>
           <span class="badge badge-blue" style="font-size:10px">${typeLabel[t.type]||t.type}</span>
@@ -2628,37 +2756,76 @@ function renderTrainingLog(){
         </div>
         ${dpBadge}
       </div>`;
-    if(t.exercises&&t.exercises.length){
-      html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px">';
-      t.exercises.forEach(e=>{
-        if(!e.name)return;
-        const kg=parseFloat(e.weight)||0;const reps=parseInt(e.reps)||0;
+
+    // 種目ごとの表示（セット別）
+    if (t.exercises && t.exercises.length) {
+      htmlStr += '<div style="display:flex;flex-direction:column;gap:6px">';
+      t.exercises.forEach(e => {
+        if (!e.name) return;
         // 前回比較
-        const prev2=DB.arr('trainings').slice().reverse().find(s=>s.date<t.date&&s.exercises&&s.exercises.find(ex=>ex.name===e.name&&parseFloat(ex.weight)>0));
-        let diff='';
-        if(prev2&&kg>0){const prevEx=prev2.exercises.find(ex=>ex.name===e.name);if(prevEx){const dw=kg-parseFloat(prevEx.weight);const dr=reps-(parseInt(prevEx.reps)||0);if(dw>0)diff=`<span style="color:var(--accent4);font-size:10px">+${dw}kg</span>`;else if(dr>0)diff=`<span style="color:var(--accent4);font-size:10px">+${dr}rep</span>`;else if(dw<0||dr<0)diff=`<span style="color:var(--accent3);font-size:10px">${dw<0?dw+'kg':dr+'rep'}</span>`;}}
-        html+=`<div style="font-size:11px;color:var(--text2);padding:3px 6px;background:var(--bg3);border-radius:4px;display:flex;justify-content:space-between;gap:4px"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${e.name}</span><span class="mono" style="color:var(--text);white-space:nowrap">${kg?kg+'kg':'—'}×${reps||e.reps} ${diff}</span></div>`;
+        const prev2 = DB.arr('trainings').slice().reverse().find(s =>
+          s.date < t.date && s.exercises && s.exercises.find(ex => ex.name === e.name && parseFloat(ex.weight) > 0)
+        );
+        let diffBadge = '';
+        if (prev2) {
+          const prevEx = prev2.exercises.find(ex => ex.name === e.name);
+          if (prevEx) {
+            const dw = parseFloat(e.weight) - parseFloat(prevEx.weight);
+            const dr = parseInt(e.reps) - (parseInt(prevEx.reps)||0);
+            if (dw > 0) diffBadge = `<span style="color:var(--accent4);font-size:10px;margin-left:4px">↑+${dw}kg</span>`;
+            else if (dr > 0) diffBadge = `<span style="color:var(--accent4);font-size:10px;margin-left:4px">↑+${dr}rep</span>`;
+            else if (dw < 0) diffBadge = `<span style="color:var(--accent3);font-size:10px;margin-left:4px">↓${dw}kg</span>`;
+          }
+        }
+
+        const sets = e.setData || [{weight:e.weight, reps:e.reps}];
+        const setStr = sets.map((s,i) =>
+          `<span style="font-size:11px;font-family:var(--font-mono);padding:2px 6px;background:var(--bg4);border-radius:3px">${parseFloat(s.weight)||'—'}kg×${parseInt(s.reps)||'—'}</span>`
+        ).join('');
+
+        htmlStr += `<div style="padding:6px 8px;background:var(--bg3);border-radius:var(--rs);border-left:2px solid var(--border2)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:12px;font-weight:500">${e.name}</span>
+            <span style="font-size:11px;color:var(--text3)">${sets.length}セット${diffBadge}</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px">${setStr}</div>
+        </div>`;
       });
-      html+='</div>';
+      htmlStr += '</div>';
     }
+
     // 有酸素詳細
-    if(t.cardioData&&t.cardioData.cardioType){
-      const cd=t.cardioData;
-      const ctLabel=CARDIO_TYPES[cd.cardioType]?.label||cd.cardioType;
-      const zoneLabel={1:'Z1',2:'Z2',3:'Z3',4:'Z4',hiit:'HIIT'}[cd.zone]||cd.zone;
-      const zoneCol={1:'var(--text2)',2:'var(--accent4)',3:'var(--accent2)',4:'var(--accent3)',hiit:'var(--accent)'}[cd.zone]||'var(--text2)';
-      let cdInfo=`<span style="font-weight:500">${ctLabel}</span> / <span style="color:${zoneCol};font-weight:600">${zoneLabel}</span>`;
-      if(cd.distance)cdInfo+=` / ${cd.distance}km`;
-      if(cd.hr)cdInfo+=` / 平均${cd.hr}bpm`;
-      if(cd.kcal)cdInfo+=` / ${cd.kcal}kcal`;
-      html+=`<div style="font-size:12px;color:var(--text2);margin-top:6px;padding:5px 8px;background:rgba(34,197,94,0.08);border-radius:4px;border-left:2px solid var(--accent4)">🏃 ${cdInfo}</div>`;
+    if (t.cardioData && t.cardioData.cardioType) {
+      const cd = t.cardioData;
+      const ctLabel = CARDIO_TYPES[cd.cardioType]?.label || cd.cardioType;
+      const zoneLabel = {1:'Z1',2:'Z2',3:'Z3',4:'Z4',hiit:'HIIT'}[cd.zone]||cd.zone;
+      const zoneCol = {1:'var(--text2)',2:'var(--accent4)',3:'var(--accent2)',4:'var(--accent3)',hiit:'var(--accent)'}[cd.zone]||'var(--text2)';
+      let cdInfo = `<span style="font-weight:500">${ctLabel}</span> / <span style="color:${zoneCol};font-weight:600">${zoneLabel}</span>`;
+      if (cd.distance) cdInfo += ` / ${cd.distance}km`;
+      if (cd.hr) cdInfo += ` / 平均${cd.hr}bpm`;
+      if (cd.kcal) cdInfo += ` / ${cd.kcal}kcal`;
+      htmlStr += `<div style="font-size:12px;color:var(--text2);margin-top:6px;padding:5px 8px;background:rgba(34,197,94,0.08);border-radius:4px;border-left:2px solid var(--accent4)">🏃 ${cdInfo}</div>`;
     }
-    if(t.notes)html+=`<div class="muted" style="font-size:11px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">📝 ${t.notes}</div>`;
-    html+='</div>';
+    if (t.notes) htmlStr += `<div class="muted" style="font-size:11px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">📝 ${t.notes}</div>`;
+    htmlStr += '</div>';
   });
-  html+='</div>';
-  el.innerHTML=html;
+  htmlStr += '</div>';
+  el.innerHTML = htmlStr;
 }
+
+// ============================================================
+// SHIFT MANAGEMENT
+// ============================================================
+let shiftMonthDelta=0,currentShiftMode='24h';
+
+// ===== training.js =====
+
+
+
+
+
+
+
 
 const CARDIO_TYPES={
   crosstrainer:{label:'クロストレーナー',kcalPerMin:8},
