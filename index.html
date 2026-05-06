@@ -218,7 +218,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="nav-item" onclick="showPage('analysis')"><span class="nav-icon">∿</span>分析レポート</div>
     <div class="nav-item" onclick="showPage('settings')"><span class="nav-icon">⊙</span>設定</div>
   </nav>
-  <div class="sidebar-footer"><div class="version">PEAK FORM v3.0</div><div class="version" style="margin-top:2px;opacity:0.5">based on sports science</div></div>
+  <div class="sidebar-footer"><div class="version">PEAK FORM v3.1</div><div class="version" style="margin-top:2px;opacity:0.5">based on sports science</div></div>
 </aside>
 <main class="main">
 <div class="topbar">
@@ -539,13 +539,22 @@ input[type=range]:focus{border:none;box-shadow:none}
 
     <!-- 食品プリセット -->
     <div style="margin-bottom:14px">
-      <div class="label" style="margin-bottom:8px">プリセットから選ぶ（タップで自動入力）</div>
-      <div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:6px">
+      <div class="label" style="margin-bottom:8px">プリセットから選ぶ（183品 / 文部科学省成分表2020準拠）</div>
+      <!-- 食品検索バー -->
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <input type="text" id="food-search-input" placeholder="🔍 食品名で検索（例: 鶏むね、バナナ）"
+          style="flex:1;font-size:13px;padding:8px 10px" oninput="showFoodSearch(this.value)">
+      </div>
+      <!-- カテゴリタブ -->
+      <div class="row" style="gap:5px;flex-wrap:wrap;margin-bottom:6px">
         <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('protein')">🥩 タンパク質</span>
         <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('carb')">🍚 炭水化物</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('veggie')">🥦 野菜・果物</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('fermented')">🥒 発酵・乳製品</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('fat')">🥑 良質な脂質</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('veggie')">🥦 野菜・海藻</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('fat')">🥑 脂質・ナッツ</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('fermented')">🫙 発酵食品</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('seasoning')">🧂 調味料</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('drink')">🥤 飲料・補食</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('convenience')">🏪 コンビニ</span>
         <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('custom')">⭐ マイプリセット</span>
       </div>
       <div id="preset-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;max-height:200px;overflow-y:auto"></div>
@@ -1723,6 +1732,248 @@ function applyCookingToForm(weightG, method) {
   }
 }
 
+const FOOD_DB={
+  protein:[
+    {name:'鶏むね肉（皮なし）',unit:'g',per:100,cal:108,p:24.4,c:0,f:1.5,tag:'鶏肉'},
+    {name:'鶏もも肉（皮なし）',unit:'g',per:100,cal:116,p:18.8,c:0,f:3.9,tag:'鶏肉'},
+    {name:'鶏ささみ',unit:'g',per:100,cal:98,p:23.9,c:0,f:0.8,tag:'鶏肉'},
+    {name:'鶏むね肉（皮あり）',unit:'g',per:100,cal:133,p:21.3,c:0,f:5.9,tag:'鶏肉'},
+    {name:'鶏もも肉（皮あり）',unit:'g',per:100,cal:190,p:16.6,c:0,f:14.2,tag:'鶏肉'},
+    {name:'鶏手羽元',unit:'g',per:100,cal:175,p:18.2,c:0,f:11.8,tag:'鶏肉'},
+    {name:'鶏レバー',unit:'g',per:100,cal:100,p:18.9,c:0.6,f:3.1,tag:'鶏肉'},
+    {name:'鶏ハツ',unit:'g',per:100,cal:128,p:14.5,c:0.1,f:8.2,tag:'鶏肉'},
+    {name:'豚ロース（赤身）',unit:'g',per:100,cal:150,p:22.7,c:0.2,f:5.6,tag:'豚肉'},
+    {name:'豚もも（赤身）',unit:'g',per:100,cal:128,p:22.1,c:0.2,f:3.6,tag:'豚肉'},
+    {name:'豚ヒレ',unit:'g',per:100,cal:118,p:22.2,c:0.3,f:3.7,tag:'豚肉'},
+    {name:'豚バラ',unit:'g',per:100,cal:366,p:14.4,c:0.1,f:35.4,tag:'豚肉'},
+    {name:'豚肩ロース',unit:'g',per:100,cal:237,p:17.1,c:0.1,f:19.2,tag:'豚肉'},
+    {name:'豚レバー',unit:'g',per:100,cal:114,p:20.4,c:2.5,f:3.4,tag:'豚肉'},
+    {name:'牛モモ赤身',unit:'g',per:100,cal:140,p:21.2,c:0.5,f:4.6,tag:'牛肉'},
+    {name:'牛ヒレ',unit:'g',per:100,cal:133,p:20.5,c:0.3,f:4.8,tag:'牛肉'},
+    {name:'牛ロース（赤身）',unit:'g',per:100,cal:240,p:16.5,c:0.2,f:19.0,tag:'牛肉'},
+    {name:'牛肩赤身',unit:'g',per:100,cal:142,p:20.4,c:0.3,f:5.7,tag:'牛肉'},
+    {name:'牛バラ',unit:'g',per:100,cal:472,p:11.0,c:0.1,f:50.0,tag:'牛肉'},
+    {name:'牛レバー',unit:'g',per:100,cal:119,p:19.6,c:3.7,f:3.7,tag:'牛肉'},
+    {name:'サーモン（アトランティック）',unit:'g',per:100,cal:204,p:17.3,c:0.1,f:16.5,tag:'魚'},
+    {name:'サバ（生）',unit:'g',per:100,cal:211,p:20.6,c:0.3,f:16.8,tag:'魚'},
+    {name:'イワシ（生）',unit:'g',per:100,cal:169,p:19.2,c:0.2,f:9.2,tag:'魚'},
+    {name:'マグロ赤身',unit:'g',per:100,cal:106,p:26.4,c:0.1,f:1.4,tag:'魚'},
+    {name:'マグロ中トロ',unit:'g',per:100,cal:165,p:20.1,c:0.1,f:7.6,tag:'魚'},
+    {name:'カツオ（生）',unit:'g',per:100,cal:108,p:25.8,c:0.1,f:0.5,tag:'魚'},
+    {name:'タラ（生）',unit:'g',per:100,cal:72,p:17.6,c:0.1,f:0.2,tag:'魚'},
+    {name:'ブリ（生）',unit:'g',per:100,cal:222,p:21.4,c:0.3,f:17.6,tag:'魚'},
+    {name:'アジ（生）',unit:'g',per:100,cal:112,p:19.7,c:0.1,f:4.5,tag:'魚'},
+    {name:'サンマ（生）',unit:'g',per:100,cal:297,p:17.4,c:0.1,f:25.6,tag:'魚'},
+    {name:'タイ（生）',unit:'g',per:100,cal:142,p:20.6,c:0.1,f:5.8,tag:'魚'},
+    {name:'ヒラメ（生）',unit:'g',per:100,cal:93,p:20.0,c:0.1,f:2.0,tag:'魚'},
+    {name:'エビ（バナメイ）',unit:'g',per:100,cal:82,p:19.6,c:0.3,f:0.6,tag:'魚介'},
+    {name:'ホタテ（生）',unit:'g',per:100,cal:66,p:13.5,c:1.5,f:0.9,tag:'魚介'},
+    {name:'イカ（生）',unit:'g',per:100,cal:76,p:17.9,c:0.1,f:1.0,tag:'魚介'},
+    {name:'タコ（生）',unit:'g',per:100,cal:70,p:16.4,c:0.1,f:0.7,tag:'魚介'},
+    {name:'カニ（ズワイ）',unit:'g',per:100,cal:59,p:13.5,c:0.1,f:0.4,tag:'魚介'},
+    {name:'ツナ缶（水煮）',unit:'g',per:100,cal:97,p:22.7,c:0.1,f:0.7,tag:'缶詰'},
+    {name:'ツナ缶（油漬け）',unit:'g',per:100,cal:267,p:17.7,c:0.1,f:21.7,tag:'缶詰'},
+    {name:'サバ缶（水煮）',unit:'g',per:100,cal:174,p:20.9,c:0.2,f:10.7,tag:'缶詰'},
+    {name:'サバ缶（味噌煮）',unit:'g',per:100,cal:188,p:16.3,c:6.6,f:10.9,tag:'缶詰'},
+    {name:'イワシ缶（水煮）',unit:'g',per:100,cal:165,p:20.7,c:0.1,f:9.3,tag:'缶詰'},
+    {name:'全卵（Lサイズ）',unit:'個',per:1,perLabel:'個',gramsPerUnit:60,cal:91,p:7.4,c:0.2,f:6.2,tag:'卵'},
+    {name:'卵白',unit:'g',per:100,cal:44,p:10.1,c:0.4,f:0,tag:'卵'},
+    {name:'卵黄',unit:'個',per:1,perLabel:'個',gramsPerUnit:20,cal:68,p:3.3,c:0.1,f:6.0,tag:'卵'},
+    {name:'牛乳（普通）',unit:'ml',per:200,cal:134,p:6.6,c:9.6,f:7.6,tag:'乳製品'},
+    {name:'低脂肪乳',unit:'ml',per:200,cal:88,p:6.6,c:11.0,f:2.0,tag:'乳製品'},
+    {name:'ギリシャヨーグルト（無糖）',unit:'g',per:100,cal:59,p:10.2,c:4.0,f:0.3,tag:'乳製品'},
+    {name:'プレーンヨーグルト（無糖）',unit:'g',per:100,cal:56,p:3.6,c:4.9,f:3.0,tag:'乳製品'},
+    {name:'カッテージチーズ',unit:'g',per:100,cal:99,p:13.3,c:1.9,f:4.5,tag:'乳製品'},
+    {name:'モッツァレラ',unit:'g',per:100,cal:250,p:18.0,c:2.0,f:19.9,tag:'乳製品'},
+    {name:'カマンベール',unit:'g',per:100,cal:291,p:19.1,c:0.9,f:24.7,tag:'乳製品'},
+    {name:'プロセスチーズ',unit:'g',per:100,cal:313,p:22.7,c:1.3,f:26.0,tag:'乳製品'},
+    {name:'木綿豆腐',unit:'g',per:100,cal:72,p:7.0,c:1.6,f:4.9,tag:'大豆'},
+    {name:'絹ごし豆腐',unit:'g',per:100,cal:56,p:5.3,c:2.0,f:3.5,tag:'大豆'},
+    {name:'納豆（1パック）',unit:'パック',per:1,perLabel:'パック',gramsPerUnit:45,cal:86,p:7.4,c:5.4,f:4.5,tag:'大豆'},
+    {name:'高野豆腐（乾燥）',unit:'g',per:100,cal:496,p:49.4,c:1.7,f:33.2,tag:'大豆'},
+    {name:'枝豆（冷凍）',unit:'g',per:100,cal:118,p:11.5,c:7.6,f:6.6,tag:'大豆'},
+    {name:'大豆（茹で）',unit:'g',per:100,cal:163,p:14.8,c:8.4,f:9.8,tag:'大豆'},
+    {name:'ひよこ豆（茹で）',unit:'g',per:100,cal:171,p:9.5,c:27.4,f:2.5,tag:'豆類'},
+    {name:'レンズ豆（茹で）',unit:'g',per:100,cal:132,p:10.0,c:21.5,f:0.8,tag:'豆類'},
+    {name:'黒豆（茹で）',unit:'g',per:100,cal:158,p:13.0,c:16.5,f:6.5,tag:'豆類'},
+    {name:'ホエイプロテイン（WPI）',unit:'g',per:30,cal:115,p:26.0,c:1.0,f:0.5,tag:'サプリ'},
+    {name:'ホエイプロテイン（WPC）',unit:'g',per:30,cal:120,p:22.0,c:4.0,f:2.0,tag:'サプリ'},
+    {name:'カゼインプロテイン',unit:'g',per:30,cal:114,p:24.0,c:2.0,f:1.5,tag:'サプリ'},
+    {name:'ソイプロテイン',unit:'g',per:30,cal:110,p:23.0,c:2.5,f:1.0,tag:'サプリ'},
+  ],
+  carb:[
+    {name:'白米（炊飯）',unit:'g',per:100,cal:156,p:2.5,c:37.1,f:0.3,tag:'ご飯'},
+    {name:'玄米（炊飯）',unit:'g',per:100,cal:152,p:2.8,c:35.6,f:1.0,tag:'ご飯'},
+    {name:'雑穀米（炊飯）',unit:'g',per:100,cal:154,p:3.2,c:34.8,f:1.2,tag:'ご飯'},
+    {name:'おにぎり（シャケ）',unit:'個',per:1,perLabel:'個',gramsPerUnit:105,cal:178,p:4.6,c:36.0,f:1.5,tag:'ご飯'},
+    {name:'おにぎり（梅）',unit:'個',per:1,perLabel:'個',gramsPerUnit:100,cal:168,p:2.8,c:37.8,f:0.4,tag:'ご飯'},
+    {name:'もち',unit:'個',per:1,perLabel:'個',gramsPerUnit:50,cal:112,p:2.0,c:25.2,f:0.2,tag:'ご飯'},
+    {name:'食パン（6枚切り）',unit:'枚',per:1,perLabel:'枚',gramsPerUnit:60,cal:156,p:5.3,c:28.0,f:2.5,tag:'パン'},
+    {name:'全粒粉パン（1枚）',unit:'枚',per:1,perLabel:'枚',gramsPerUnit:60,cal:148,p:6.0,c:27.0,f:2.0,tag:'パン'},
+    {name:'バゲット',unit:'g',per:100,cal:279,p:9.4,c:57.3,f:1.3,tag:'パン'},
+    {name:'スパゲッティ（乾燥）',unit:'g',per:100,cal:347,p:13.0,c:72.2,f:1.8,tag:'麺'},
+    {name:'スパゲッティ（茹で）',unit:'g',per:100,cal:150,p:5.8,c:30.3,f:0.9,tag:'麺'},
+    {name:'うどん（茹で）',unit:'g',per:100,cal:95,p:2.6,c:21.4,f:0.4,tag:'麺'},
+    {name:'そば（茹で）',unit:'g',per:100,cal:130,p:4.8,c:26.0,f:1.0,tag:'麺'},
+    {name:'ラーメン（麺のみ）',unit:'g',per:100,cal:268,p:8.7,c:55.7,f:1.2,tag:'麺'},
+    {name:'オートミール（乾燥）',unit:'g',per:100,cal:350,p:13.7,c:69.1,f:5.7,tag:'穀物'},
+    {name:'コーンフレーク',unit:'g',per:100,cal:381,p:7.8,c:83.6,f:1.7,tag:'穀物'},
+    {name:'グラノーラ',unit:'g',per:100,cal:430,p:9.0,c:68.0,f:14.0,tag:'穀物'},
+    {name:'さつまいも（蒸し）',unit:'g',per:100,cal:131,p:1.2,c:33.1,f:0.2,tag:'いも'},
+    {name:'じゃがいも（茹で）',unit:'g',per:100,cal:84,p:1.8,c:19.9,f:0.1,tag:'いも'},
+    {name:'じゃがいも（生）',unit:'g',per:100,cal:76,p:1.8,c:17.3,f:0.1,tag:'いも'},
+    {name:'山芋（とろろ）',unit:'g',per:100,cal:108,p:4.5,c:26.7,f:0.2,tag:'いも'},
+    {name:'里芋（茹で）',unit:'g',per:100,cal:52,p:1.5,c:13.1,f:0.1,tag:'いも'},
+    {name:'紫芋（焼き芋）',unit:'g',per:100,cal:141,p:1.3,c:34.9,f:0.2,tag:'いも'},
+    {name:'バナナ',unit:'本',per:1,perLabel:'本',gramsPerUnit:100,cal:86,p:1.1,c:22.5,f:0.2,tag:'果物'},
+    {name:'りんご',unit:'個',per:1,perLabel:'個',gramsPerUnit:250,cal:143,p:0.4,c:38.5,f:0.3,tag:'果物'},
+    {name:'みかん',unit:'個',per:1,perLabel:'個',gramsPerUnit:80,cal:38,p:0.6,c:9.0,f:0.1,tag:'果物'},
+    {name:'キウイ',unit:'個',per:1,perLabel:'個',gramsPerUnit:100,cal:51,p:1.0,c:12.2,f:0.1,tag:'果物'},
+    {name:'オレンジ',unit:'個',per:1,perLabel:'個',gramsPerUnit:130,cal:61,p:1.1,c:15.3,f:0.1,tag:'果物'},
+    {name:'ぶどう（1房）',unit:'g',per:100,cal:59,p:0.4,c:15.7,f:0.1,tag:'果物'},
+    {name:'いちご',unit:'g',per:100,cal:34,p:0.9,c:8.5,f:0.1,tag:'果物'},
+    {name:'スイカ',unit:'g',per:100,cal:37,p:0.6,c:9.5,f:0.1,tag:'果物'},
+    {name:'桃',unit:'個',per:1,perLabel:'個',gramsPerUnit:200,cal:80,p:1.2,c:20.0,f:0.2,tag:'果物'},
+    {name:'梨',unit:'個',per:1,perLabel:'個',gramsPerUnit:250,cal:105,p:0.5,c:27.5,f:0.3,tag:'果物'},
+    {name:'アボカド',unit:'個',per:1,perLabel:'個',gramsPerUnit:150,cal:240,p:3.0,c:6.8,f:22.5,tag:'果物'},
+    {name:'はちみつ',unit:'g',per:100,cal:294,p:0.2,c:81.9,f:0,tag:'甘味'},
+    {name:'砂糖',unit:'g',per:100,cal:384,p:0,c:99.3,f:0,tag:'甘味'},
+    {name:'ジャム（いちご）',unit:'g',per:100,cal:250,p:0.5,c:63.0,f:0.1,tag:'甘味'},
+  ],
+  veggie:[
+    {name:'ほうれん草（茹で）',unit:'g',per:100,cal:25,p:2.6,c:4.0,f:0.5,tag:'葉野菜'},
+    {name:'小松菜（茹で）',unit:'g',per:100,cal:14,p:1.5,c:2.4,f:0.2,tag:'葉野菜'},
+    {name:'ブロッコリー（茹で）',unit:'g',per:100,cal:33,p:4.3,c:5.2,f:0.4,tag:'葉野菜'},
+    {name:'キャベツ（生）',unit:'g',per:100,cal:23,p:1.3,c:5.2,f:0.2,tag:'葉野菜'},
+    {name:'レタス（生）',unit:'g',per:100,cal:11,p:0.6,c:2.8,f:0.1,tag:'葉野菜'},
+    {name:'水菜（生）',unit:'g',per:100,cal:23,p:2.2,c:4.8,f:0.4,tag:'葉野菜'},
+    {name:'ルッコラ（生）',unit:'g',per:100,cal:19,p:1.9,c:3.1,f:0.4,tag:'葉野菜'},
+    {name:'ほうれん草（生）',unit:'g',per:100,cal:20,p:2.2,c:3.1,f:0.4,tag:'葉野菜'},
+    {name:'春菊（茹で）',unit:'g',per:100,cal:27,p:2.7,c:4.3,f:0.5,tag:'葉野菜'},
+    {name:'にんじん（生）',unit:'g',per:100,cal:39,p:0.7,c:9.3,f:0.2,tag:'根野菜'},
+    {name:'大根（生）',unit:'g',per:100,cal:18,p:0.5,c:4.1,f:0.1,tag:'根野菜'},
+    {name:'玉ねぎ（生）',unit:'g',per:100,cal:37,p:1.0,c:8.8,f:0.1,tag:'根野菜'},
+    {name:'れんこん（茹で）',unit:'g',per:100,cal:66,p:1.6,c:16.2,f:0.1,tag:'根野菜'},
+    {name:'ごぼう（茹で）',unit:'g',per:100,cal:58,p:1.8,c:13.7,f:0.2,tag:'根野菜'},
+    {name:'トマト（生）',unit:'個',per:1,perLabel:'個',gramsPerUnit:150,cal:29,p:1.1,c:5.8,f:0.2,tag:'果菜'},
+    {name:'ミニトマト',unit:'個',per:1,perLabel:'個',gramsPerUnit:15,cal:3,p:0.1,c:0.6,f:0,tag:'果菜'},
+    {name:'きゅうり（生）',unit:'本',per:1,perLabel:'本',gramsPerUnit:100,cal:14,p:1.0,c:3.0,f:0.1,tag:'果菜'},
+    {name:'ピーマン（生）',unit:'個',per:1,perLabel:'個',gramsPerUnit:35,cal:7,p:0.4,c:1.7,f:0,tag:'果菜'},
+    {name:'パプリカ赤（生）',unit:'個',per:1,perLabel:'個',gramsPerUnit:150,cal:46,p:1.5,c:10.8,f:0.2,tag:'果菜'},
+    {name:'なす（生）',unit:'本',per:1,perLabel:'本',gramsPerUnit:80,cal:15,p:1.1,c:3.6,f:0.1,tag:'果菜'},
+    {name:'かぼちゃ（茹で）',unit:'g',per:100,cal:82,p:1.6,c:20.6,f:0.3,tag:'果菜'},
+    {name:'ズッキーニ（生）',unit:'g',per:100,cal:14,p:1.3,c:2.6,f:0.1,tag:'果菜'},
+    {name:'しいたけ（生）',unit:'個',per:1,perLabel:'個',gramsPerUnit:15,cal:3,p:0.4,c:0.6,f:0.1,tag:'きのこ'},
+    {name:'えのきたけ（生）',unit:'g',per:100,cal:22,p:2.7,c:7.6,f:0.2,tag:'きのこ'},
+    {name:'まいたけ（生）',unit:'g',per:100,cal:16,p:2.0,c:4.4,f:0.5,tag:'きのこ'},
+    {name:'しめじ（生）',unit:'g',per:100,cal:17,p:2.7,c:4.9,f:0.5,tag:'きのこ'},
+    {name:'エリンギ（生）',unit:'g',per:100,cal:19,p:2.8,c:6.0,f:0.4,tag:'きのこ'},
+    {name:'マッシュルーム（生）',unit:'g',per:100,cal:11,p:2.9,c:2.1,f:0.3,tag:'きのこ'},
+    {name:'わかめ（乾燥）',unit:'g',per:10,cal:13,p:1.9,c:6.6,f:0.2,tag:'海藻'},
+    {name:'のり（1枚）',unit:'枚',per:1,perLabel:'枚',gramsPerUnit:3,cal:5,p:0.8,c:0.8,f:0,tag:'海藻'},
+    {name:'昆布（乾燥）',unit:'g',per:10,cal:15,p:0.8,c:7.3,f:0.2,tag:'海藻'},
+    {name:'もずく（生）',unit:'g',per:100,cal:5,p:0.3,c:1.4,f:0.1,tag:'海藻'},
+  ],
+  fermented:[
+    {name:'納豆（1パック）',unit:'パック',per:1,perLabel:'パック',gramsPerUnit:45,cal:86,p:7.4,c:5.4,f:4.5,tag:'発酵食品'},
+    {name:'キムチ',unit:'g',per:100,cal:50,p:2.8,c:5.5,f:2.1,tag:'発酵食品'},
+    {name:'味噌（白）',unit:'g',per:100,cal:192,p:12.5,c:23.7,f:5.4,tag:'発酵食品'},
+    {name:'味噌（赤）',unit:'g',per:100,cal:186,p:13.1,c:21.9,f:5.5,tag:'発酵食品'},
+    {name:'醤油（薄口）',unit:'ml',per:100,cal:60,p:5.7,c:7.8,f:0,tag:'調味料'},
+    {name:'醤油（濃口）',unit:'ml',per:100,cal:71,p:7.7,c:10.1,f:0,tag:'調味料'},
+    {name:'プレーンヨーグルト',unit:'g',per:100,cal:56,p:3.6,c:4.9,f:3.0,tag:'発酵食品'},
+    {name:'ギリシャヨーグルト（無糖）',unit:'g',per:100,cal:59,p:10.2,c:4.0,f:0.3,tag:'発酵食品'},
+    {name:'酢',unit:'ml',per:100,cal:25,p:0.1,c:2.4,f:0,tag:'調味料'},
+    {name:'ぬか漬け（きゅうり）',unit:'g',per:100,cal:21,p:1.5,c:4.0,f:0.2,tag:'発酵食品'},
+    {name:'甘酒',unit:'ml',per:100,cal:81,p:1.7,c:18.3,f:0.1,tag:'発酵食品'},
+  ],
+  fat:[
+    {name:'オリーブオイル',unit:'g',per:100,cal:921,p:0,c:0,f:100,tag:'油'},
+    {name:'ごま油',unit:'g',per:100,cal:921,p:0,c:0,f:100,tag:'油'},
+    {name:'MCTオイル',unit:'g',per:100,cal:860,p:0,c:0,f:100,tag:'油'},
+    {name:'バター（有塩）',unit:'g',per:100,cal:700,p:0.5,c:0.2,f:81.0,tag:'油脂'},
+    {name:'マヨネーズ',unit:'g',per:100,cal:703,p:1.5,c:3.6,f:76.0,tag:'油脂'},
+    {name:'アーモンド',unit:'g',per:100,cal:598,p:19.6,c:19.7,f:54.1,tag:'ナッツ'},
+    {name:'くるみ',unit:'g',per:100,cal:713,p:14.6,c:13.6,f:68.8,tag:'ナッツ'},
+    {name:'カシューナッツ',unit:'g',per:100,cal:576,p:19.8,c:26.7,f:47.6,tag:'ナッツ'},
+    {name:'ピーナッツバター',unit:'g',per:100,cal:599,p:24.7,c:17.9,f:50.4,tag:'ナッツ'},
+    {name:'チアシード',unit:'g',per:100,cal:486,p:16.5,c:42.1,f:30.7,tag:'種実'},
+    {name:'亜麻仁油',unit:'g',per:100,cal:897,p:0,c:0,f:99.4,tag:'油'},
+    {name:'ホワイトゴマ',unit:'g',per:100,cal:578,p:17.0,c:18.5,f:51.9,tag:'種実'},
+  ],
+  seasoning:[
+    {name:'ケチャップ',unit:'g',per:100,cal:104,p:1.6,c:26.6,f:0.2,tag:'調味料'},
+    {name:'ウスターソース',unit:'ml',per:100,cal:117,p:1.0,c:29.4,f:0.1,tag:'調味料'},
+    {name:'ポン酢',unit:'ml',per:100,cal:49,p:2.5,c:10.5,f:0.1,tag:'調味料'},
+    {name:'ドレッシング（和風）',unit:'ml',per:100,cal:118,p:1.0,c:12.8,f:7.0,tag:'調味料'},
+    {name:'ドレッシング（シーザー）',unit:'ml',per:100,cal:395,p:1.8,c:7.9,f:40.0,tag:'調味料'},
+    {name:'コチュジャン',unit:'g',per:100,cal:198,p:5.7,c:38.4,f:2.6,tag:'調味料'},
+    {name:'カレールー（1かけ）',unit:'個',per:1,perLabel:'かけ',gramsPerUnit:20,cal:87,p:1.0,c:8.8,f:5.7,tag:'調味料'},
+    {name:'めんつゆ（2倍濃縮）',unit:'ml',per:100,cal:98,p:5.1,c:19.8,f:0.2,tag:'調味料'},
+  ],
+  drink:[
+    {name:'スポーツドリンク（500ml）',unit:'本',per:1,perLabel:'本',gramsPerUnit:500,cal:140,p:0,c:35.0,f:0,tag:'飲料'},
+    {name:'豆乳（無調整）',unit:'ml',per:200,cal:92,p:7.6,c:5.8,f:5.4,tag:'飲料'},
+    {name:'豆乳（調整）',unit:'ml',per:200,cal:126,p:7.2,c:11.0,f:6.4,tag:'飲料'},
+    {name:'オレンジジュース',unit:'ml',per:200,cal:84,p:1.4,c:19.4,f:0.2,tag:'飲料'},
+    {name:'アーモンドミルク（無糖）',unit:'ml',per:200,cal:50,p:1.8,c:3.0,f:3.6,tag:'飲料'},
+    {name:'プロテインバー',unit:'本',per:1,perLabel:'本',gramsPerUnit:60,cal:240,p:20.0,c:24.0,f:8.0,tag:'補食'},
+    {name:'バナナ入りプロテインシェイク',unit:'g',per:300,cal:280,p:25.0,c:35.0,f:4.0,tag:'補食'},
+  ],
+  convenience:[
+    {name:'ゆで卵',unit:'個',per:1,perLabel:'個',gramsPerUnit:55,cal:80,p:6.6,c:0.2,f:5.5,tag:'コンビニ'},
+    {name:'サラダチキン（プレーン）',unit:'個',per:1,perLabel:'個',gramsPerUnit:120,cal:132,p:30.0,c:0,f:1.8,tag:'コンビニ'},
+    {name:'サラダチキン（スモーク）',unit:'個',per:1,perLabel:'個',gramsPerUnit:120,cal:138,p:28.0,c:2.4,f:1.8,tag:'コンビニ'},
+    {name:'おにぎり（ツナマヨ）',unit:'個',per:1,perLabel:'個',gramsPerUnit:110,cal:220,p:5.5,c:36.0,f:6.5,tag:'コンビニ'},
+    {name:'おにぎり（鮭）',unit:'個',per:1,perLabel:'個',gramsPerUnit:105,cal:178,p:6.4,c:34.0,f:1.8,tag:'コンビニ'},
+    {name:'おにぎり（梅）',unit:'個',per:1,perLabel:'個',gramsPerUnit:100,cal:165,p:2.8,c:37.0,f:0.4,tag:'コンビニ'},
+    {name:'ザバスミルクプロテイン（200ml）',unit:'本',per:1,perLabel:'本',gramsPerUnit:200,cal:144,p:15.0,c:16.0,f:3.5,tag:'コンビニ'},
+    {name:'ゆで枝豆（袋）',unit:'g',per:100,cal:118,p:11.5,c:7.6,f:6.6,tag:'コンビニ'},
+    {name:'温泉卵',unit:'個',per:1,perLabel:'個',gramsPerUnit:55,cal:75,p:6.2,c:0.2,f:5.2,tag:'コンビニ'},
+    {name:'シーチキン（サラダ）',unit:'個',per:1,perLabel:'個',gramsPerUnit:60,cal:58,p:13.6,c:0.1,f:0.4,tag:'コンビニ'},
+  ],
+};
+
+// FOOD_PRESTSはFOOD_DBへの互換ラッパー
+// カテゴリ表示名マッピング
+const FOOD_DB_LABELS = {
+  protein:     'タンパク質源',
+  carb:        '炭水化物・糖質',
+  veggie:      '野菜・きのこ・海藻',
+  fermented:   '発酵食品・調味料',
+  fat:         '良質な脂質・ナッツ',
+  seasoning:   '調味料・ソース',
+  drink:       '飲料・補食',
+  convenience: 'コンビニ・市販品',
+};
+
+// タグ検索用インデックス
+const FOOD_TAG_INDEX = {};
+Object.entries(FOOD_DB).forEach(([cat, items]) => {
+  items.forEach(item => {
+    const tag = item.tag || cat;
+    if (!FOOD_TAG_INDEX[tag]) FOOD_TAG_INDEX[tag] = [];
+    FOOD_TAG_INDEX[tag].push({ ...item, _cat: cat });
+  });
+});
+
+// 食品を名前・タグで横断検索
+function searchFoodDB(query) {
+  if (!query || query.length < 1) return [];
+  const q = query.toLowerCase();
+  const results = [];
+  Object.entries(FOOD_DB).forEach(([cat, items]) => {
+    items.forEach(item => {
+      if (item.name.toLowerCase().includes(q) ||
+          (item.tag && item.tag.toLowerCase().includes(q))) {
+        results.push({ ...item, _cat: cat });
+      }
+    });
+  });
+  return results.slice(0, 30);
+}
+
+// 既存コードとの互換性のため FOOD_PRESETS も保持
 const FOOD_PRESETS={
   // docx第4.3節データ + 日本食品標準成分表2020準拠
   protein:[
@@ -1966,28 +2217,53 @@ function getMealTemplateButtonsHTML(){
     </div>`;
 }
 
-function showPresetCategory(cat){
-  const grid=document.getElementById('preset-grid');
-  if(!grid)return;
-  let foods=FOOD_PRESETS[cat]||[];
-  // マイプリセット
-  if(cat==='custom'){
-    foods=DB.get('pf_custom_presets')||[];
-  }
-  if(!foods.length){
-    grid.innerHTML='<div class="muted" style="font-size:12px;padding:8px">まだマイプリセットがありません。食品を入力して「⭐ 保存」ボタンで登録できます。</div>';
+function showPresetCategory(cat) {
+  const el = document.getElementById('preset-list');
+  if (!el) return;
+
+  // FOOD_DBから取得（新カテゴリ対応）
+  const items = FOOD_DB[cat] || FOOD_PRESETS[cat] || [];
+  if (!items.length) { el.innerHTML = '<div class="muted">データなし</div>'; return; }
+
+  el.innerHTML = items.map(f => {
+    const unitDisp = f.gramsPerUnit ? f.unit : (f.unit === 'g' ? 'per 100g' : `per ${f.per}${f.unit}`);
+    const tagBadge = f.tag ? `<span style="font-size:9px;color:var(--text3);background:var(--bg4);padding:1px 5px;border-radius:3px;margin-left:4px">${f.tag}</span>` : '';
+    return `<div class="preset-item" onclick="selectPreset(${JSON.stringify(f).replace(/"/g,"'")})">
+      <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+        <span style="font-weight:500;font-size:13px">${f.name}</span>${tagBadge}
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--font-mono)">
+        ${f.cal}kcal / P${f.p}g C${f.c}g F${f.f}g
+        <span style="color:var(--text3)">(${unitDisp})</span>
+      </div>
+      ${f.highlight ? `<div style="font-size:10px;color:var(--accent4);margin-top:2px">${f.highlight}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// 食品横断検索
+function showFoodSearch(query) {
+  const el = document.getElementById('preset-list');
+  if (!el || !query.trim()) return;
+  const results = searchFoodDB(query.trim());
+  if (!results.length) {
+    el.innerHTML = '<div class="muted">「' + query + '」に一致する食品が見つかりません</div>';
     return;
   }
-  grid.innerHTML=foods.map((f,i)=>`
-    <div onclick="selectPreset(${JSON.stringify({...f,_cat:cat,_idx:i}).replace(/"/g,'&quot;')})" style="cursor:pointer;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent2)'" onmouseout="this.style.borderColor='var(--border)'">
-      <div style="font-size:12px;font-weight:500;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.name}</div>
-      <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">${f.cal}kcal / P${f.p}g / C${f.c}g / F${f.f}g</div>
-      ${f.highlight?`<div style="font-size:10px;color:var(--accent2);margin-top:2px">${f.highlight}</div>`:''}
-    </div>`).join('');
-  // datalistも更新
-  const dl=document.getElementById('food-datalist');
-  if(dl)dl.innerHTML=foods.map(f=>`<option value="${f.name}">`).join('');
+  el.innerHTML = `<div style="font-size:11px;color:var(--text3);margin-bottom:8px">${results.length}件 見つかりました</div>` +
+    results.map(f => {
+      const tagBadge = f.tag ? `<span style="font-size:9px;color:var(--text3);background:var(--bg4);padding:1px 5px;border-radius:3px;margin-left:4px">${f.tag}</span>` : '';
+      return `<div class="preset-item" onclick="selectPreset(${JSON.stringify(f).replace(/"/g,"'")})">
+        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+          <span style="font-weight:500;font-size:13px">${f.name}</span>${tagBadge}
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--font-mono)">
+          ${f.cal}kcal / P${f.p}g C${f.c}g F${f.f}g
+        </div>
+      </div>`;
+    }).join('');
 }
+
 
 function selectPreset(f){
   selectedPreset=f;
