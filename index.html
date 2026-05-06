@@ -218,7 +218,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="nav-item" onclick="showPage('analysis')"><span class="nav-icon">∿</span>分析レポート</div>
     <div class="nav-item" onclick="showPage('settings')"><span class="nav-icon">⊙</span>設定</div>
   </nav>
-  <div class="sidebar-footer"><div class="version">PEAK FORM v3.1</div><div class="version" style="margin-top:2px;opacity:0.5">based on sports science</div></div>
+  <div class="sidebar-footer"><div class="version">PEAK FORM v3.2</div><div class="version" style="margin-top:2px;opacity:0.5">based on sports science</div></div>
 </aside>
 <main class="main">
 <div class="topbar">
@@ -540,6 +540,19 @@ input[type=range]:focus{border:none;box-shadow:none}
     <!-- 食品プリセット -->
     <div style="margin-bottom:14px">
       <div class="label" style="margin-bottom:8px">プリセットから選ぶ（183品 / 文部科学省成分表2020準拠）</div>
+      <!-- OCR撮影ボタン -->
+      <div style="margin-bottom:10px">
+        <button class="btn btn-primary" style="width:100%;font-size:13px;padding:10px;display:flex;align-items:center;justify-content:center;gap:8px"
+          onclick="triggerOCR()">
+          📷 成分表を撮影して自動入力
+        </button>
+        <input type="file" id="ocr-image-input" accept="image/*" capture="environment"
+          style="display:none" onchange="onOcrImageSelected(event)">
+        <div id="ocr-status" style="font-size:11px;color:var(--text3);margin-top:5px;text-align:center"></div>
+      </div>
+      <!-- OCRプレビュー・結果 -->
+      <div id="ocr-result-panel" style="display:none;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.25);border-radius:var(--rs);padding:12px;margin-bottom:10px"></div>
+      <img id="ocr-preview" style="display:none;max-width:100%;max-height:160px;border-radius:var(--rs);margin-bottom:8px;object-fit:contain">
       <!-- 食品検索バー -->
       <div style="display:flex;gap:6px;margin-bottom:8px">
         <input type="text" id="food-search-input" placeholder="🔍 食品名で検索（例: 鶏むね、バナナ）"
@@ -1539,7 +1552,22 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="field"><label class="label">栄養目標モード</label><select id="cfg-goalmode" style="max-width:200px"><option value="maintain">維持</option><option value="cut">減量</option><option value="bulk">増量</option></select></div>
     <button class="btn btn-primary" onclick="saveSettings()">保存する</button>
   </div>
-  <div class="card" style="margin-bottom:18px"><div class="card-header-bar"></div><div class="h3" style="margin-bottom:12px">データ管理</div><div class="row" style="gap:10px;flex-wrap:wrap"><button class="btn" onclick="exportData()">JSONエクスポート</button><button class="btn btn-danger" onclick="clearAll()">全データリセット</button></div><div class="muted" style="margin-top:10px;font-size:12px">エクスポートしたJSONはExcel・Google Sheetsにインポート可能。ブラウザのlocalStorageに永続保存されます。</div></div>
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar blue"></div>
+    <div class="h3" style="margin-bottom:8px">Claude API設定</div>
+    <div class="muted" style="font-size:12px;margin-bottom:12px;line-height:1.7">
+      APIキーを設定すると📷<strong>食品成分表の写真から栄養素を自動読み取り</strong>できます。<br>
+      キーはこのデバイスのみに保存。取得: <span style="color:var(--accent2)">console.anthropic.com</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <input type="password" id="cfg-api-key" placeholder="sk-ant-api03-..."
+        style="flex:1;font-family:var(--font-mono);font-size:12px">
+      <button class="btn btn-sm btn-primary" onclick="saveApiKeyFromSettings()">保存</button>
+    </div>
+    <div id="api-key-status" style="font-size:12px;color:var(--text3)"></div>
+  </div>
+
+  <div style="margin-bottom:18px"><div class="card-header-bar"></div><div class="h3" style="margin-bottom:12px">データ管理</div><div class="row" style="gap:10px;flex-wrap:wrap"><button class="btn" onclick="exportData()">JSONエクスポート</button><button class="btn btn-danger" onclick="clearAll()">全データリセット</button></div><div class="muted" style="margin-top:10px;font-size:12px">エクスポートしたJSONはExcel・Google Sheetsにインポート可能。ブラウザのlocalStorageに永続保存されます。</div></div>
   <div class="card"><div class="card-header-bar blue"></div><div class="h3" style="margin-bottom:12px">科学的根拠</div>
     <table><thead><tr><th>機能</th><th>根拠</th></tr></thead><tbody>
       <tr><td>TDEE算出</td><td class="muted">Mifflin-St Jeor式（JADA 2005）</td></tr>
@@ -1970,6 +1998,12 @@ function searchFoodDB(query) {
       }
     });
   });
+  // カスタムプリセットも検索対象に
+  getCustomPresets().forEach(item => {
+    if (item.name.toLowerCase().includes(q)) {
+      results.push(item);
+    }
+  });
   return results.slice(0, 30);
 }
 
@@ -2222,7 +2256,9 @@ function showPresetCategory(cat) {
   if (!el) return;
 
   // FOOD_DBから取得（新カテゴリ対応）
-  const items = FOOD_DB[cat] || FOOD_PRESETS[cat] || [];
+  const items = cat === 'custom'
+    ? getCustomPresets()
+    : (FOOD_DB[cat] || FOOD_PRESETS[cat] || []);
   if (!items.length) { el.innerHTML = '<div class="muted">データなし</div>'; return; }
 
   el.innerHTML = items.map(f => {
@@ -2239,6 +2275,18 @@ function showPresetCategory(cat) {
       ${f.highlight ? `<div style="font-size:10px;color:var(--accent4);margin-top:2px">${f.highlight}</div>` : ''}
     </div>`;
   }).join('');
+}
+
+// カスタムプリセット（マイプリセット）をFOOD_DBに統合表示
+function getCustomPresets() {
+  const stored = DB.get('pf_custom_presets') || [];
+  const legacy = DB.get('pf_custom_exercises') ? [] : [];
+  return stored.map(p => ({
+    name: p.name, unit: p.unit||'g', per: p.per||100,
+    cal: p.cal||0, p: p.p||0, c: p.c||0, f: p.f||0,
+    tag: p.tag||'マイプリセット', _cat: 'custom',
+    source: p.source||'manual'
+  }));
 }
 
 // 食品横断検索
@@ -5143,7 +5191,19 @@ function applyTDEE(){const tdee=parseInt(document.getElementById('td-tdee').text
 // ===== settings.js =====
 function saveSettings(){const c={name:document.getElementById('cfg-name').value,dept:document.getElementById('cfg-dept').value,goalweight:parseFloat(document.getElementById('cfg-goalweight').value)||0,goalmode:document.getElementById('cfg-goalmode').value,tdee:parseInt(document.getElementById('cfg-tdee').value)||2800,water:parseInt(document.getElementById('cfg-water').value)||2500};DB.set('cfg',c);alert('設定を保存しました');}
 
-function loadSettings(){const c=cfg();['cfg-name','cfg-dept','cfg-tdee','cfg-water'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=c[id.replace('cfg-','')]||''});if(document.getElementById('cfg-goalmode'))document.getElementById('cfg-goalmode').value=c.goalmode||'maintain';if(document.getElementById('cfg-goalweight'))document.getElementById('cfg-goalweight').value=c.goalweight||'';}
+function loadSettings(){const c=cfg();['cfg-name','cfg-dept','cfg-tdee','cfg-water'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=c[id.replace('cfg-','')]||''});if(document.getElementById('cfg-goalmode'))document.getElementById('cfg-goalmode').value=c.goalmode||'maintain';
+  // APIキー設定状態表示
+  const apiStatus = document.getElementById('api-key-status');
+  if (apiStatus) {
+    const key = getApiKey();
+    if (key) {
+      apiStatus.textContent = '✓ APIキー設定済み（' + key.slice(0,12) + '...）';
+      apiStatus.style.color = 'var(--accent4)';
+    } else {
+      apiStatus.textContent = '未設定 — OCR機能を使うには設定してください';
+      apiStatus.style.color = 'var(--text3)';
+    }
+  }if(document.getElementById('cfg-goalweight'))document.getElementById('cfg-goalweight').value=c.goalweight||'';}
 
 function exportData(){const data={trainings:DB.arr('trainings'),meals:DB.arr('meals'),sleeps:DB.arr('sleeps'),peaking:DB.get('peaking'),cfg:DB.get('cfg'),gut:DB.get('gutData'),bristolLog:DB.arr('bristolLog'),exported:new Date().toISOString()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='peakform_'+today()+'.json';a.click();URL.revokeObjectURL(url);}
 
@@ -5501,6 +5561,246 @@ function dismissPwaBanner() {
   var b = document.getElementById('pwa-install-banner');
   if (b) b.style.display = 'none';
   localStorage.setItem('pf_pwa_prompted', '1');
+}
+
+
+// ============================================================
+// OCR機能 - Claude API連携（成分表自動読み取り）
+// ============================================================
+
+// APIキー管理
+function getApiKey() {
+  return localStorage.getItem('pf_claude_api_key') || '';
+}
+function saveApiKey(key) {
+  localStorage.setItem('pf_claude_api_key', key.trim());
+}
+
+// 画像をbase64に変換
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Claude APIで成分表を解析
+async function analyzeNutritionLabel(imageBase64, mediaType) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    alert('APIキーが設定されていません。設定ページからAnthropicのAPIキーを入力してください。');
+    showPage('settings');
+    return null;
+  }
+
+  const prompt = `この画像は食品の栄養成分表（または食品パッケージ）です。
+以下の情報をJSONで抽出してください。値が見つからない場合は0にしてください。
+数値は必ず1食分（または100g）あたりの値にしてください。
+
+{
+  "name": "食品名（パッケージから読み取る。なければ空文字）",
+  "serving": "1食分の量（例: 100g, 1個(55g)）",
+  "cal": カロリー（kcal、数値のみ）,
+  "protein": タンパク質（g、数値のみ）,
+  "carb": 炭水化物（g、数値のみ）,
+  "fat": 脂質（g、数値のみ）,
+  "salt": 食塩相当量（g、数値のみ。なければ0）,
+  "per": 基準量（g、数値のみ。1食分が100gなら100）
+}
+
+JSONのみを返してください。説明文は不要です。`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-5',
+        max_tokens: 512,
+        messages: [{
+          role: 'user',
+          content: [{
+            type: 'image',
+            source: { type: 'base64', media_type: mediaType, data: imageBase64 }
+          }, {
+            type: 'text',
+            text: prompt
+          }]
+        }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || `APIエラー: ${res.status}`);
+    }
+
+    const data = await res.json();
+    const text = data.content[0]?.text || '';
+
+    // JSONを抽出
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('JSONが取得できませんでした');
+    return JSON.parse(jsonMatch[0]);
+
+  } catch (e) {
+    alert('OCRエラー: ' + e.message);
+    return null;
+  }
+}
+
+// OCRボタンクリック
+async function triggerOCR() {
+  const input = document.getElementById('ocr-image-input');
+  if (input) input.click();
+}
+
+// 画像選択後の処理
+async function onOcrImageSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // ファイルタイプ確認
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  if (!allowedTypes.includes(file.type)) {
+    alert('JPG・PNG・WebP・GIF形式の画像を選択してください');
+    return;
+  }
+
+  // プレビュー表示
+  const preview = document.getElementById('ocr-preview');
+  const statusEl = document.getElementById('ocr-status');
+  if (preview) {
+    const url = URL.createObjectURL(file);
+    preview.src = url;
+    preview.style.display = 'block';
+  }
+  if (statusEl) {
+    statusEl.textContent = '🔍 成分表を読み取り中...';
+    statusEl.style.color = 'var(--accent2)';
+  }
+
+  // 解析実行
+  const base64 = await fileToBase64(file);
+  const result = await analyzeNutritionLabel(base64, file.type);
+
+  if (!result) {
+    if (statusEl) statusEl.textContent = '❌ 読み取り失敗';
+    return;
+  }
+
+  // フォームに自動入力
+  const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (el && val !== undefined && val !== null) el.value = val;
+  };
+
+  setVal('n-food',    result.name || '');
+  setVal('n-cal',     result.cal  || 0);
+  setVal('n-protein', result.protein || 0);
+  setVal('n-carb',    result.carb || 0);
+  setVal('n-fat',     result.fat  || 0);
+
+  // OCR結果パネルに表示
+  const resultPanel = document.getElementById('ocr-result-panel');
+  if (resultPanel) {
+    resultPanel.style.display = 'block';
+    resultPanel.innerHTML = `
+      <div style="font-size:12px;font-weight:600;color:var(--accent4);margin-bottom:8px">✓ 読み取り完了</div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">${result.name || '（食品名なし）'}</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">${result.serving || ''}</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
+        <div class="card-sm" style="text-align:center;padding:6px">
+          <div style="font-size:16px;font-weight:500;color:var(--accent)">${result.cal}</div>
+          <div style="font-size:9px;color:var(--text3)">kcal</div>
+        </div>
+        <div class="card-sm" style="text-align:center;padding:6px">
+          <div style="font-size:16px;font-weight:500;color:var(--accent2)">${result.protein}g</div>
+          <div style="font-size:9px;color:var(--text3)">タンパク質</div>
+        </div>
+        <div class="card-sm" style="text-align:center;padding:6px">
+          <div style="font-size:16px;font-weight:500;color:var(--accent3)">${result.carb}g</div>
+          <div style="font-size:9px;color:var(--text3)">炭水化物</div>
+        </div>
+        <div class="card-sm" style="text-align:center;padding:6px">
+          <div style="font-size:16px;font-weight:500;color:var(--accent4)">${result.fat}g</div>
+          <div style="font-size:9px;color:var(--text3)">脂質</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-primary" onclick="saveOcrAsPreset(${JSON.stringify(result).replace(/"/g,"'")})">
+          ⭐ マイプリセットに登録
+        </button>
+        <button class="btn btn-sm" onclick="document.getElementById('ocr-result-panel').style.display='none'">
+          閉じる
+        </button>
+      </div>
+    `;
+  }
+
+  if (statusEl) {
+    statusEl.textContent = `✓ 読み取り完了（${result.name || '食品名なし'}）`;
+    statusEl.style.color = 'var(--accent4)';
+  }
+
+  // 食事記録フォームにスクロール
+  document.getElementById('n-food')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// OCR結果をマイプリセットに保存
+
+function saveApiKeyFromSettings() {
+  const key = document.getElementById('cfg-api-key')?.value?.trim();
+  if (!key) { alert('APIキーを入力してください'); return; }
+  if (!key.startsWith('sk-ant-')) {
+    if (!confirm('Anthropic APIキーは通常 sk-ant- で始まります。このまま保存しますか？')) return;
+  }
+  saveApiKey(key);
+  const statusEl = document.getElementById('api-key-status');
+  if (statusEl) {
+    statusEl.textContent = '✓ 保存しました（' + key.slice(0,12) + '...）';
+    statusEl.style.color = 'var(--accent4)';
+  }
+  // 入力欄をマスク
+  const keyEl = document.getElementById('cfg-api-key');
+  if (keyEl) keyEl.value = '';
+}
+
+function saveOcrAsPreset(result) {
+  const name = result.name || prompt('食品名を入力してください:', result.name || '');
+  if (!name) return;
+
+  const preset = {
+    name,
+    unit: 'g',
+    per: result.per || 100,
+    cal: result.cal || 0,
+    p: result.protein || 0,
+    c: result.carb || 0,
+    f: result.fat || 0,
+    tag: 'OCR登録',
+    source: 'ocr',
+    registeredAt: today(),
+  };
+
+  const customs = DB.get('pf_custom_presets') || [];
+  // 同名の場合は上書き確認
+  const existIdx = customs.findIndex(c => c.name === name);
+  if (existIdx >= 0) {
+    if (!confirm(`「${name}」は既に登録されています。上書きしますか？`)) return;
+    customs[existIdx] = preset;
+  } else {
+    customs.push(preset);
+  }
+  DB.set('pf_custom_presets', customs);
+  alert(`「${name}」をマイプリセットに登録しました！\n次回から「⭐ マイプリセット」カテゴリから選べます。`);
 }
 
 init();
