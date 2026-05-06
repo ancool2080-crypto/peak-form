@@ -218,7 +218,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="nav-item" onclick="showPage('analysis')"><span class="nav-icon">∿</span>分析レポート</div>
     <div class="nav-item" onclick="showPage('settings')"><span class="nav-icon">⊙</span>設定</div>
   </nav>
-  <div class="sidebar-footer"><div class="version">PEAK FORM v2.8</div><div class="version" style="margin-top:2px;opacity:0.5">based on sports science</div></div>
+  <div class="sidebar-footer"><div class="version">PEAK FORM v2.9</div><div class="version" style="margin-top:2px;opacity:0.5">based on sports science</div></div>
 </aside>
 <main class="main">
 <div class="topbar">
@@ -424,7 +424,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="card-header-bar blue"></div>
     <div class="h3" style="margin-bottom:16px">本日のセッション</div>
     <div class="grid2"><div class="field"><label class="label">日付</label><input type="date" id="t-date"></div><div class="field"><label class="label">種別</label><select id="t-type" onchange="onTrainingTypeChange()"><option value="strength">筋力トレーニング</option><option value="hiit">HIIT</option><option value="cardio">有酸素</option><option value="functional">機能的トレーニング</option><option value="mobility">モビリティ・回復</option><option value="firefighting">消防訓練</option></select></div></div>
-    <div class="grid3"><div class="field"><label class="label">時間（分）</label><input type="number" id="t-duration" placeholder="60"></div><div class="field"><label class="label">RPE（1〜10）</label><input type="number" id="t-rpe" placeholder="7" min="1" max="10"></div><div class="field"><label class="label">水分（mL）</label><input type="number" id="t-water" placeholder="2000"></div></div>
+    <div class="grid3"><div class="field"><label class="label">時間（分）<span class="muted" style="font-size:10px;font-weight:400;margin-left:4px">インターバル含む合計</span></label><input type="number" id="t-duration" placeholder="60"></div><div class="field"><label class="label">RPE（1〜10）</label><input type="number" id="t-rpe" placeholder="7" min="1" max="10"></div><div class="field"><label class="label">水分（mL）</label><input type="number" id="t-water" placeholder="2000"></div></div>
 
     <!-- 有酸素専用フィールド（cardio/hiit時のみ表示） -->
     <div id="cardio-fields" style="display:none">
@@ -520,6 +520,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   </div>
   <div class="card" style="margin-bottom:18px">
     <div class="card-header-bar"></div>
+    <div id="meal-edit-banner" style="display:none;background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.4);color:#fbbf24;font-size:12px;padding:8px 12px;border-radius:var(--rs);margin-bottom:12px"></div>
     <div class="h3" style="margin-bottom:16px">食事記録</div>
     <div id="meal-template-btns"></div>
     <div class="grid2"><div class="field"><label class="label">日付</label><input type="date" id="n-date"></div><div class="field"><label class="label">タイミング</label><select id="n-meal"><option value="breakfast">朝食</option><option value="preworkout">トレ前</option><option value="postworkout">トレ後</option><option value="lunch">昼食</option><option value="dinner">夕食</option><option value="snack">間食</option></select></div></div>
@@ -624,8 +625,28 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="h2">睡眠・回復管理</div>
   <div class="card" style="margin-bottom:18px">
     <div class="card-header-bar blue"></div>
+    <div id="sleep-edit-banner" style="display:none;background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.4);color:#fbbf24;font-size:12px;padding:8px 12px;border-radius:var(--rs);margin-bottom:12px"></div>
     <div class="h3" style="margin-bottom:16px">睡眠・コンディション記録</div>
     <div class="grid3"><div class="field"><label class="label">日付</label><input type="date" id="s-date"></div><div class="field"><label class="label">就寝</label><input type="time" id="s-bed"></div><div class="field"><label class="label">起床</label><input type="time" id="s-wake"></div></div>
+    <!-- 分割睡眠・仮眠入力 -->
+    <div style="background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.15);border-radius:var(--rs);padding:10px 12px;margin:8px 0">
+      <div style="font-size:11px;color:var(--accent2);font-weight:600;margin-bottom:8px;letter-spacing:1px">🌙 睡眠の詳細（任意）</div>
+      <div class="grid2">
+        <div class="field">
+          <label class="label">中断時間（分）
+            <span class="muted" style="font-size:10px;font-weight:400;display:block;margin-top:1px">夜間出動・受付対応等で起きた合計時間</span>
+          </label>
+          <input type="number" id="s-interrupt-min" placeholder="0" min="0" max="480" step="5">
+        </div>
+        <div class="field">
+          <label class="label">仮眠（分）
+            <span class="muted" style="font-size:10px;font-weight:400;display:block;margin-top:1px">非番・週休日の昼寝など（睡眠に加算）</span>
+          </label>
+          <input type="number" id="s-nap-min" placeholder="0" min="0" max="480" step="10">
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:4px">実効睡眠 = (就寝〜起床) − 中断 + 仮眠 で自動計算されます</div>
+    </div>
     <div class="grid2"><div class="field"><label class="label">睡眠の質 (1〜5)</label><input type="number" id="s-quality" placeholder="4" min="1" max="5"></div><div class="field"><label class="label">体重 (kg)</label><input type="number" id="s-weight" placeholder="70.0" step="0.1"></div></div>
     <div class="divider"></div>
     <div class="h3" style="margin-bottom:14px">ウェルネス問診（各1〜10）</div>
@@ -1870,19 +1891,27 @@ function showPresetCategory(cat){
 
 function selectPreset(f){
   selectedPreset=f;
-  selectedPresetAmount=f.per||100;
+  // 個数単位（gramsPerUnit）があれば1個から開始、なければperまたは100g
+  selectedPresetAmount = f.gramsPerUnit ? 1 : (f.per||100);
   const row=document.getElementById('preset-amount-row');
   const nameEl=document.getElementById('preset-selected-name');
   const slider=document.getElementById('preset-amount-slider');
+  const unitDisp=document.getElementById('preset-unit-label');
   if(row)row.style.display='block';
   if(nameEl)nameEl.textContent=f.name;
+  if(unitDisp)unitDisp.textContent = f.gramsPerUnit ? f.unit : (f.unit||'g');
   if(slider){
-    slider.min=f.per?Math.round(f.per/4):25;
-    slider.max=f.per?f.per*8:400;
-    slider.step=f.per||25;
-    slider.value=f.per||100;
+    if(f.gramsPerUnit){
+      // 個数モード：1〜20個
+      slider.min=1; slider.max=20; slider.step=1; slider.value=1;
+    } else {
+      slider.min=f.per?Math.round(f.per/4):25;
+      slider.max=f.per?f.per*8:400;
+      slider.step=f.per||25;
+      slider.value=f.per||100;
+    }
   }
-  updatePresetAmount(f.per||100);
+  updatePresetAmount(selectedPresetAmount);
 }
 
 function updatePresetAmount(amount){
@@ -1903,9 +1932,17 @@ function updatePresetAmount(amount){
 
 function applyPreset(){
   if(!selectedPreset)return;
-  const base=selectedPreset.per||100;
-  const ratio=selectedPresetAmount/base;
-  const unitLabel=selectedPreset.per?`${selectedPresetAmount}${selectedPreset.unit}`:`${selectedPresetAmount}g`;
+  let ratio, unitLabel;
+  if(selectedPreset.gramsPerUnit){
+    // 個数モード：1個=gramsPerUnit g として計算
+    const totalG = selectedPresetAmount * selectedPreset.gramsPerUnit;
+    ratio = totalG / (selectedPreset.per || 100);
+    unitLabel = `${selectedPresetAmount}個 (${totalG}g)`;
+  } else {
+    const base=selectedPreset.per||100;
+    ratio=selectedPresetAmount/base;
+    unitLabel=selectedPreset.per?`${selectedPresetAmount}${selectedPreset.unit}`:`${selectedPresetAmount}g`;
+  }
   document.getElementById('n-food').value=`${selectedPreset.name} ${unitLabel}`;
   document.getElementById('n-cal').value=Math.round(selectedPreset.cal*ratio);
   document.getElementById('n-protein').value=Math.round(selectedPreset.p*ratio*10)/10;
@@ -3628,9 +3665,105 @@ function updateSmartNutrition(){const c=cfg();const isTr=document.getElementById
   updateNutritionTotals();}
 
 // ===== sleep.js =====
-function saveSleep(){const bed=document.getElementById('s-bed').value;const wake=document.getElementById('s-wake').value;let dur=0;if(bed&&wake){const[bh,bm]=bed.split(':').map(Number);const[wh,wm]=wake.split(':').map(Number);let m=(wh*60+wm)-(bh*60+bm);if(m<0)m+=1440;dur=Math.round(m/60*10)/10}const fat=parseInt(document.getElementById('s-fatigue').value)||7,sor=parseInt(document.getElementById('s-soreness').value)||7,mot=parseInt(document.getElementById('s-motivation').value)||7,mood=parseInt(document.getElementById('s-mood').value)||7;const wellness=Math.round((fat+sor+mot+mood)/4*10)/10;DB.push('sleeps',{date:document.getElementById('s-date').value,bedtime:bed,waketime:wake,duration:dur,quality:parseInt(document.getElementById('s-quality').value)||3,fatigue:fat,soreness:sor,motivation:mot,mood,wellness,weight:parseFloat(document.getElementById('s-weight').value)||0,id:Date.now()});alert('記録しました！睡眠: '+dur+'h / ウェルネス: '+wellness+'/10');renderSleepCharts();}
+function saveSleep(){
+  const date = document.getElementById('s-date').value;
+  if (!date) { alert('日付は必須です'); return; }
 
-function renderSleepCharts(){const sl=DB.arr('sleeps').slice(-7);if(!sl.length)return;const labels=sl.map(s=>s.date.slice(5));const co={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a5a78',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#5a5a78',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}}};if(sleepChart)sleepChart.destroy();sleepChart=new Chart(document.getElementById('sleep-chart'),{type:'bar',data:{labels,datasets:[{data:sl.map(s=>s.duration||0),backgroundColor:'rgba(74,158,255,0.45)',borderColor:'#4a9eff',borderWidth:1,borderRadius:4}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:0,max:12}}}});if(wellnessChart)wellnessChart.destroy();wellnessChart=new Chart(document.getElementById('wellness-chart'),{type:'line',data:{labels,datasets:[{data:sl.map(s=>s.wellness||0),borderColor:'#f5a623',tension:0.4,borderWidth:2,fill:false,pointRadius:5,pointBackgroundColor:'#f5a623'}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:0,max:10}}}});}
+  // ① メイン睡眠（就寝〜起床）
+  const bed  = document.getElementById('s-bed').value;
+  const wake = document.getElementById('s-wake').value;
+  let mainDur = 0;
+  if (bed && wake) {
+    const [bh,bm] = bed.split(':').map(Number);
+    const [wh,wm] = wake.split(':').map(Number);
+    let m = (wh*60+wm) - (bh*60+bm);
+    if (m < 0) m += 1440;
+    mainDur = Math.round(m / 60 * 10) / 10;
+  }
+
+  // ② 中断時間（夜間出動・受付対応など）
+  const interrupts = parseInt(document.getElementById('s-interrupt-min')?.value) || 0;
+
+  // ③ 仮眠（非番・週休日の昼寝など）
+  const napMin = parseInt(document.getElementById('s-nap-min')?.value) || 0;
+  const napHour = Math.round(napMin / 60 * 10) / 10;
+
+  // 実効睡眠時間 = メイン - 中断 + 仮眠
+  const effectiveDur = Math.max(0, Math.round((mainDur - interrupts/60 + napHour) * 10) / 10);
+
+  const fat  = parseInt(document.getElementById('s-fatigue').value) || 7;
+  const sor  = parseInt(document.getElementById('s-soreness').value) || 7;
+  const mot  = parseInt(document.getElementById('s-motivation').value) || 7;
+  const mood = parseInt(document.getElementById('s-mood').value) || 7;
+  const wellness = Math.round((fat+sor+mot+mood)/4*10)/10;
+
+  const editId = document.getElementById('s-date')?.closest('.card')?.dataset?.editId;
+
+  const rec = {
+    id: editId ? undefined : Date.now(),
+    date,
+    bedtime: bed,
+    waketime: wake,
+    mainDuration: mainDur,
+    interruptMin: interrupts,
+    napMin,
+    duration: effectiveDur,   // ← ATL/CTL等で使う実効値
+    wellness, fatigue: fat, soreness: sor, motivation: mot, mood,
+    weight: parseFloat(document.getElementById('s-weight').value) || 0,
+    rhr:    parseInt(document.getElementById('s-rhr')?.value) || 0,
+  };
+
+  if (editId) {
+    const arr = DB.arr('sleeps');
+    const idx = arr.findIndex(x => String(x.id) === String(editId));
+    if (idx >= 0) { arr[idx] = { ...rec, id: arr[idx].id }; DB.set('sleeps', arr); }
+    delete document.getElementById('s-date').closest('.card').dataset.editId;
+    const banner = document.getElementById('sleep-edit-banner');
+    if (banner) banner.style.display = 'none';
+  } else {
+    DB.push('sleeps', rec);
+  }
+
+  // フォームリセット
+  ['s-date','s-bed','s-wake','s-weight','s-rhr','s-fatigue','s-soreness','s-motivation','s-mood']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  const intEl = document.getElementById('s-interrupt-min');
+  const napEl = document.getElementById('s-nap-min');
+  if (intEl) intEl.value = '';
+  if (napEl) napEl.value = '';
+
+  renderSleepCharts();
+  renderDashboard();
+  alert(`睡眠を記録しました。実効睡眠: ${effectiveDur}h（メイン${mainDur}h - 中断${interrupts}分 + 仮眠${napMin}分）`);
+}
+
+function renderSleepCharts(){const sl=DB.arr('sleeps').slice(-7);if(!sl.length)return;const labels=sl.map(s=>s.date.slice(5));const co={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a5a78',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#5a5a78',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}}};if(sleepChart)sleepChart.destroy();sleepChart=new Chart(document.getElementById('sleep-chart'),{type:'bar',data:{labels,datasets:[{data:sl.map(s=>s.duration||0),backgroundColor:'rgba(74,158,255,0.45)',borderColor:'#4a9eff',borderWidth:1,borderRadius:4}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:0,max:12}}}});if(wellnessChart)wellnessChart.destroy();wellnessChart=new Chart(document.getElementById('wellness-chart'),{type:'line',data:{labels,datasets:[{data:sl.map(s=>s.wellness||0),borderColor:'#f5a623',tension:0.4,borderWidth:2,fill:false,pointRadius:5,pointBackgroundColor:'#f5a623'}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:0,max:10}}}});
+  // 睡眠記録リスト（直近10件）
+  const sleepListEl = document.getElementById('sleep-record-list');
+  if (sleepListEl) {
+    const allSleeps = DB.arr('sleeps').slice().reverse().slice(0, 10);
+    if (!allSleeps.length) {
+      sleepListEl.innerHTML = '<div class="muted">記録がありません</div>';
+    } else {
+      sleepListEl.innerHTML = allSleeps.map(s => {
+        const napStr = s.napMin ? ` + 仮眠${s.napMin}分` : '';
+        const intStr = s.interruptMin ? ` (中断${s.interruptMin}分)` : '';
+        return `<div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:600">${s.date} <span style="color:var(--accent2);font-family:var(--font-mono)">${s.duration}h</span><span style="color:var(--text3);font-size:10px">${intStr}${napStr}</span></div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">ウェルネス: ${s.wellness||'—'} / 体重: ${s.weight||'—'}kg</div>
+          </div>
+          <div style="display:flex;gap:5px;flex-shrink:0">
+            <button class="btn btn-sm" style="font-size:11px;background:rgba(74,158,255,0.12);border-color:rgba(74,158,255,0.3);color:var(--accent2)"
+              onclick="editSleep(${s.id})">編集</button>
+            <button class="btn btn-sm btn-danger" style="font-size:11px"
+              onclick="deleteSleep(${s.id})">削除</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+}
 
 // ===== shift.js =====
 const SHIFT_TYPES={
@@ -4788,6 +4921,125 @@ window.addEventListener('appinstalled', function() {
   dismissPwaBanner();
   localStorage.setItem('pf_pwa_prompted', '1');
 });
+// ============================================================
+// 記録の編集機能
+// ============================================================
+function editTraining(id) {
+  const all = DB.arr('trainings');
+  const t = all.find(x => x.id === id);
+  if (!t) return;
+
+  // フォームに値を復元
+  const setVal = (elId, val) => { const el = document.getElementById(elId); if(el && val !== undefined) el.value = val; };
+  setVal('t-date', t.date);
+  setVal('t-type', t.type);
+  setVal('t-duration', t.duration);
+  setVal('t-rpe', t.rpe);
+  setVal('t-water', t.water);
+  setVal('t-notes', t.notes || '');
+
+  // カーディオデータ復元
+  if (t.cardioData) {
+    setVal('t-cardio-type', t.cardioData.cardioType);
+    setVal('t-cardio-zone', t.cardioData.zone);
+    setVal('t-cardio-dist', t.cardioData.distance);
+    setVal('t-cardio-hr', t.cardioData.hr);
+    setVal('t-cardio-kcal', t.cardioData.kcal);
+    const cardioSec = document.getElementById('t-cardio-detail');
+    if (cardioSec) cardioSec.style.display = 'block';
+  }
+
+  // 種目を復元
+  exCount = 0;
+  const exContainer = document.getElementById('t-exercises');
+  if (exContainer) exContainer.innerHTML = '';
+  if (t.exercises && t.exercises.length) {
+    t.exercises.forEach(ex => {
+      addExRow(ex.name, ex.setData || [{ weight: ex.weight, reps: ex.reps }]);
+    });
+  }
+
+  // 編集中IDをフォームに保持（保存時に上書き用）
+  const form = document.getElementById('training-form') || document.getElementById('t-date')?.closest('.card');
+  if (form) form.dataset.editId = id;
+
+  // 編集中バナーを表示
+  const banner = document.getElementById('training-edit-banner');
+  if (banner) { banner.style.display = 'block'; banner.textContent = `編集中: ${t.date} のトレーニング（保存で上書きされます）`; }
+
+  // フォームまでスクロール
+  document.getElementById('t-date')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  showPage('training');
+}
+
+function editMeal(id) {
+  const all = DB.arr('meals');
+  const m = all.find(x => x.id === id);
+  if (!m) return;
+
+  const setVal = (elId, val) => { const el = document.getElementById(elId); if(el && val !== undefined) el.value = val; };
+  setVal('n-date', m.date);
+  setVal('n-meal', m.meal);
+  setVal('n-food', m.food);
+  setVal('n-cal', m.cal);
+  setVal('n-protein', m.protein);
+  setVal('n-carb', m.carb);
+  setVal('n-fat', m.fat);
+
+  const form = document.getElementById('n-date')?.closest('.card');
+  if (form) form.dataset.editId = id;
+
+  const banner = document.getElementById('meal-edit-banner');
+  if (banner) { banner.style.display = 'block'; banner.textContent = `編集中: ${m.food}（保存で上書きされます）`; }
+
+  document.getElementById('n-date')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  showPage('nutrition');
+}
+
+function editSleep(id) {
+  const all = DB.arr('sleeps');
+  const s = all.find(x => x.id === id);
+  if (!s) return;
+
+  const setVal = (elId, val) => { const el = document.getElementById(elId); if(el && val !== undefined) el.value = val; };
+  setVal('s-date', s.date);
+  setVal('s-bed', s.bedtime || '');
+  setVal('s-wake', s.waketime || '');
+  setVal('s-quality', s.quality || '');
+  setVal('s-weight', s.weight || '');
+  setVal('s-fatigue', s.fatigue || '');
+  setVal('s-soreness', s.soreness || '');
+  setVal('s-motivation', s.motivation || '');
+  setVal('s-mood', s.mood || '');
+  setVal('s-rhr', s.rhr || '');
+
+  const form = document.getElementById('s-date')?.closest('.card');
+  if (form) form.dataset.editId = id;
+
+  const banner = document.getElementById('sleep-edit-banner');
+  if (banner) { banner.style.display = 'block'; banner.textContent = `編集中: ${s.date} の睡眠記録`; }
+
+  document.getElementById('s-date')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  showPage('sleep');
+}
+
+function deleteSleep(id) {
+  if (!confirm('この睡眠記録を削除しますか？')) return;
+  const arr = DB.arr('sleeps').filter(x => x.id !== id);
+  DB.set('sleeps', arr);
+  renderSleepCharts();
+  renderDashboard();
+}
+
+
+
 </script>
 </body>
-</html>
+</html
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar blue"></div>
+    <div class="h3" style="margin-bottom:12px">睡眠記録一覧</div>
+    <div id="sleep-record-list"><div class="muted">記録がありません</div></div>
+  </div>
+
+>
