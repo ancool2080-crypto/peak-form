@@ -2254,27 +2254,12 @@ function getMealTemplateButtonsHTML(){
 function showPresetCategory(cat) {
   const el = document.getElementById('preset-list');
   if (!el) return;
-
-  // FOOD_DBから取得（新カテゴリ対応）
+  const searchEl = document.getElementById('food-search-input');
+  if (searchEl) searchEl.value = '';
   const items = cat === 'custom'
     ? getCustomPresets()
     : (FOOD_DB[cat] || FOOD_PRESETS[cat] || []);
-  if (!items.length) { el.innerHTML = '<div class="muted">データなし</div>'; return; }
-
-  el.innerHTML = items.map(f => {
-    const unitDisp = f.gramsPerUnit ? f.unit : (f.unit === 'g' ? 'per 100g' : `per ${f.per}${f.unit}`);
-    const tagBadge = f.tag ? `<span style="font-size:9px;color:var(--text3);background:var(--bg4);padding:1px 5px;border-radius:3px;margin-left:4px">${f.tag}</span>` : '';
-    return `<div class="preset-item" onclick="selectPreset(${JSON.stringify(f).replace(/"/g,"'")})">
-      <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-        <span style="font-weight:500;font-size:13px">${f.name}</span>${tagBadge}
-      </div>
-      <div style="font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--font-mono)">
-        ${f.cal}kcal / P${f.p}g C${f.c}g F${f.f}g
-        <span style="color:var(--text3)">(${unitDisp})</span>
-      </div>
-      ${f.highlight ? `<div style="font-size:10px;color:var(--accent4);margin-top:2px">${f.highlight}</div>` : ''}
-    </div>`;
-  }).join('');
+  renderFoodList(items, el);
 }
 
 // カスタムプリセット（マイプリセット）をFOOD_DBに統合表示
@@ -2292,26 +2277,56 @@ function getCustomPresets() {
 // 食品横断検索
 function showFoodSearch(query) {
   const el = document.getElementById('preset-list');
-  if (!el || !query.trim()) return;
-  const results = searchFoodDB(query.trim());
-  if (!results.length) {
-    el.innerHTML = '<div class="muted">「' + query + '」に一致する食品が見つかりません</div>';
+  if (!el) return;
+  if (!query || !query.trim()) {
+    el.innerHTML = '<div class="muted" style="padding:12px">食品名を入力して検索</div>';
+    _foodCache = [];
     return;
   }
-  el.innerHTML = `<div style="font-size:11px;color:var(--text3);margin-bottom:8px">${results.length}件 見つかりました</div>` +
-    results.map(f => {
-      const tagBadge = f.tag ? `<span style="font-size:9px;color:var(--text3);background:var(--bg4);padding:1px 5px;border-radius:3px;margin-left:4px">${f.tag}</span>` : '';
-      return `<div class="preset-item" onclick="selectPreset(${JSON.stringify(f).replace(/"/g,"'")})">
-        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-          <span style="font-weight:500;font-size:13px">${f.name}</span>${tagBadge}
-        </div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--font-mono)">
-          ${f.cal}kcal / P${f.p}g C${f.c}g F${f.f}g
-        </div>
-      </div>`;
-    }).join('');
+  const results = searchFoodDB(query.trim());
+  renderFoodList(results, el);
 }
 
+
+
+// 食品リスト表示用グローバルキャッシュ
+let _foodCache = [];
+let _lastOcrResult = null;
+
+// インデックスでプリセット選択（onclick属性からの安全な呼び出し用）
+function selectPresetByIndex(idx) {
+  const f = _foodCache[idx];
+  if (f) selectPreset(f);
+}
+
+// 食品リストをHTMLに描画（JSON.stringifyをonclickに入れない安全な方式）
+function renderFoodList(items, containerEl) {
+  if (!containerEl) return;
+  if (!items || !items.length) {
+    containerEl.innerHTML = '<div class="muted" style="padding:12px">該当する食品がありません</div>';
+    _foodCache = [];
+    return;
+  }
+  _foodCache = items;
+  containerEl.innerHTML = items.map((f, idx) => {
+    const tagBadge = f.tag
+      ? `<span style="font-size:9px;color:var(--text3);background:var(--bg4);padding:1px 5px;border-radius:3px;margin-left:4px">${f.tag}</span>`
+      : '';
+    const unitDisp = f.gramsPerUnit
+      ? `1${f.unit}=${f.gramsPerUnit}g`
+      : (f.unit === 'g' ? '100gあたり' : `${f.per||100}${f.unit}あたり`);
+    return `<div class="preset-item" onclick="selectPresetByIndex(${idx})" style="cursor:pointer;padding:10px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+        <span style="font-weight:500;font-size:13px">${f.name}</span>${tagBadge}
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:3px;font-family:var(--font-mono)">
+        ${f.cal}kcal &nbsp;P:${f.p}g &nbsp;C:${f.c}g &nbsp;F:${f.f}g
+        <span style="margin-left:6px;opacity:0.6">(${unitDisp})</span>
+      </div>
+      ${f.highlight ? `<div style="font-size:10px;color:var(--accent4);margin-top:2px">${f.highlight}</div>` : ''}
+    </div>`;
+  }).join('');
+}
 
 function selectPreset(f){
   selectedPreset=f;
@@ -5691,6 +5706,7 @@ async function onOcrImageSelected(event) {
   const base64 = await fileToBase64(file);
   const result = await analyzeNutritionLabel(base64, file.type);
 
+  _lastOcrResult = result;
   if (!result) {
     if (statusEl) statusEl.textContent = '❌ 読み取り失敗';
     return;
@@ -5735,7 +5751,7 @@ async function onOcrImageSelected(event) {
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-sm btn-primary" onclick="saveOcrAsPreset(${JSON.stringify(result).replace(/"/g,"'")})">
+        <button class="btn btn-sm btn-primary" onclick="saveOcrAsPreset(_lastOcrResult)">
           ⭐ マイプリセットに登録
         </button>
         <button class="btn btn-sm" onclick="document.getElementById('ocr-result-panel').style.display='none'">
