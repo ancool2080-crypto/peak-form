@@ -814,8 +814,10 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="field"><label class="label">登録週数</label><input type="number" id="shift-pattern-weeks" value="8" min="1" max="26"></div>
       <div class="field"><label class="label">パターン</label>
         <select id="shift-pattern-type">
-          <option value="tfd">東消標準（24h→非番→週休）</option>
-          <option value="tfd2">東消変形（24h→非番→週休×2）</option>
+          <option value="cycle1">①当番→非番→週休→当番→非番→当番→非番</option>
+          <option value="cycle2">②週休→当番→非番→週休→当番→非番→当番</option>
+          <option value="cycle3">③非番→週休→当番→非番→日勤→週休→週休</option>
+          <option value="full21">①②③フルサイクル（21日）</option>
           <option value="custom">カスタム</option>
         </select>
       </div>
