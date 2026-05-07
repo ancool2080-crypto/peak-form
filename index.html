@@ -5872,7 +5872,8 @@ function editTraining(id) {
   }
 
   // 編集中IDをフォームに保持（保存時に上書き用）
-  const form = document.getElementById('training-form') || document.getElementById('t-date')?.closest('.card');
+  const tDateEl = document.getElementById('t-date');
+  const form = tDateEl?.closest ? tDateEl.closest('.card') : null;
   if (form) form.dataset.editId = id;
 
   // 編集中バナーを表示
@@ -5880,7 +5881,7 @@ function editTraining(id) {
   if (banner) { banner.style.display = 'block'; banner.textContent = `編集中: ${t.date} のトレーニング（保存で上書きされます）`; }
 
   // フォームまでスクロール
-  document.getElementById('t-date')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const tScroll = document.getElementById('t-date'); if (tScroll?.scrollIntoView) tScroll.scrollIntoView({ behavior: 'smooth', block: 'start' });
   showPage('training');
 }
 
@@ -5904,7 +5905,7 @@ function editMeal(id) {
   const banner = document.getElementById('meal-edit-banner');
   if (banner) { banner.style.display = 'block'; banner.textContent = `編集中: ${m.food}（保存で上書きされます）`; }
 
-  document.getElementById('n-date')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const mScroll = document.getElementById('n-date'); if (mScroll?.scrollIntoView) mScroll.scrollIntoView({ behavior: 'smooth', block: 'start' });
   showPage('nutrition');
 }
 
@@ -5931,7 +5932,7 @@ function editSleep(id) {
   const banner = document.getElementById('sleep-edit-banner');
   if (banner) { banner.style.display = 'block'; banner.textContent = `編集中: ${s.date} の睡眠記録`; }
 
-  document.getElementById('s-date')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const sScroll = document.getElementById('s-date'); if (sScroll?.scrollIntoView) sScroll.scrollIntoView({ behavior: 'smooth', block: 'start' });
   showPage('sleep');
 }
 
