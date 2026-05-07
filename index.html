@@ -728,11 +728,12 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="row-between" style="margin-bottom:10px;flex-wrap:wrap;gap:8px">
       <div class="row" style="gap:6px;flex-wrap:wrap">
         <span style="font-size:11px;font-weight:500;color:var(--text2)">タップして登録：</span>
-        <span class="badge badge-red" style="cursor:pointer" id="shift-mode-24" onclick="setShiftMode('24h')">🔥 24h勤務</span>
+        <span class="badge badge-red" style="cursor:pointer" id="shift-mode-24h" onclick="setShiftMode('24h')">🔥 当番</span>
         <span class="badge badge-gray" style="cursor:pointer" id="shift-mode-off" onclick="setShiftMode('off')">💤 非番</span>
         <span class="badge badge-amber" style="cursor:pointer" id="shift-mode-off-work" onclick="setShiftMode('off-work')">⚡ 非番出勤</span>
         <span class="badge badge-blue" style="cursor:pointer" id="shift-mode-rest" onclick="setShiftMode('rest')">🏠 週休</span>
         <span class="badge badge-purple" style="cursor:pointer" id="shift-mode-rest-work" onclick="setShiftMode('rest-work')">🚨 週休出勤</span>
+        <span class="badge" style="background:rgba(251,191,36,0.18);border:1px solid rgba(251,191,36,0.45);color:#fbbf24;cursor:pointer" id="shift-mode-dayshift" onclick="setShiftMode('dayshift')">☀️ 日勤</span>
         <span class="badge badge-green" style="cursor:pointer" id="shift-mode-gym" onclick="setShiftMode('gym')">💪 ジム</span>
         <span class="badge" style="cursor:pointer;background:rgba(29,158,117,0.15);color:#34d399;border:1px solid rgba(29,158,117,0.3)" id="shift-mode-cardio" onclick="setShiftMode('cardio')">🏃 有酸素</span>
         <span class="badge badge-gray" style="cursor:pointer" id="shift-mode-clear" onclick="setShiftMode('clear')">✕ クリア</span>
@@ -3721,9 +3722,10 @@ function getTodayShiftCalBonus(){
   if(!entry)return{bonus:0,label:'シフト未登録',color:'var(--text3)'};
   const type=getShiftType(entry);
   const bonusMap={
-    '24h':      {bonus:700,label:'24h勤務',  color:'var(--accent)'},
+    '24h':      {bonus:700,label:'当番',     color:'var(--accent)'},
     'off-work': {bonus:400,label:'非番出勤', color:'var(--accent3)'},
     'rest-work':{bonus:600,label:'週休出勤', color:'var(--accent5)'},
+    'dayshift': {bonus:150,label:'日勤',     color:'rgba(251,191,36,0.9)'},
     'gym':      {bonus:300,label:'ジム',     color:'var(--accent4)'},
     'cardio':   {bonus:250,label:'有酸素',   color:'var(--accent4)'},
     'off':      {bonus:0,  label:'非番',     color:'var(--text2)'},
@@ -4426,13 +4428,14 @@ function renderSleepCharts(){const sl=DB.arr('sleeps').slice(-7);if(!sl.length)r
 
 // ===== shift.js =====
 const SHIFT_TYPES={
-  '24h':    {label:'24h勤務',   bg:'rgba(255,69,96,0.25)',  border:'rgba(255,69,96,0.6)',  text:'#ff6b7a',icon:'🔥',load:800},
-  'off':    {label:'非番',      bg:'rgba(90,90,120,0.25)',  border:'rgba(90,90,120,0.5)',  text:'var(--text2)',icon:'💤',load:100},
+  '24h':     {label:'当番',     bg:'rgba(255,69,96,0.25)',  border:'rgba(255,69,96,0.6)',  text:'#ff6b7a',icon:'🔥',load:800},
+  'off':     {label:'非番',     bg:'rgba(90,90,120,0.25)',  border:'rgba(90,90,120,0.5)',  text:'var(--text2)',icon:'💤',load:100},
   'off-work':{label:'非番出勤', bg:'rgba(245,166,35,0.28)', border:'rgba(245,166,35,0.7)', text:'#fbbf24',icon:'⚡',load:600},
-  'rest':   {label:'週休',      bg:'rgba(74,158,255,0.2)',  border:'rgba(74,158,255,0.5)', text:'#6baaff',icon:'🏠',load:0},
+  'rest':    {label:'週休',     bg:'rgba(74,158,255,0.2)',  border:'rgba(74,158,255,0.5)', text:'#6baaff',icon:'🏠',load:0},
   'rest-work':{label:'週休出勤',bg:'rgba(167,139,250,0.28)',border:'rgba(167,139,250,0.7)',text:'#c4b5fd',icon:'🚨',load:700},
-  'gym':    {label:'ジム',      bg:'rgba(34,197,94,0.2)',   border:'rgba(34,197,94,0.5)',  text:'#4ade80',icon:'💪',load:0},
-  'cardio': {label:'有酸素',    bg:'rgba(29,158,117,0.2)',  border:'rgba(29,158,117,0.5)', text:'#34d399',icon:'🏃',load:200},
+  'dayshift':{label:'日勤',     bg:'rgba(251,191,36,0.18)', border:'rgba(251,191,36,0.45)',text:'#fbbf24',icon:'☀️',load:150},
+  'gym':     {label:'ジム',     bg:'rgba(34,197,94,0.2)',   border:'rgba(34,197,94,0.5)',  text:'#4ade80',icon:'💪',load:0},
+  'cardio':  {label:'有酸素',   bg:'rgba(29,158,117,0.2)',  border:'rgba(29,158,117,0.5)', text:'#34d399',icon:'🏃',load:200},
 };
 // 非番→非番出勤、週休→週休出勤 のサイクルマップ
 const SHIFT_CYCLE={'off':'off-work','off-work':'off','rest':'rest-work','rest-work':'rest'};
@@ -4657,10 +4660,21 @@ function applyShiftPattern(){
   if(!start){alert('開始日を設定してください');return}
   const data=getShiftData();
   const patterns={
+    // ① 当番→非番→週休→当番→非番→当番→非番（7日サイクル）
+    cycle1:['24h','off','rest','24h','off','24h','off'],
+    // ② 週休→当番→非番→週休→当番→非番→当番（7日サイクル）
+    cycle2:['rest','24h','off','rest','24h','off','24h'],
+    // ③ 非番→週休→当番→非番→日勤→週休→週休（7日サイクル・日勤は代休扱い）
+    cycle3:['off','rest','24h','off','dayshift','rest','rest'],
+    // 3サイクル連続（21日フルサイクル）
+    full21:['24h','off','rest','24h','off','24h','off',   // ①
+            'rest','24h','off','rest','24h','off','24h',   // ②
+            'off','rest','24h','off','dayshift','rest','rest'], // ③
+    // 旧パターン（後方互換）
     tfd:['24h','off','rest'],
     tfd2:['24h','off','rest','rest'],
   };
-  const cycle=patterns[pat]||['24h','off','rest'];
+  const cycle=patterns[pat]||patterns['cycle1'];
   let idx=0;
   const base=new Date(start);
   for(let d=0;d<weeks*7;d++){
@@ -5449,6 +5463,10 @@ function getShiftTrainingSchedule(year, month) {
     } else if (type === 'rest') {
       const sid = cycle[nextIdx % cycle.length];
       rec = {type:'suggest', sessionId:sid, label:(prog.sessions[sid]?.name||sid).replace('FULL BODY ','FB').replace(' DAY',''), reason:'週休（ジム最適）'};
+    } else if (type === 'dayshift') {
+      // 日勤（代休扱い）→ 週休と同様にジム候補
+      const sid = cycle[nextIdx % cycle.length];
+      rec = {type:'suggest', sessionId:sid, label:(prog.sessions[sid]?.name||sid).replace('FULL BODY ','FB').replace(' DAY',''), reason:'日勤（代休）'};
     } else if (type === '24h') {
       rec = {type:'duty', sessionId:null, label:'24h勤務', reason:'トレなし'};
     } else if (type==='off-work'||type==='rest-work') {
