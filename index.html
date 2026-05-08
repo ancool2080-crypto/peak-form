@@ -2517,16 +2517,20 @@ function applyPreset(){
   const method = document.getElementById('n-cooking-method')?.value || 'raw';
   let rawG;
   if(selectedPreset.gramsPerUnit){
+    // 個数単位: 個数 × 1個あたりのg = 総重量g
     rawG = selectedPresetAmount * selectedPreset.gramsPerUnit;
   } else {
     rawG = selectedPresetAmount;
   }
   if(method !== 'raw'){
-    applyCookingToForm(selectedPreset.gramsPerUnit ? selectedPresetAmount : rawG, method);
+    applyCookingToForm(rawG, method);
   } else {
-    const ratio = rawG / (selectedPreset.per || 100);
+    // gramsPerUnitがある食品のcal等はper100g基準で格納されているため
+    // ratio = rawG / 100 で統一（per:1の個数単位食品でper=1を使うと135倍になるバグ修正）
+    const base = selectedPreset.gramsPerUnit ? 100 : (selectedPreset.per || 100);
+    const ratio = rawG / base;
     const unitLabel = selectedPreset.gramsPerUnit
-      ? `${selectedPresetAmount}個 (${rawG}g)`
+      ? `${selectedPresetAmount}${selectedPreset.unit||'個'} (${rawG}g)`
       : `${rawG}g`;
     document.getElementById('n-food').value=`${selectedPreset.name} ${unitLabel}`;
     document.getElementById('n-cal').value=Math.round(selectedPreset.cal*ratio);
