@@ -539,7 +539,7 @@ input[type=range]:focus{border:none;box-shadow:none}
 
     <!-- 食品プリセット -->
     <div style="margin-bottom:14px">
-      <div class="label" style="margin-bottom:8px">プリセットから選ぶ（183品 / 文部科学省成分表2020準拠）</div>
+      <div class="label" style="margin-bottom:8px">プリセットから選ぶ（278品（外食95品含む）/ 文部科学省成分表2020準拠）</div>
       <!-- OCR撮影ボタン -->
       <div style="margin-bottom:10px">
         <button class="btn btn-primary" style="width:100%;font-size:13px;padding:10px;display:flex;align-items:center;justify-content:center;gap:8px"
@@ -569,6 +569,15 @@ input[type=range]:focus{border:none;box-shadow:none}
         <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('drink')">🥤 飲料・補食</span>
         <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('convenience')">🏪 コンビニ</span>
         <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('custom')">⭐ マイプリセット</span>
+      </div>
+      <!-- 外食タブ -->
+      <div class="row" style="gap:5px;flex-wrap:wrap;margin-bottom:6px">
+        <span style="font-size:10px;color:var(--text3);align-self:center">外食：</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_gyudon')">🍚 牛丼</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_fastfood')">🍔 ファーストフード</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_family_restaurant')">🍽 ファミレス</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_sushi')">🍣 回転寿司</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_yakiniku')">🥩 焼肉</span>
       </div>
       <div id="preset-list" style="max-height:260px;overflow-y:auto;margin-top:4px"></div>
     </div>
@@ -1967,6 +1976,116 @@ const FOOD_DB={
 
 // FOOD_PRESTSはFOOD_DBへの互換ラッパー
 // カテゴリ表示名マッピング
+const EATING_OUT_DB={
+  gyudon:[
+    {name:'吉野家 牛丼（並）',unit:'g',per:358,cal:652,p:20.4,c:96.4,f:16.4,tag:'吉野家'},
+    {name:'吉野家 牛丼（大）',unit:'g',per:476,cal:862,p:27.0,c:127.3,f:21.7,tag:'吉野家'},
+    {name:'吉野家 牛丼（特盛）',unit:'g',per:594,cal:1074,p:33.7,c:158.7,f:27.0,tag:'吉野家'},
+    {name:'吉野家 牛丼（小）',unit:'g',per:240,cal:441,p:13.7,c:65.4,f:11.1,tag:'吉野家'},
+    {name:'吉野家 牛皿（並）',unit:'g',per:130,cal:283,p:14.0,c:16.5,f:14.7,tag:'吉野家'},
+    {name:'吉野家 豚丼（並）',unit:'g',per:348,cal:631,p:18.2,c:95.6,f:15.1,tag:'吉野家'},
+    {name:'松屋 牛めし（並）',unit:'g',per:380,cal:669,p:22.3,c:97.0,f:16.9,tag:'松屋'},
+    {name:'松屋 牛めし（大盛）',unit:'g',per:500,cal:867,p:29.0,c:128.3,f:21.9,tag:'松屋'},
+    {name:'松屋 牛めし（特盛）',unit:'g',per:590,cal:1007,p:33.9,c:151.1,f:25.4,tag:'松屋'},
+    {name:'松屋 プレミアム牛めし（並）',unit:'g',per:380,cal:692,p:23.1,c:98.4,f:18.1,tag:'松屋'},
+    {name:'松屋 豚めし（並）',unit:'g',per:340,cal:591,p:18.0,c:88.2,f:13.0,tag:'松屋'},
+    {name:'松屋 ネギたっぷり旨辛牛めし（並）',unit:'g',per:400,cal:724,p:24.1,c:100.2,f:19.4,tag:'松屋'},
+    {name:'すき家 牛丼（並）',unit:'g',per:350,cal:663,p:21.1,c:95.1,f:16.4,tag:'すき家'},
+    {name:'すき家 牛丼（大盛）',unit:'g',per:490,cal:891,p:28.8,c:131.9,f:21.7,tag:'すき家'},
+    {name:'すき家 牛丼（特盛）',unit:'g',per:585,cal:1062,p:34.1,c:158.3,f:25.8,tag:'すき家'},
+    {name:'すき家 牛丼（メガ）',unit:'g',per:780,cal:1399,p:45.3,c:210.8,f:34.3,tag:'すき家'},
+    {name:'すき家 ねぎ玉牛丼（並）',unit:'g',per:400,cal:756,p:28.3,c:97.8,f:22.7,tag:'すき家'},
+    {name:'すき家 3種のチーズ牛丼（並）',unit:'g',per:380,cal:766,p:28.4,c:96.0,f:24.6,tag:'すき家'},
+  ],
+  fastfood:[
+    {name:'マクドナルド ビッグマック',unit:'個',per:1,perLabel:'個',gramsPerUnit:213,cal:545,p:26,c:46,f:29,tag:'マクドナルド'},
+    {name:'マクドナルド てりやきマックバーガー',unit:'個',per:1,perLabel:'個',gramsPerUnit:175,cal:494,p:16,c:59,f:20,tag:'マクドナルド'},
+    {name:'マクドナルド チキンフィレオ',unit:'個',per:1,perLabel:'個',gramsPerUnit:160,cal:440,p:21,c:46,f:19,tag:'マクドナルド'},
+    {name:'マクドナルド ダブルチーズバーガー',unit:'個',per:1,perLabel:'個',gramsPerUnit:175,cal:470,p:29,c:35,f:25,tag:'マクドナルド'},
+    {name:'マクドナルド マックフライポテト（M）',unit:'個',per:1,perLabel:'個',gramsPerUnit:135,cal:410,p:4,c:52,f:21,tag:'マクドナルド'},
+    {name:'マクドナルド マックフライポテト（L）',unit:'個',per:1,perLabel:'個',gramsPerUnit:170,cal:517,p:5,c:66,f:26,tag:'マクドナルド'},
+    {name:'マクドナルド マックチキン',unit:'個',per:1,perLabel:'個',gramsPerUnit:113,cal:271,p:15,c:19,f:15,tag:'マクドナルド'},
+    {name:'マクドナルド エッグマックマフィン',unit:'個',per:1,perLabel:'個',gramsPerUnit:137,cal:286,p:18,c:28,f:11,tag:'マクドナルド'},
+    {name:'KFC オリジナルチキン（1ピース）',unit:'個',per:1,perLabel:'個',gramsPerUnit:136,cal:280,p:21,c:9,f:18,tag:'ケンタッキー'},
+    {name:'KFC カーネルクリスピー（1ピース）',unit:'個',per:1,perLabel:'個',gramsPerUnit:96,cal:260,p:15,c:15,f:16,tag:'ケンタッキー'},
+    {name:'KFC チキンフィレサンド',unit:'個',per:1,perLabel:'個',gramsPerUnit:185,cal:474,p:24,c:46,f:21,tag:'ケンタッキー'},
+    {name:'KFC ポテト（M）',unit:'個',per:1,perLabel:'個',gramsPerUnit:135,cal:265,p:3,c:41,f:10,tag:'ケンタッキー'},
+    {name:'モスバーガー モスバーガー',unit:'個',per:1,perLabel:'個',gramsPerUnit:156,cal:343,p:14,c:35,f:16,tag:'モスバーガー'},
+    {name:'モスバーガー テリヤキバーガー',unit:'個',per:1,perLabel:'個',gramsPerUnit:175,cal:389,p:13,c:46,f:16,tag:'モスバーガー'},
+    {name:'モスバーガー フィッシュバーガー',unit:'個',per:1,perLabel:'個',gramsPerUnit:138,cal:291,p:13,c:32,f:12,tag:'モスバーガー'},
+    {name:'松のや ロースかつ定食（並）',unit:'g',per:567,cal:835,p:36.0,c:91.5,f:32.5,tag:'とんかつ'},
+    {name:'かつや カツ丼（並）',unit:'g',per:470,cal:843,p:30.4,c:113.9,f:24.6,tag:'とんかつ'},
+    {name:'かつや カツカレー（並）',unit:'g',per:550,cal:912,p:28.1,c:124.3,f:28.4,tag:'とんかつ'},
+  ],
+  family_restaurant:[
+    {name:'サイゼリヤ ミラノ風ドリア',unit:'g',per:430,cal:579,p:21.6,c:77.2,f:18.7,tag:'サイゼリヤ'},
+    {name:'サイゼリヤ ハンバーグ（ランチ）',unit:'g',per:400,cal:542,p:27.2,c:56.2,f:21.4,tag:'サイゼリヤ'},
+    {name:'サイゼリヤ マルゲリータ（M）',unit:'g',per:390,cal:789,p:35.1,c:101.3,f:25.3,tag:'サイゼリヤ'},
+    {name:'サイゼリヤ ペペロンチーノ',unit:'g',per:378,cal:598,p:17.2,c:84.7,f:19.8,tag:'サイゼリヤ'},
+    {name:'サイゼリヤ ペスカトーレ',unit:'g',per:398,cal:556,p:22.5,c:80.1,f:14.2,tag:'サイゼリヤ'},
+    {name:'サイゼリヤ チキンのグリル',unit:'g',per:280,cal:381,p:34.3,c:13.5,f:19.8,tag:'サイゼリヤ'},
+    {name:'サイゼリヤ 小エビのサラダ',unit:'g',per:195,cal:122,p:10.2,c:8.7,f:5.1,tag:'サイゼリヤ'},
+    {name:'ガスト ハンバーグ（単品）',unit:'g',per:200,cal:320,p:18.0,c:14.0,f:22.0,tag:'ガスト'},
+    {name:'ガスト チーズINハンバーグ',unit:'g',per:220,cal:385,p:21.0,c:15.0,f:27.0,tag:'ガスト'},
+    {name:'ガスト から揚げ（5個）',unit:'g',per:185,cal:435,p:31.0,c:19.0,f:27.0,tag:'ガスト'},
+    {name:'ガスト シーザーサラダ',unit:'g',per:230,cal:186,p:6.5,c:12.3,f:13.1,tag:'ガスト'},
+    {name:'デニーズ ハンバーグステーキ',unit:'g',per:330,cal:498,p:24.0,c:22.0,f:33.0,tag:'デニーズ'},
+    {name:'デニーズ グリルチキン',unit:'g',per:260,cal:312,p:38.0,c:8.0,f:14.0,tag:'デニーズ'},
+    {name:'ジョイフル Aランチ（ハンバーグ）',unit:'g',per:450,cal:710,p:28.0,c:75.0,f:30.0,tag:'ジョイフル'},
+    {name:'大戸屋 定食（若鶏炭火焼き）',unit:'g',per:520,cal:621,p:40.6,c:74.3,f:14.2,tag:'大戸屋'},
+    {name:'大戸屋 定食（ほうれん草豆腐ハンバーグ）',unit:'g',per:530,cal:570,p:33.0,c:68.7,f:14.5,tag:'大戸屋'},
+    {name:'大戸屋 チキン南蛮定食',unit:'g',per:540,cal:728,p:34.2,c:82.5,f:22.8,tag:'大戸屋'},
+  ],
+  sushi:[
+    {name:'スシロー まぐろ（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:60,cal:96,p:8.0,c:14.2,f:0.4,tag:'スシロー'},
+    {name:'スシロー サーモン（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:62,cal:124,p:7.8,c:13.8,f:4.3,tag:'スシロー'},
+    {name:'スシロー えび（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:58,cal:89,p:5.9,c:14.5,f:0.5,tag:'スシロー'},
+    {name:'スシロー いか（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:58,cal:88,p:5.8,c:14.2,f:0.5,tag:'スシロー'},
+    {name:'スシロー たまご（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:62,cal:122,p:4.8,c:17.8,f:3.1,tag:'スシロー'},
+    {name:'スシロー ハマチ（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:60,cal:122,p:7.4,c:13.5,f:4.2,tag:'スシロー'},
+    {name:'スシロー いくら（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:60,cal:116,p:8.2,c:13.8,f:2.9,tag:'スシロー'},
+    {name:'スシロー ねぎまぐろ（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:64,cal:104,p:8.5,c:14.4,f:1.1,tag:'スシロー'},
+    {name:'スシロー 軍艦 納豆（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:68,cal:122,p:6.2,c:17.8,f:2.8,tag:'スシロー'},
+    {name:'スシロー 茶碗蒸し',unit:'個',per:1,perLabel:'個',gramsPerUnit:110,cal:65,p:4.8,c:5.9,f:2.1,tag:'スシロー'},
+    {name:'くら寿司 まぐろ（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:58,cal:90,p:7.8,c:13.5,f:0.3,tag:'くら寿司'},
+    {name:'くら寿司 サーモン（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:62,cal:120,p:7.4,c:13.6,f:4.0,tag:'くら寿司'},
+    {name:'くら寿司 えびアボカド（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:76,cal:152,p:6.2,c:14.8,f:6.8,tag:'くら寿司'},
+
+    // ===== はま寿司 =====
+    {name:'はま寿司 まぐろ（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:58,cal:93,p:7.8,c:13.9,f:0.4,tag:'はま寿司'},
+    {name:'はま寿司 サーモン（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:62,cal:121,p:7.6,c:13.7,f:4.1,tag:'はま寿司'},
+    {name:'はま寿司 えび（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:58,cal:88,p:5.8,c:14.4,f:0.4,tag:'はま寿司'},
+    {name:'はま寿司 ハマチ（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:60,cal:119,p:7.2,c:13.4,f:4.0,tag:'はま寿司'},
+    {name:'はま寿司 いか（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:58,cal:87,p:5.7,c:14.1,f:0.4,tag:'はま寿司'},
+    {name:'はま寿司 たまご（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:62,cal:120,p:4.7,c:17.5,f:3.0,tag:'はま寿司'},
+    {name:'はま寿司 いくら（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:60,cal:113,p:8.0,c:13.6,f:2.8,tag:'はま寿司'},
+    {name:'はま寿司 ねぎまぐろ（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:64,cal:101,p:8.3,c:14.2,f:1.0,tag:'はま寿司'},
+    {name:'はま寿司 びんちょうまぐろ（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:60,cal:108,p:8.5,c:13.8,f:2.4,tag:'はま寿司'},
+    {name:'はま寿司 炙りサーモン（2貫）',unit:'皿',per:1,perLabel:'皿',gramsPerUnit:64,cal:148,p:8.0,c:14.0,f:5.8,tag:'はま寿司'},
+    {name:'はま寿司 茶碗蒸し',unit:'個',per:1,perLabel:'個',gramsPerUnit:110,cal:63,p:4.6,c:5.7,f:2.0,tag:'はま寿司'},
+    {name:'はま寿司 うどん（かけ）',unit:'個',per:1,perLabel:'杯',gramsPerUnit:350,cal:210,p:7.5,c:43.2,f:1.2,tag:'はま寿司'},
+    {name:'回転寿司 シャリ1貫（目安）',unit:'g',per:20,cal:33,p:0.5,c:7.4,f:0.1,tag:'寿司共通'},
+    {name:'回転寿司 10皿（目安）',unit:'皿',per:10,perLabel:'皿相当',gramsPerUnit:60,cal:600,p:40,c:90,f:12,tag:'寿司共通'},
+  ],
+  yakiniku:[
+    {name:'焼肉 カルビ（1人前 100g）',unit:'g',per:100,cal:310,p:15.0,c:0.5,f:27.0,tag:'焼肉'},
+    {name:'焼肉 ロース（1人前 100g）',unit:'g',per:100,cal:268,p:17.0,c:0.5,f:22.0,tag:'焼肉'},
+    {name:'焼肉 ハラミ（1人前 100g）',unit:'g',per:100,cal:240,p:20.0,c:0.5,f:17.0,tag:'焼肉'},
+    {name:'焼肉 タン（1人前 100g）',unit:'g',per:100,cal:264,p:14.0,c:0.1,f:23.0,tag:'焼肉'},
+    {name:'焼肉 ホルモン（1人前 100g）',unit:'g',per:100,cal:287,p:9.9,c:0.1,f:28.5,tag:'焼肉'},
+    {name:'焼肉 鶏もも（1人前 100g）',unit:'g',per:100,cal:190,p:16.6,c:0,f:14.2,tag:'焼肉'},
+    {name:'焼肉 豚トロ（1人前 100g）',unit:'g',per:100,cal:386,p:14.0,c:0.1,f:37.0,tag:'焼肉'},
+    {name:'焼肉 ザブトン（1人前 100g）',unit:'g',per:100,cal:350,p:13.5,c:0.1,f:33.0,tag:'焼肉'},
+    {name:'焼肉 ライス（並）',unit:'g',per:200,cal:312,p:5.0,c:74.2,f:0.6,tag:'焼肉'},
+    {name:'焼肉 冷麺',unit:'g',per:380,cal:380,p:12.0,c:72.0,f:4.5,tag:'焼肉'},
+    {name:'焼肉 ナムル盛り合わせ',unit:'g',per:150,cal:108,p:4.5,c:12.0,f:5.2,tag:'焼肉'},
+    {name:'焼肉 クッパ',unit:'g',per:400,cal:312,p:14.0,c:52.0,f:5.0,tag:'焼肉'},
+    {name:'焼肉 石焼ビビンバ',unit:'g',per:380,cal:520,p:16.0,c:78.0,f:14.0,tag:'焼肉'},
+    {name:'牛角 カルビ（塩/並）',unit:'g',per:100,cal:298,p:15.8,c:1.2,f:25.6,tag:'牛角'},
+    {name:'牛角 上カルビ（並）',unit:'g',per:100,cal:335,p:14.2,c:1.0,f:30.1,tag:'牛角'},
+  ],
+};
+
 const FOOD_DB_LABELS = {
   protein:     'タンパク質源',
   carb:        '炭水化物・糖質',
@@ -1976,6 +2095,11 @@ const FOOD_DB_LABELS = {
   seasoning:   '調味料・ソース',
   drink:       '飲料・補食',
   convenience: 'コンビニ・市販品',
+  eating_gyudon:           '牛丼チェーン',
+  eating_fastfood:         'ファーストフード',
+  eating_family_restaurant:'ファミレス',
+  eating_sushi:            '回転寿司',
+  eating_yakiniku:         '焼肉チェーン',
 };
 
 // タグ検索用インデックス
@@ -1998,6 +2122,15 @@ function searchFoodDB(query) {
       if (item.name.toLowerCase().includes(q) ||
           (item.tag && item.tag.toLowerCase().includes(q))) {
         results.push({ ...item, _cat: cat });
+      }
+    });
+  });
+  // 外食DBも検索対象に
+  Object.entries(EATING_OUT_DB).forEach(([cat, items]) => {
+    items.forEach(item => {
+      if (item.name.toLowerCase().includes(q) ||
+          (item.tag && item.tag.toLowerCase().includes(q))) {
+        results.push({ ...item, _cat: 'eating_out_' + cat });
       }
     });
   });
@@ -2261,7 +2394,9 @@ function showPresetCategory(cat) {
   if (searchEl) searchEl.value = '';
   const items = cat === 'custom'
     ? getCustomPresets()
-    : (FOOD_DB[cat] || FOOD_PRESETS[cat] || []);
+    : cat.startsWith('eating_')
+      ? (EATING_OUT_DB[cat.replace('eating_','')] || [])
+      : (FOOD_DB[cat] || FOOD_PRESETS[cat] || []);
   renderFoodList(items, el);
 }
 
