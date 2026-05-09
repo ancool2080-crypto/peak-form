@@ -490,6 +490,36 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="card"><div class="card-header-bar"></div><div class="h3" style="margin-bottom:14px">記録一覧（直近20件）</div><div id="training-log-table"></div></div>
 </div>
 
+  <!-- インターバルタイマー設定 -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar blue"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="h3">インターバルタイマー設定</div>
+      <button class="btn btn-sm" onclick="toggleRestSettings()" id="rest-settings-toggle">▼ 設定を開く</button>
+    </div>
+    <div id="rest-settings-panel" style="display:none"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:20px;font-weight:600;font-family:var(--font-mono);color:var(--accent)" id="rest-display-C">3:00</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">コンパウンド</div>
+        <div style="font-size:9px;color:var(--text3)">スクワット・チン等</div>
+      </div>
+      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:20px;font-weight:600;font-family:var(--font-mono);color:var(--accent2)" id="rest-display-M">2:30</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">マシン多関節</div>
+        <div style="font-size:9px;color:var(--text3)">レッグプレス等</div>
+      </div>
+      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:20px;font-weight:600;font-family:var(--font-mono);color:var(--accent4)" id="rest-display-I">1:30</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">アイソレーション</div>
+        <div style="font-size:9px;color:var(--text3)">カール・レイズ等</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:8px;text-align:center">
+      根拠: Schoenfeld (2016) + Singer (2024) — 種目タイプで自動判定
+    </div>
+  </div>
+
 <!-- NUTRITION -->
 <div class="page" id="page-nutrition">
   <div class="h2">栄養管理</div>
@@ -2725,6 +2755,119 @@ function renderSupplementPage(){
   }
 }
 
+
+// ============================================================
+// インターバルタイマー設定（エビデンスベース）
+// ============================================================
+
+function updateRestDisplays() {
+  const prefs = DB.get('pf_rest_prefs') || {};
+  const defaults = { C: 180, M: 150, I: 90 };
+  ['C','M','I'].forEach(type => {
+    const el = document.getElementById('rest-display-' + type);
+    if (!el) return;
+    const v = prefs[type] || defaults[type];
+    el.textContent = Math.floor(v/60) + ':' + String(v%60).padStart(2,'0');
+  });
+}
+
+
+function toggleRestSettings() {
+  const panel = document.getElementById('rest-settings-panel');
+  const btn   = document.getElementById('rest-settings-toggle');
+  if (!panel) return;
+  if (panel.style.display === 'none' || panel.style.display === '') {
+    panel.style.display = 'block';
+    renderRestSettings();
+    if (btn) btn.textContent = '▲ 閉じる';
+  } else {
+    panel.style.display = 'none';
+    if (btn) btn.textContent = '▼ 設定を開く';
+  }
+}
+
+function renderRestSettings() {
+  const el = document.getElementById('rest-settings-panel');
+  if (!el) return;
+  const prefs = DB.get('pf_rest_prefs') || {};
+  // デフォルト値（エビデンス準拠）
+  const defaults = { C: 180, M: 150, I: 90 };
+  const labels = {
+    C: 'コンパウンド多関節',
+    M: 'マシン多関節',
+    I: 'アイソレーション単関節'
+  };
+  const examples = {
+    C: 'スクワット・チンニング・ベンチプレス',
+    M: 'レッグプレス・ラットプルダウン・マシンロウ',
+    I: 'カール・レイズ・レッグカール'
+  };
+  const colors = { C: 'var(--accent)', M: 'var(--accent2)', I: 'var(--accent4)' };
+
+  el.innerHTML = `
+    <div style="font-size:11px;color:var(--text3);margin-bottom:12px;line-height:1.7;background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.2);border-radius:var(--rs);padding:10px">
+      <div style="font-weight:600;color:var(--accent2);margin-bottom:4px">📚 エビデンス根拠</div>
+      <div>• Schoenfeld et al. (2016) JSCR: 3分 > 1分（筋肥大・筋力ともに有意差）</div>
+      <div>• Singer, Schoenfeld et al. (2024) Frontiers: 90秒超は差なし、60秒超 > 60秒以下の小差</div>
+      <div style="color:var(--accent4);margin-top:4px">→ 60秒以上確保し、コンパウンドは長め・アイソレーションは短めが現時点の最適解</div>
+    </div>
+    ${['C','M','I'].map(type => {
+      const val = prefs[type] || defaults[type];
+      const valMin = Math.floor(val/60);
+      const valSec = val % 60;
+      return `
+      <div style="margin-bottom:14px;padding:12px;background:var(--bg3);border-radius:var(--rs);border-left:3px solid ${colors[type]}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div>
+            <div style="font-size:13px;font-weight:600">${labels[type]}</div>
+            <div style="font-size:10px;color:var(--text3)">${examples[type]}</div>
+          </div>
+          <div style="font-family:var(--font-mono);font-size:20px;font-weight:600;color:${colors[type]}">${valMin}:${String(valSec).padStart(2,'0')}</div>
+        </div>
+        <input type="range" min="60" max="360" step="15" value="${val}"
+          style="width:100%;margin-top:6px;accent-color:${colors[type]}"
+          oninput="updateRestPref('${type}',this.value,this.closest('div').querySelector('.rest-val-display'))"
+          onchange="saveRestPref('${type}',this.value)">
+        <div class="rest-val-display" style="display:none">${val}</div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:2px">
+          <span>1:00</span><span style="color:${colors[type]}">推奨: ${Math.floor(defaults[type]/60)}:${String(defaults[type]%60).padStart(2,'0')}</span><span>6:00</span>
+        </div>
+      </div>`;
+    }).join('')}
+    <button class="btn btn-sm" style="width:100%;margin-top:4px" onclick="resetRestPrefs()">デフォルトに戻す</button>
+  `;
+}
+
+function updateRestPref(type, val, displayEl) {
+  const v = parseInt(val);
+  const min = Math.floor(v/60);
+  const sec = v % 60;
+  // 親要素の時間表示を更新
+  const panel = document.getElementById('rest-settings-panel');
+  if (!panel) return;
+  const cards = panel.querySelectorAll('[style*="border-left"]');
+  const typeMap = ['C','M','I'];
+  typeMap.forEach((t, idx) => {
+    if (t === type && cards[idx]) {
+      const timeDisp = cards[idx].querySelector('[style*="font-size:20px"]');
+      if (timeDisp) timeDisp.textContent = `${min}:${String(sec).padStart(2,'0')}`;
+    }
+  });
+}
+
+function saveRestPref(type, val) {
+  const prefs = DB.get('pf_rest_prefs') || {};
+  prefs[type] = parseInt(val);
+  DB.set('pf_rest_prefs', prefs);
+  updateRestDisplays();
+}
+
+function resetRestPrefs() {
+  DB.set('pf_rest_prefs', {});
+  renderRestSettings();
+  updateRestDisplays();
+}
+
 function saveSuppCheck(){
   const suppData=DB.get('pf_supp_checks')||{};
   const todayStr=today();
@@ -3921,6 +4064,10 @@ function startRestTimer(eid, seconds) {
 
 function getDefaultRestTime(eid) {
   // 種目タイプでデフォルト休憩時間を決める
+  // エビデンス: Schoenfeld et al. (2016) JSCR + Singer et al. (2024) Frontiers
+  // - 60秒超 > 60秒以下（有意差あり）
+  // - 90秒超は差がほぼなし（但しボリューム保持の観点で長めを推奨）
+  // - コンパウンド種目ほど長い休憩が有利（大筋群・CNS疲労が大きいため）
   const nameEl = document.querySelector('#' + eid + ' .ex-name');
   const name = nameEl ? nameEl.value : '';
   const prog = getCurrentProgramData();
@@ -3929,7 +4076,13 @@ function getDefaultRestTime(eid) {
     const ex = s.exercises.find(e => e.name === name);
     if (ex) exType = ex.rpe || 'I';
   });
-  return exType === 'C' ? 180 : exType === 'M' ? 120 : 90;
+  // ユーザー設定上書き確認
+  const userRest = DB.get('pf_rest_prefs') || {};
+  if (userRest[exType]) return userRest[exType];
+  // C: コンパウンド多関節（スクワット・ベンチ・チン等）→ 3分
+  // M: マシン多関節（レッグプレス・ラットプル等）→ 2.5分
+  // I: アイソレーション単関節（カール・レイズ等）→ 90秒
+  return exType === 'C' ? 180 : exType === 'M' ? 150 : 90;
 }
 
 function showRestTimerUI(seconds) {
@@ -3937,7 +4090,7 @@ function showRestTimerUI(seconds) {
   if (!panel) {
     panel = document.createElement('div');
     panel.id = 'rest-timer-panel';
-    panel.style.cssText = 'position:fixed;bottom:80px;right:16px;background:var(--bg2);border:2px solid var(--accent2);border-radius:var(--r);padding:16px 20px;z-index:500;text-align:center;min-width:160px;box-shadow:0 8px 32px rgba(0,0,0,0.5)';
+    panel.style.cssText = 'position:fixed;bottom:80px;right:16px;background:var(--bg2);border:2px solid var(--accent2);border-radius:var(--r);padding:14px 18px;z-index:500;text-align:center;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,0.5);max-width:240px';
     document.body.appendChild(panel);
   }
   panel.style.display = 'block';
