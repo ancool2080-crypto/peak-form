@@ -436,7 +436,9 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="card-header-bar blue"></div>
     <div class="h3" style="margin-bottom:16px">本日のセッション</div>
     <div class="grid2"><div class="field"><label class="label">日付</label><input type="date" id="t-date"></div><div class="field"><label class="label">種別</label><select id="t-type" onchange="onTrainingTypeChange()"><option value="strength">筋力トレーニング</option><option value="hiit">HIIT</option><option value="cardio">有酸素</option><option value="functional">機能的トレーニング</option><option value="mobility">モビリティ・回復</option><option value="firefighting">消防訓練</option><option value="firefighter_run">🔥 防火装備ランニング</option></select></div></div>
-    <div class="grid3"><div class="field"><label class="label">時間（分）<span class="muted" style="font-size:10px;font-weight:400;margin-left:4px">インターバル含む合計</span></label><input type="number" id="t-duration" placeholder="60"></div><div class="field"><label class="label">RPE（1〜10）</label><input type="number" id="t-rpe" placeholder="7" min="1" max="10"></div><div class="field"><label class="label">水分（mL）</label><input type="number" id="t-water" placeholder="2000"></div></div>
+    <div class="grid3"><div class="field"><label class="label">時間（分）<span class="muted" style="font-size:10px;font-weight:400;margin-left:4px">インターバル含む合計</span></label><input type="number" id="t-duration" placeholder="60" oninput="autoEstimateKcal()"></div><div class="field"><label class="label">RPE（1〜10）</label><input type="number" id="t-rpe" placeholder="7" min="1" max="10" oninput="autoEstimateKcal()"></div><div class="field"><label class="label">水分（mL）</label><input type="number" id="t-water" placeholder="2000"></div></div>
+    <!-- 消費カロリー自動推定表示 -->
+    <div id="t-strength-kcal-display" style="display:none;padding:8px 12px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:var(--rs);margin-top:8px;font-size:12px"></div>
 
     <!-- 有酸素専用フィールド（cardio/hiit時のみ表示） -->
     <div id="cardio-fields" style="display:none">
@@ -456,7 +458,7 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="grid2" style="margin-bottom:10px">
         <div class="field">
           <label class="label">種目</label>
-          <select id="t-cardio-type">
+          <select id="t-cardio-type" onchange="autoEstimateKcal()">
             <option value="crosstrainer">クロストレーナー（推奨）</option>
             <option value="bike">バイク</option>
             <option value="treadmill_walk">傾斜ウォーク</option>
@@ -483,7 +485,11 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="grid3" style="margin-bottom:10px">
         <div class="field"><label class="label">距離（km）任意</label><input type="number" id="t-cardio-distance" placeholder="5.0" step="0.1" min="0"></div>
         <div class="field"><label class="label">平均心拍（bpm）任意</label><input type="number" id="t-cardio-hr" placeholder="135" min="50" max="220"></div>
-        <div class="field"><label class="label">消費kcal（任意）</label><input type="number" id="t-cardio-kcal" placeholder="300" min="0"></div>
+        <div class="field"><label class="label">消費kcal
+          <span style="font-size:9px;color:var(--accent4);margin-left:4px">自動推定</span>
+        </label>
+        <input type="number" id="t-cardio-kcal" placeholder="300" min="0" oninput="this.dataset.manualEdit=this.value?'1':'';">
+        <div id="kcal-estimate-hint" style="display:none;font-size:10px;color:var(--text3);margin-top:4px;line-height:1.5"></div></div>
       </div>
       <div id="cardio-zone-hint" class="alert alert-info" style="font-size:12px;margin-bottom:10px">ゾーン2は脂肪燃焼効率が高く、筋トレパフォーマンスへの影響が最小。Pelland et al. 推奨のゾーン2を基本とし、週1〜2回のみ高強度（ゾーン3〜4）を取り入れましょう。</div>
     </div>
@@ -2767,6 +2773,159 @@ function renderSupplementPage(){
 }
 
 
+
+// ============================================================
+// トレーニング消費カロリー推定エンジン
+// 根拠:
+//   筋力: MET法 - Ainsworth et al. (2011) Compendium of Physical Activities
+//   有酸素: Keytel et al. (2005) 心拍ベース推定式 + MET補正
+//   RPE補正: Foster et al. (2001) sRPE → 強度係数に変換
+// ============================================================
+
+// RPEから強度係数を算出（Foster 2001 sRPE準拠）
+function rpeToIntensity(rpe) {
+  // RPE 1-10 → 相対強度 0.3〜1.0
+  const table = {1:0.30, 2:0.35, 3:0.40, 4:0.50, 5:0.60,
+                 6:0.70, 7:0.75, 8:0.82, 9:0.90, 10:1.00};
+  return table[Math.round(rpe)] || 0.70;
+}
+
+// MET値テーブル（Ainsworth 2011 + 消防装備補正）
+function getMETForSession(type, rpe) {
+  const intensity = rpeToIntensity(rpe);
+  const baseMET = {
+    // 筋力系: ベースMET × RPE強度係数
+    strength:        3.5 + intensity * 4.5,  // 3.5〜8.0 METs
+    hiit:            6.0 + intensity * 6.0,  // 6〜12 METs
+    functional:      4.0 + intensity * 4.0,
+    mobility:        2.5,
+    firefighting:    7.0 + intensity * 3.0,  // 消防訓練
+    // 有酸素系
+    cardio:          4.0 + intensity * 8.0,  // 種目で上書き
+    firefighter_run: (8.0 + intensity * 8.0) * 1.7, // 装備補正×1.7
+  };
+  return baseMET[type] || 4.0;
+}
+
+// 有酸素種目別MET（Ainsworth 2011）
+const CARDIO_MET = {
+  crosstrainer:    { base: 5.0, max: 9.5  },
+  bike:            { base: 4.0, max: 8.5  },
+  treadmill_walk:  { base: 3.5, max: 5.0  },
+  treadmill_run:   { base: 7.0, max: 12.5 },
+  rowing:          { base: 6.0, max: 10.0 },
+  stairmaster:     { base: 6.0, max: 9.0  },
+  swim:            { base: 5.8, max: 9.8  },
+  outdoor_run:     { base: 7.0, max: 13.0 },
+  cycling:         { base: 4.0, max: 8.0  },
+  walk:            { base: 2.5, max: 4.0  },
+  firefighter_run: { base: 10.0,max: 16.0 }, // 装備込みMET
+  firefighter_hill:{ base: 12.0,max: 18.0 },
+};
+
+// ============================================================
+// メイン推定関数
+// 引数: { type, duration(min), rpe, weight(kg), age, sex,
+//         cardioType, hr, zone }
+// 戻り値: { kcal, method, detail }
+// ============================================================
+function estimateTrainingKcal({ type, duration, rpe, weight, age, sex,
+                                 cardioType, hr, zone }) {
+  const w  = weight || 70;
+  const d  = duration || 0;
+  const r  = rpe || 7;
+  const h  = d / 60; // 時間（h）
+
+  // ① 心拍ベース推定（有酸素で心拍あり）
+  // Keytel et al. (2005): 性別・体重・年齢・心拍から推定
+  if (hr && hr > 80 && (type === 'cardio' || type === 'firefighter_run')) {
+    const ag = age || 28;
+    let kcalPerMin;
+    if (sex === 'female') {
+      kcalPerMin = (-20.4022 + 0.4472 * hr - 0.1263 * w + 0.074 * ag) / 4.184;
+    } else {
+      kcalPerMin = (-55.0969 + 0.6309 * hr + 0.1988 * w + 0.2017 * ag) / 4.184;
+    }
+    // 防火装備補正
+    const mult = type === 'firefighter_run' ? 1.7 : 1.0;
+    const kcal = Math.round(Math.max(0, kcalPerMin) * d * mult);
+    return {
+      kcal,
+      method: '心拍ベース（Keytel 2005）',
+      detail: `HR${hr}bpm × ${d}分 × ${mult > 1 ? '装備補正×1.7' : ''}`,
+    };
+  }
+
+  // ② 有酸素MET + RPE補正
+  if (type === 'cardio' || type === 'firefighter_run') {
+    const ctMet = CARDIO_MET[cardioType] || CARDIO_MET['crosstrainer'];
+    const intensity = rpeToIntensity(r);
+    const met = ctMet.base + (ctMet.max - ctMet.base) * intensity;
+    const firefMult = type === 'firefighter_run' ? 1.7 : 1.0;
+    const kcal = Math.round(met * w * h * firefMult);
+    return {
+      kcal,
+      method: `MET法（Ainsworth 2011）+ RPE${r}補正`,
+      detail: `MET${met.toFixed(1)} × ${w}kg × ${d}分${firefMult > 1 ? ' × 1.7(装備)' : ''}`,
+    };
+  }
+
+  // ③ 筋力・HIIT: MET × 体重 × 時間 × RPE強度係数
+  const met = getMETForSession(type, r);
+  const kcal = Math.round(met * w * h);
+  return {
+    kcal,
+    method: `MET法（Ainsworth 2011）+ RPE${r}強度補正`,
+    detail: `MET${met.toFixed(1)} × ${w}kg × ${d}分`,
+  };
+}
+
+// フォームのデータからリアルタイム推定してkcalフィールドに反映
+function autoEstimateKcal() {
+  const type     = document.getElementById('t-type')?.value || 'strength';
+  const duration = parseInt(document.getElementById('t-duration')?.value) || 0;
+  const rpe      = parseInt(document.getElementById('t-rpe')?.value) || 7;
+  const hr       = parseInt(document.getElementById('t-cardio-hr')?.value) || 0;
+  const cardioType = document.getElementById('t-cardio-type')?.value || 'crosstrainer';
+
+  if (!duration) return;
+
+  const c   = DB.get('cfg') || {};
+  const w   = c.tdeeweight || 70;
+  const age = c.age || 28;
+  const sex = c.sex || 'male';
+
+  const result = estimateTrainingKcal({
+    type, duration, rpe, weight: w, age, sex, cardioType, hr,
+  });
+
+  // kcalフィールドに自動入力（手動入力を優先）
+  const kcalEl = document.getElementById('t-cardio-kcal');
+  const hintEl = document.getElementById('kcal-estimate-hint');
+
+  if (kcalEl && !kcalEl.dataset.manualEdit) {
+    kcalEl.value = result.kcal;
+  }
+
+  // 筋力トレの消費カロリー表示（別フィールドに表示）
+  const strengthKcalEl = document.getElementById('t-strength-kcal-display');
+  if (strengthKcalEl && type === 'strength') {
+    strengthKcalEl.innerHTML = `
+      <span style="color:var(--accent4);font-weight:600">${result.kcal} kcal</span>
+      <span style="color:var(--text3);font-size:10px;margin-left:6px">${result.method}</span>
+    `;
+    strengthKcalEl.style.display = 'block';
+  } else if (strengthKcalEl) {
+    strengthKcalEl.style.display = 'none';
+  }
+
+  if (hintEl) {
+    hintEl.innerHTML = `推定: <strong>${result.kcal} kcal</strong>
+      <span style="font-size:10px;color:var(--text3);margin-left:4px">${result.detail}</span>`;
+    hintEl.style.display = 'block';
+  }
+}
+
 // ============================================================
 // インターバルタイマー設定（エビデンスベース）
 // ============================================================
@@ -3726,11 +3885,27 @@ function saveTraining(){
     });
   }
 
+  // 消費カロリーを推定・記録
+  const c_ = DB.get('cfg') || {};
+  const estimatedKcal_ = estimateTrainingKcal({
+    type, duration: dur, rpe,
+    weight: c_.tdeeweight || 70,
+    age: c_.age || 28,
+    sex: c_.sex || 'male',
+    cardioType: cardioData?.cardioType || 'crosstrainer',
+    hr: cardioData?.hr || 0,
+  });
+  const recordedKcal = cardioData?.kcal || estimatedKcal_.kcal;
+
   DB.push('trainings', {
     date, type, duration: dur, rpe,
     water: parseInt(document.getElementById('t-water').value) || 0,
     notes: document.getElementById('t-notes').value,
-    exercises, cardioData, id: Date.now()
+    exercises, cardioData,
+    estimatedKcal: estimatedKcal_.kcal,
+    recordedKcal,
+    kcalMethod: estimatedKcal_.method,
+    id: Date.now()
   });
 
   // フォームリセット
@@ -4381,6 +4556,7 @@ function onTrainingTypeChange(){
     const hintEl=document.getElementById('firefighter-run-hint');
     if(hintEl)hintEl.style.display='none';
   }
+  autoEstimateKcal();
 }
 function updateCardioZoneHint(){
   const zone=document.getElementById('t-cardio-zone').value;
