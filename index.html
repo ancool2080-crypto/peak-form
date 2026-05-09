@@ -447,10 +447,10 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">🔥 防火装備ランニング</div>
       <div style="font-size:11px;color:var(--text2);line-height:1.7">
         <div>• <strong>装備重量:</strong> 空気呼吸器(13kg) + 防火衣(8kg) + ヘルメット等 ≈ 25kg</div>
-        <div>• <strong>負荷補正:</strong> 通常有酸素の<strong style="color:var(--accent)">×1.7倍</strong>でATL/CTLに計上</div>
+        <div>• <strong>負荷補正:</strong> 通常有酸素の<strong style="color:var(--accent)">×1.4倍</strong>でATL/CTLに計上</div>
         <div>• <strong>消費カロリー:</strong> 約17kcal/分（坂道ダッシュは約19.5kcal/分）</div>
         <div>• <strong>推奨ゾーン:</strong> Zone3〜4（装備着用で心拍が通常より高め）</div>
-        <div style="margin-top:4px;color:var(--text3);font-size:10px">根拠: Knapik et al. (1990) 装備重量による代謝コスト1.5〜2倍</div>
+        <div style="margin-top:4px;color:var(--text3);font-size:10px">根拠: Knapik et al. (1990) 装備重量による代謝コスト実測平均+35〜45%</div>
       </div>
     </div>
       <div class="divider"></div>
@@ -1631,6 +1631,34 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div id="api-key-status" style="font-size:12px;color:var(--text3)"></div>
   </div>
 
+  <!-- 勤務カロリー補正カスタム設定 -->
+  <div class="card card-blue" style="margin-bottom:18px">
+    <div class="card-header-bar blue"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div>
+        <div class="h3">勤務カロリー補正設定</div>
+        <div class="muted" style="font-size:11px;margin-top:2px">個人差に合わせてカスタマイズ</div>
+      </div>
+      <button class="btn btn-sm" onclick="toggleShiftBonusSettings()" id="shift-bonus-toggle">▼ 設定を開く</button>
+    </div>
+    <!-- クイック表示 -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px">
+      <div style="text-align:center;padding:6px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:15px;font-weight:600;font-family:var(--font-mono);color:var(--accent)" id="sbonus-quick-24h">+400</div>
+        <div style="font-size:9px;color:var(--text3)">当番</div>
+      </div>
+      <div style="text-align:center;padding:6px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:15px;font-weight:600;font-family:var(--font-mono);color:var(--accent3)" id="sbonus-quick-off-work">+200</div>
+        <div style="font-size:9px;color:var(--text3)">非番出勤</div>
+      </div>
+      <div style="text-align:center;padding:6px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:15px;font-weight:600;font-family:var(--font-mono);color:#c4b5fd" id="sbonus-quick-rest-work">+350</div>
+        <div style="font-size:9px;color:var(--text3)">週休出勤</div>
+      </div>
+    </div>
+    <div id="shift-bonus-settings-panel" style="display:none"></div>
+  </div>
+
   <div style="margin-bottom:18px"><div class="card-header-bar"></div><div class="h3" style="margin-bottom:12px">データ管理</div><div class="row" style="gap:10px;flex-wrap:wrap"><button class="btn" onclick="exportData()">JSONエクスポート</button><button class="btn btn-danger" onclick="clearAll()">全データリセット</button></div><div class="muted" style="margin-top:10px;font-size:12px">エクスポートしたJSONはExcel・Google Sheetsにインポート可能。ブラウザのlocalStorageに永続保存されます。</div></div>
   <div class="card"><div class="card-header-bar blue"></div><div class="h3" style="margin-bottom:12px">科学的根拠</div>
     <table><thead><tr><th>機能</th><th>根拠</th></tr></thead><tbody>
@@ -2793,16 +2821,18 @@ function rpeToIntensity(rpe) {
 // MET値テーブル（Ainsworth 2011 + 消防装備補正）
 function getMETForSession(type, rpe) {
   const intensity = rpeToIntensity(rpe);
+  // 実測値ベース MET（休憩・セットアップ込みの実セッション）
+  // Ainsworth (2011) + 実際の筋トレセッションへの補正
+  // 筋力: 有効運動時間は全体の約40〜50%→ METを0.55倍で補正
+  // HIIT: 高強度インターバル → 補正少なめ
   const baseMET = {
-    // 筋力系: ベースMET × RPE強度係数
-    strength:        3.5 + intensity * 4.5,  // 3.5〜8.0 METs
-    hiit:            6.0 + intensity * 6.0,  // 6〜12 METs
-    functional:      4.0 + intensity * 4.0,
-    mobility:        2.5,
-    firefighting:    7.0 + intensity * 3.0,  // 消防訓練
-    // 有酸素系
-    cardio:          4.0 + intensity * 8.0,  // 種目で上書き
-    firefighter_run: (8.0 + intensity * 8.0) * 1.7, // 装備補正×1.7
+    strength:        2.0 + intensity * 2.5,  // 2.0〜4.5 METs（休憩込み実セッション）
+    hiit:            5.0 + intensity * 4.0,  // 5.0〜9.0 METs
+    functional:      3.0 + intensity * 2.5,
+    mobility:        2.0,
+    firefighting:    5.0 + intensity * 3.0,
+    cardio:          4.0 + intensity * 8.0,  // 有酸素は種目で上書き
+    firefighter_run: (8.0 + intensity * 8.0) * 1.4, // 装備補正×1.4（1.7→1.4に修正）
   };
   return baseMET[type] || 4.0;
 }
@@ -2847,7 +2877,7 @@ function estimateTrainingKcal({ type, duration, rpe, weight, age, sex,
       kcalPerMin = (-55.0969 + 0.6309 * hr + 0.1988 * w + 0.2017 * ag) / 4.184;
     }
     // 防火装備補正
-    const mult = type === 'firefighter_run' ? 1.7 : 1.0;
+    const mult = type === 'firefighter_run' ? 1.4 : 1.0; // 装備補正×1.4
     const kcal = Math.round(Math.max(0, kcalPerMin) * d * mult);
     return {
       kcal,
@@ -2861,7 +2891,7 @@ function estimateTrainingKcal({ type, duration, rpe, weight, age, sex,
     const ctMet = CARDIO_MET[cardioType] || CARDIO_MET['crosstrainer'];
     const intensity = rpeToIntensity(r);
     const met = ctMet.base + (ctMet.max - ctMet.base) * intensity;
-    const firefMult = type === 'firefighter_run' ? 1.7 : 1.0;
+    const firefMult = type === 'firefighter_run' ? 1.4 : 1.0; // 装備補正×1.4
     const kcal = Math.round(met * w * h * firefMult);
     return {
       kcal,
@@ -3038,6 +3068,82 @@ function resetRestPrefs() {
   updateRestDisplays();
 }
 
+
+// ============================================================
+// 勤務カロリー補正カスタム設定
+// ============================================================
+function renderShiftBonusSettings() {
+  const el = document.getElementById('shift-bonus-settings-panel');
+  if (!el) return;
+  const userBonus = DB.get('pf_shift_bonus_custom') || {};
+  const defaults = {'24h':400,'off-work':200,'rest-work':350,'dayshift':150,'gym':300,'cardio':250};
+  const labels = {'24h':'当番（24h勤務）','off-work':'非番出勤','rest-work':'週休出勤',
+                   'dayshift':'日勤','gym':'ジム','cardio':'有酸素'};
+  const colors = {'24h':'var(--accent)','off-work':'var(--accent3)','rest-work':'#c4b5fd',
+                   'dayshift':'#fbbf24','gym':'var(--accent4)','cardio':'var(--accent4)'};
+
+  el.innerHTML = `
+    <div style="font-size:11px;color:var(--text3);margin-bottom:12px;background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.2);border-radius:var(--rs);padding:10px;line-height:1.7">
+      <div style="font-weight:600;color:var(--accent2);margin-bottom:4px">📌 補正値について</div>
+      <div>• 個人差が大きいため自分の実測値に合わせてください</div>
+      <div>• デフォルト値は待機多めの標準的な勤務日を想定</div>
+      <div>• 出動が多い日や訓練が多い日は手動で増やしてください</div>
+    </div>
+    ${Object.entries(defaults).map(([key, def]) => {
+      const val = userBonus[key] ?? def;
+      return `
+      <div style="margin-bottom:12px;padding:10px;background:var(--bg3);border-radius:var(--rs);border-left:3px solid ${colors[key]}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:13px;font-weight:500">${labels[key]}</span>
+          <span style="font-family:var(--font-mono);font-size:16px;font-weight:600;color:${colors[key]}">+<span id="sbonus-val-${key}">${val}</span>kcal</span>
+        </div>
+        <input type="range" min="0" max="1000" step="50" value="${val}"
+          style="width:100%;accent-color:${colors[key]}"
+          oninput="updateShiftBonusDisplay('${key}',this.value)"
+          onchange="saveShiftBonus('${key}',this.value)">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:2px">
+          <span>0</span><span style="color:${colors[key]}">デフォルト: ${def}kcal</span><span>1000</span>
+        </div>
+      </div>`;
+    }).join('')}
+    <button class="btn btn-sm" style="width:100%;margin-top:4px" onclick="resetShiftBonus()">デフォルトに戻す</button>
+  `;
+}
+
+function updateShiftBonusDisplay(key, val) {
+  const el = document.getElementById('sbonus-val-' + key);
+  if (el) el.textContent = val;
+}
+
+function saveShiftBonus(key, val) {
+  const userBonus = DB.get('pf_shift_bonus_custom') || {};
+  userBonus[key] = parseInt(val);
+  DB.set('pf_shift_bonus_custom', userBonus);
+  updateNutritionGoals();
+  renderDashboard();
+}
+
+function resetShiftBonus() {
+  DB.set('pf_shift_bonus_custom', {});
+  renderShiftBonusSettings();
+  updateNutritionGoals();
+  renderDashboard();
+}
+
+function toggleShiftBonusSettings() {
+  const panel = document.getElementById('shift-bonus-settings-panel');
+  const btn   = document.getElementById('shift-bonus-toggle');
+  if (!panel) return;
+  if (panel.style.display === 'none' || panel.style.display === '') {
+    panel.style.display = 'block';
+    renderShiftBonusSettings();
+    if (btn) btn.textContent = '▲ 閉じる';
+  } else {
+    panel.style.display = 'none';
+    if (btn) btn.textContent = '▼ 設定を開く';
+  }
+}
+
 function saveSuppCheck(){
   const suppData=DB.get('pf_supp_checks')||{};
   const todayStr=today();
@@ -3209,7 +3315,7 @@ function computeLoad(){
   const s=DB.arr('trainings');const days={};
   s.forEach(t=>{// 防火装備ランニングは装備重量(約25kg)による代謝コスト増加を反映 ×1.7
   // 根拠: Knapik et al. (1990) 装備重量による代謝コスト1.5〜2倍
-  const ffMult = t.type === 'firefighter_run' ? 1.7 : 1.0;
+  const ffMult = t.type === 'firefighter_run' ? 1.4 : 1.0; // 装備重量補正 ×1.4（Knapik 1990 実測平均値）
   const l = Math.round((parseInt(t.duration)||0) * (parseInt(t.rpe)||5) * ffMult);days[t.date]=(days[t.date]||0)+l});
   // シフト負荷を統合（消防訓練日の疲労をATL/CTLに反映）
   const shiftData=DB.get('pf_shift_data')||{};
@@ -4199,15 +4305,17 @@ function getTodayShiftCalBonus(){
   const entry=shiftData[today()];
   if(!entry)return{bonus:0,label:'シフト未登録',color:'var(--text3)'};
   const type=getShiftType(entry);
+  // ユーザーカスタム補正値を優先
+  const userBonus = DB.get('pf_shift_bonus_custom') || {};
   const bonusMap={
-    '24h':      {bonus:700,label:'当番',     color:'var(--accent)'},
-    'off-work': {bonus:400,label:'非番出勤', color:'var(--accent3)'},
-    'rest-work':{bonus:600,label:'週休出勤', color:'var(--accent5)'},
-    'dayshift': {bonus:150,label:'日勤',     color:'rgba(251,191,36,0.9)'},
-    'gym':      {bonus:300,label:'ジム',     color:'var(--accent4)'},
-    'cardio':   {bonus:250,label:'有酸素',   color:'var(--accent4)'},
-    'off':      {bonus:0,  label:'非番',     color:'var(--text2)'},
-    'rest':     {bonus:0,  label:'週休',     color:'var(--text2)'},
+    '24h':      {bonus: userBonus['24h']      ?? 400, label:'当番',     color:'var(--accent)'},
+    'off-work': {bonus: userBonus['off-work'] ?? 200, label:'非番出勤', color:'var(--accent3)'},
+    'rest-work':{bonus: userBonus['rest-work']?? 350, label:'週休出勤', color:'var(--accent5)'},
+    'dayshift': {bonus: userBonus['dayshift'] ?? 150, label:'日勤',     color:'rgba(251,191,36,0.9)'},
+    'gym':      {bonus: userBonus['gym']      ?? 300, label:'ジム',     color:'var(--accent4)'},
+    'cardio':   {bonus: userBonus['cardio']   ?? 250, label:'有酸素',   color:'var(--accent4)'},
+    'off':      {bonus: userBonus['off']      ?? 0,   label:'非番',     color:'var(--text2)'},
+    'rest':     {bonus: userBonus['rest']     ?? 0,   label:'週休',     color:'var(--text2)'},
   };
   if(typeof entry==='object'&&entry.hours&&(type==='off-work'||type==='rest-work')){
     const hrs=parseFloat(entry.hours)||4;
@@ -5833,6 +5941,12 @@ function applyTDEE(){const tdee=parseInt(document.getElementById('td-tdee').text
 function saveSettings(){const c={name:document.getElementById('cfg-name').value,dept:document.getElementById('cfg-dept').value,goalweight:parseFloat(document.getElementById('cfg-goalweight').value)||0,goalmode:document.getElementById('cfg-goalmode').value,tdee:parseInt(document.getElementById('cfg-tdee').value)||2800,water:parseInt(document.getElementById('cfg-water').value)||2500};DB.set('cfg',c);alert('設定を保存しました');}
 
 function loadSettings(){const c=cfg();['cfg-name','cfg-dept','cfg-tdee','cfg-water'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=c[id.replace('cfg-','')]||''});if(document.getElementById('cfg-goalmode'))document.getElementById('cfg-goalmode').value=c.goalmode||'maintain';
+  // 勤務補正クイック表示更新
+  const userBonus_ = DB.get('pf_shift_bonus_custom') || {};
+  [['24h',400,'sbonus-quick-24h'],['off-work',200,'sbonus-quick-off-work'],['rest-work',350,'sbonus-quick-rest-work']].forEach(([k,def,elId])=>{
+    const el=document.getElementById(elId);
+    if(el)el.textContent='+'+(userBonus_[k]??def);
+  });
   // APIキー設定状態表示
   const apiStatus = document.getElementById('api-key-status');
   if (apiStatus) {
