@@ -435,11 +435,22 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="card" style="margin-bottom:18px">
     <div class="card-header-bar blue"></div>
     <div class="h3" style="margin-bottom:16px">本日のセッション</div>
-    <div class="grid2"><div class="field"><label class="label">日付</label><input type="date" id="t-date"></div><div class="field"><label class="label">種別</label><select id="t-type" onchange="onTrainingTypeChange()"><option value="strength">筋力トレーニング</option><option value="hiit">HIIT</option><option value="cardio">有酸素</option><option value="functional">機能的トレーニング</option><option value="mobility">モビリティ・回復</option><option value="firefighting">消防訓練</option></select></div></div>
+    <div class="grid2"><div class="field"><label class="label">日付</label><input type="date" id="t-date"></div><div class="field"><label class="label">種別</label><select id="t-type" onchange="onTrainingTypeChange()"><option value="strength">筋力トレーニング</option><option value="hiit">HIIT</option><option value="cardio">有酸素</option><option value="functional">機能的トレーニング</option><option value="mobility">モビリティ・回復</option><option value="firefighting">消防訓練</option><option value="firefighter_run">🔥 防火装備ランニング</option></select></div></div>
     <div class="grid3"><div class="field"><label class="label">時間（分）<span class="muted" style="font-size:10px;font-weight:400;margin-left:4px">インターバル含む合計</span></label><input type="number" id="t-duration" placeholder="60"></div><div class="field"><label class="label">RPE（1〜10）</label><input type="number" id="t-rpe" placeholder="7" min="1" max="10"></div><div class="field"><label class="label">水分（mL）</label><input type="number" id="t-water" placeholder="2000"></div></div>
 
     <!-- 有酸素専用フィールド（cardio/hiit時のみ表示） -->
     <div id="cardio-fields" style="display:none">
+    <!-- 防火装備ランニング専用注記 -->
+    <div id="firefighter-run-hint" style="display:none;background:rgba(255,69,96,0.08);border:1px solid rgba(255,69,96,0.3);border-radius:var(--rs);padding:10px 12px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">🔥 防火装備ランニング</div>
+      <div style="font-size:11px;color:var(--text2);line-height:1.7">
+        <div>• <strong>装備重量:</strong> 空気呼吸器(13kg) + 防火衣(8kg) + ヘルメット等 ≈ 25kg</div>
+        <div>• <strong>負荷補正:</strong> 通常有酸素の<strong style="color:var(--accent)">×1.7倍</strong>でATL/CTLに計上</div>
+        <div>• <strong>消費カロリー:</strong> 約17kcal/分（坂道ダッシュは約19.5kcal/分）</div>
+        <div>• <strong>推奨ゾーン:</strong> Zone3〜4（装備着用で心拍が通常より高め）</div>
+        <div style="margin-top:4px;color:var(--text3);font-size:10px">根拠: Knapik et al. (1990) 装備重量による代謝コスト1.5〜2倍</div>
+      </div>
+    </div>
       <div class="divider"></div>
       <div class="h3" style="margin-bottom:12px">有酸素の詳細</div>
       <div class="grid2" style="margin-bottom:10px">
@@ -1657,7 +1668,7 @@ const cfg=()=>DB.get('cfg')||{tdee:2800,goalmode:'maintain',water:2500,name:''};
 const today=()=>new Date().toISOString().slice(0,10);
 const fmtInt=n=>isFinite(n)?Math.round(n):'—';
 const fmt1=n=>isFinite(n)?Number(n).toFixed(1):'—';
-const typeLabel={strength:'筋力',hiit:'HIIT',cardio:'有酸素',functional:'機能',mobility:'回復',firefighting:'消防訓練'};
+const typeLabel={strength:'筋力',hiit:'HIIT',cardio:'有酸素',functional:'機能',mobility:'回復',firefighting:'消防訓練',firefighter_run:'🔥防火装備RUN'};
 const mealLabel={breakfast:'朝食',preworkout:'トレ前',postworkout:'トレ後',lunch:'昼食',dinner:'夕食',snack:'間食'};
 const pageNames={dashboard:'ダッシュボード',peaking:'ピーキングプランナー',program:'今日のメニュー',training:'トレーニング記録',nutrition:'栄養管理',sleep:'睡眠・回復',shift:'シフト管理',gut:'腸内環境管理',supplement:'サプリメント',tdee:'TDEEカリキュレーター',analysis:'分析レポート',settings:'設定'};
 
@@ -3037,7 +3048,10 @@ function renderDashboard(){
 
 function computeLoad(){
   const s=DB.arr('trainings');const days={};
-  s.forEach(t=>{const l=(parseInt(t.duration)||0)*(parseInt(t.rpe)||5);days[t.date]=(days[t.date]||0)+l});
+  s.forEach(t=>{// 防火装備ランニングは装備重量(約25kg)による代謝コスト増加を反映 ×1.7
+  // 根拠: Knapik et al. (1990) 装備重量による代謝コスト1.5〜2倍
+  const ffMult = t.type === 'firefighter_run' ? 1.7 : 1.0;
+  const l = Math.round((parseInt(t.duration)||0) * (parseInt(t.rpe)||5) * ffMult);days[t.date]=(days[t.date]||0)+l});
   // シフト負荷を統合（消防訓練日の疲労をATL/CTLに反映）
   const shiftData=DB.get('pf_shift_data')||{};
   Object.entries(shiftData).forEach(([date,entry])=>{
@@ -3672,7 +3686,7 @@ function saveTraining(){
   const type = document.getElementById('t-type').value;
   if (!date || !dur) { alert('日付と時間は必須です'); return; }
 
-  const isCardio = type === 'cardio' || type === 'hiit';
+  const isCardio = type === 'cardio' || type === 'hiit' || type === 'firefighter_run' || type === 'firefighter_run';
   let cardioData = null;
   if (isCardio) {
     cardioData = {
@@ -4331,6 +4345,8 @@ const CARDIO_TYPES={
   outdoor_run:{label:'屋外ランニング',kcalPerMin:10},
   cycling:{label:'サイクリング',kcalPerMin:7},
   walk:{label:'ウォーキング',kcalPerMin:4},
+  firefighter_run:{label:'🔥防火装備ランニング',kcalPerMin:17},
+  firefighter_hill:{label:'🔥防火装備坂道ダッシュ',kcalPerMin:20},
 };
 const ZONE_HINTS={
   '1':'ゾーン1（〜60%）: アクティブリカバリー。筋肉痛の軽減・血流促進が目的。翌日の筋トレへの影響なし。',
@@ -4341,15 +4357,29 @@ const ZONE_HINTS={
 };
 function onTrainingTypeChange(){
   const type=document.getElementById('t-type').value;
-  const isCardio=type==='cardio'||type==='hiit';
+  const isCardio=type==='cardio'||type==='hiit'||type==='firefighter_run';
   const cf=document.getElementById('cardio-fields');
   const sf=document.getElementById('strength-fields');
   if(cf)cf.style.display=isCardio?'block':'none';
   if(sf)sf.style.display=isCardio?'none':'block';
-  if(isCardio&&type==='hiit'){
+  if(type==='hiit'){
     const zoneEl=document.getElementById('t-cardio-zone');
     if(zoneEl)zoneEl.value='hiit';
     updateCardioZoneHint();
+  }
+  if(type==='firefighter_run'){
+    // 防火装備ランニングのデフォルト設定
+    const cardioTypeEl=document.getElementById('t-cardio-type');
+    if(cardioTypeEl)cardioTypeEl.value='firefighter_run';
+    const zoneEl=document.getElementById('t-cardio-zone');
+    if(zoneEl)zoneEl.value='zone3'; // 装備着用で心拍が上がりやすい
+    updateCardioZoneHint();
+    // 装備負荷の注記を表示
+    const hintEl=document.getElementById('firefighter-run-hint');
+    if(hintEl)hintEl.style.display='block';
+  } else {
+    const hintEl=document.getElementById('firefighter-run-hint');
+    if(hintEl)hintEl.style.display='none';
   }
 }
 function updateCardioZoneHint(){
