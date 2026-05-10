@@ -542,7 +542,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="h2">栄養管理</div>
   <div class="card card-amber" style="margin-bottom:0">
     <div class="card-header-bar amber"></div>
-    <div class="row-between" style="margin-bottom:14px"><div class="h3">スマート栄養アドバイス</div><div class="row" style="gap:6px" id="smart-badges"></div></div>
+    <div class="row-between" style="margin-bottom:14px"><div class="h3">スマート栄養アドバイス</div><div id="n-training-kcal-badge" style="display:none;font-size:12px;padding:5px 10px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:var(--rs);margin-bottom:6px"></div><div class="row" style="gap:6px" id="smart-badges"></div></div>
     <div class="grid3" id="smart-targets" style="margin-bottom:14px"></div>
     <div id="smart-advice-box"></div>
     <div class="divider"></div>
@@ -1652,6 +1652,26 @@ input[type=range]:focus{border:none;box-shadow:none}
       <button class="btn btn-sm btn-primary" onclick="saveApiKeyFromSettings()">保存</button>
     </div>
     <div id="api-key-status" style="font-size:12px;color:var(--text3)"></div>
+  </div>
+
+  <!-- トレーニング消費カロリー反映率設定 -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar green"></div>
+    <div class="h3" style="margin-bottom:8px">トレーニング消費カロリーの反映率</div>
+    <div class="muted" style="font-size:12px;margin-bottom:12px;line-height:1.7">
+      トレーニングで消費したカロリーの何%を栄養目標に上乗せするか設定します。<br>
+      50%推奨（100%だと食べ過ぎリスク・0%は反映なし）
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <input type="range" id="cfg-training-kcal-ratio" min="0" max="100" step="10" value="50"
+        style="flex:1;accent-color:var(--accent4)"
+        oninput="updateTrainingKcalRatioDisplay(this.value)"
+        onchange="saveTrainingKcalRatio(this.value)">
+      <span id="training-kcal-ratio-display" style="font-family:var(--font-mono);font-size:18px;font-weight:600;color:var(--accent4);min-width:40px">50%</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3)">
+      <span>0%（反映なし）</span><span style="color:var(--accent4)">推奨: 50%</span><span>100%（全量）</span>
+    </div>
   </div>
 
   <!-- 勤務カロリー補正カスタム設定 -->
@@ -3232,6 +3252,20 @@ function toggleShiftBonusSettings() {
   }
 }
 
+
+function updateTrainingKcalRatioDisplay(val) {
+  const el = document.getElementById('training-kcal-ratio-display');
+  if (el) el.textContent = val + '%';
+}
+
+function saveTrainingKcalRatio(val) {
+  const c = DB.get('cfg') || {};
+  c.trainingKcalRatio = parseInt(val) / 100;
+  DB.set('cfg', c);
+  updateNutritionGoals();
+  renderDashboard();
+}
+
 function saveSuppCheck(){
   const suppData=DB.get('pf_supp_checks')||{};
   const todayStr=today();
@@ -4259,71 +4293,106 @@ function renderTrainingLog(){
 // ============================================================
 function predictTomorrow() {
   const { atl, ctl, tsb } = computeLoad();
-  const sleeps  = DB.arr('sleeps').slice(-3);
-  const cfg_    = DB.get('cfg') || {};
+  const cfg_ = DB.get('cfg') || {};
+  const allSleeps = DB.arr('sleeps').slice(-7); // 直近7日
+  const sleeps3   = allSleeps.slice(-3);        // 直近3日
 
-  // 今日の栄養達成率
-  const today_ = new Date().toISOString().slice(0,10);
-  const todayMeals = DB.arr('meals').filter(m => m.date === today_);
-  const calTarget = getCalTarget(cfg_.goalmode || 'maintain');
-  const calActual = todayMeals.reduce((s,m) => s + (m.cal||0), 0);
-  const nutritionRate = calTarget > 0 ? Math.min(calActual / calTarget, 1.2) : 0;
-
-  // 直近睡眠スコア
-  const latestSleep = sleeps[sleeps.length - 1];
-  const sleepScore  = latestSleep
-    ? Math.min(latestSleep.duration / 8, 1) * 0.6 + (latestSleep.wellness||7) / 10 * 0.4
-    : 0.5;
-
-  // TSBスコア（-30〜+30 → 0〜1正規化）
-  const tsbScore = Math.max(0, Math.min(1, (tsb + 30) / 60));
-
-  // 疲労蓄積スコア（ATL/CTLが高いほど疲労）
-  const fatigueScore = ctl > 0 ? Math.max(0, 1 - atl / (ctl * 1.5)) : 0.5;
-
-  // 総合予測スコア（0〜100）
-  const score = Math.round(
-    (sleepScore   * 0.35 +
-     tsbScore     * 0.30 +
-     fatigueScore * 0.20 +
-     nutritionRate * 0.15) * 100
-  );
-
-  // 判定
-  let level, color, icon, advice, trainingRec;
-  if (score >= 80) {
-    level = '絶好調';          color = 'var(--accent4)'; icon = '🔥';
-    advice = '高強度トレに最適。PR更新を狙うチャンス。';
-    trainingRec = 'HIGH';
-  } else if (score >= 65) {
-    level = '好調';            color = '#4a9eff';        icon = '💪';
-    advice = '通常強度で記録を継続。調子を維持。';
-    trainingRec = 'NORMAL';
-  } else if (score >= 50) {
-    level = '普通';            color = 'var(--text2)';   icon = '😐';
-    advice = '軽め〜中程度。無理せず継続が大事。';
-    trainingRec = 'LIGHT';
-  } else if (score >= 35) {
-    level = '注意';            color = 'var(--accent3)'; icon = '⚠️';
-    advice = '疲労が蓄積中。Z2有酸素か休養を優先。';
-    trainingRec = 'REST';
-  } else {
-    level = '要回復';          color = 'var(--accent)';  icon = '🛌';
-    advice = '積極的回復が最優先。今日は休む勇気。';
-    trainingRec = 'OFF';
+  // ── 睡眠スコア（3日移動平均）──
+  const sleepScores = allSleeps.map(s => {
+    const durScore  = Math.min(s.duration / 8, 1);
+    const wellScore = (s.wellness || 7) / 10;
+    return durScore * 0.6 + wellScore * 0.4;
+  });
+  // 直近に重みをつけた加重平均（最新日が最も重い）
+  let sleepScore = 0.5;
+  if (sleepScores.length) {
+    const weights = sleepScores.map((_, i) => i + 1);
+    const wSum = weights.reduce((a, b) => a + b, 0);
+    sleepScore = sleepScores.reduce((a, v, i) => a + v * weights[i], 0) / wSum;
   }
 
-  // 要因分析
-  const factors = [];
-  if (sleepScore < 0.5)     factors.push({ text: '睡眠不足', type: 'bad' });
-  if (sleepScore >= 0.75)   factors.push({ text: '睡眠良好', type: 'good' });
-  if (tsb < -10)            factors.push({ text: '疲労蓄積(TSB低)', type: 'bad' });
-  if (tsb > 5)              factors.push({ text: 'フレッシュ(TSB高)', type: 'good' });
-  if (nutritionRate < 0.7)  factors.push({ text: '栄養不足', type: 'bad' });
-  if (nutritionRate >= 0.9) factors.push({ text: '栄養充足', type: 'good' });
-  if (atl > ctl * 1.3)     factors.push({ text: 'オーバーリーチ気味', type: 'bad' });
+  // ── ウェルネストレンド（上昇 / 下降を加味）──
+  let wellnessTrend = 0; // -1〜+1
+  if (sleeps3.length >= 2) {
+    const first = (sleeps3[0].wellness || 7);
+    const last  = (sleeps3[sleeps3.length - 1].wellness || 7);
+    wellnessTrend = (last - first) / 10; // 正=改善、負=悪化
+  }
 
-  return { score, level, color, icon, advice, trainingRec, factors, sleepScore, tsbScore, nutritionRate };
+  // ── TSBスコア（-30〜+30 → 0〜1）──
+  const tsbScore = Math.max(0, Math.min(1, (tsb + 30) / 60));
+
+  // ── 疲労蓄積スコア ──
+  const fatigueScore = ctl > 0 ? Math.max(0, 1 - atl / (ctl * 1.5)) : 0.5;
+
+  // ── 栄養達成率（直近3日平均）──
+  const calTarget = getCalTarget(cfg_.goalmode || 'maintain');
+  let nutritionRate = 0.7; // デフォルト
+  if (calTarget > 0) {
+    const last3Days = [];
+    for (let d = 0; d < 3; d++) {
+      const dt = new Date(); dt.setDate(dt.getDate() - d);
+      const ds = dt.toISOString().slice(0, 10);
+      const dayMeals = DB.arr('meals').filter(m => m.date === ds);
+      if (dayMeals.length) {
+        const cal = dayMeals.reduce((s, m) => s + (m.cal||0), 0);
+        last3Days.push(Math.min(cal / calTarget, 1.2));
+      }
+    }
+    if (last3Days.length) {
+      nutritionRate = last3Days.reduce((a, b) => a + b, 0) / last3Days.length;
+    }
+  }
+
+  // ── 総合予測スコア（0〜100）──
+  const rawScore =
+    sleepScore    * 0.35 +
+    tsbScore      * 0.28 +
+    fatigueScore  * 0.18 +
+    nutritionRate * 0.12 +
+    Math.max(-0.1, Math.min(0.1, wellnessTrend)) * 0.07; // トレンド補正
+
+  const score = Math.round(Math.max(0, Math.min(1, rawScore)) * 100);
+
+  // ── 判定 ──
+  let level, color, icon, advice, trainingRec;
+  if (score >= 80) {
+    level='絶好調'; color='var(--accent4)'; icon='🔥';
+    advice='高強度トレに最適。PR更新を狙うチャンス。';
+    trainingRec='HIGH';
+  } else if (score >= 65) {
+    level='好調'; color='#4a9eff'; icon='💪';
+    advice='通常強度で記録を継続。調子を維持。';
+    trainingRec='NORMAL';
+  } else if (score >= 50) {
+    level='普通'; color='var(--text2)'; icon='😐';
+    advice='軽め〜中程度。無理せず継続が大事。';
+    trainingRec='LIGHT';
+  } else if (score >= 35) {
+    level='注意'; color='var(--accent3)'; icon='⚠️';
+    advice='疲労が蓄積中。Z2有酸素か休養を優先。';
+    trainingRec='REST';
+  } else {
+    level='要回復'; color='var(--accent)'; icon='🛌';
+    advice='積極的回復が最優先。今日は休む勇気。';
+    trainingRec='OFF';
+  }
+
+  // ── 要因分析（詳細化）──
+  const factors = [];
+  if (sleepScore < 0.5)     factors.push({ text: '睡眠不足',       type: 'bad' });
+  if (sleepScore >= 0.75)   factors.push({ text: '睡眠良好',       type: 'good' });
+  if (wellnessTrend < -0.1) factors.push({ text: '体調悪化傾向',   type: 'bad' });
+  if (wellnessTrend > 0.1)  factors.push({ text: '体調改善中',     type: 'good' });
+  if (tsb < -10)            factors.push({ text: '疲労蓄積(TSB低)',type: 'bad' });
+  if (tsb > 5)              factors.push({ text: 'フレッシュ',     type: 'good' });
+  if (tsb > 15)             factors.push({ text: 'ピーク状態',     type: 'good' });
+  if (nutritionRate < 0.7)  factors.push({ text: '栄養不足傾向',   type: 'bad' });
+  if (nutritionRate >= 0.9) factors.push({ text: '栄養充足',       type: 'good' });
+  if (atl > ctl * 1.3)     factors.push({ text: 'オーバーリーチ', type: 'bad' });
+
+  return { score, level, color, icon, advice, trainingRec, factors,
+           sleepScore, tsbScore, nutritionRate, wellnessTrend };
 }
 
 function renderTomorrowPrediction() {
@@ -4361,7 +4430,7 @@ function renderTomorrowPrediction() {
     <!-- スコアバー -->
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
       <div>
-        <div style="font-size:9px;color:var(--text3);margin-bottom:3px;letter-spacing:1px">睡眠</div>
+        <div style="font-size:9px;color:var(--text3);margin-bottom:3px;letter-spacing:1px">睡眠(7日平均)</div>
         <div style="height:4px;background:var(--bg4);border-radius:2px;overflow:hidden">
           <div style="height:100%;width:${Math.round(p.sleepScore*100)}%;background:var(--accent2);border-radius:2px"></div>
         </div>
@@ -4375,7 +4444,7 @@ function renderTomorrowPrediction() {
         <div style="font-size:10px;color:var(--text3);margin-top:2px;font-family:var(--font-mono)">${Math.round(p.tsbScore*100)}%</div>
       </div>
       <div>
-        <div style="font-size:9px;color:var(--text3);margin-bottom:3px;letter-spacing:1px">栄養</div>
+        <div style="font-size:9px;color:var(--text3);margin-bottom:3px;letter-spacing:1px">栄養(3日平均)</div>
         <div style="height:4px;background:var(--bg4);border-radius:2px;overflow:hidden">
           <div style="height:100%;width:${Math.min(100,Math.round(p.nutritionRate*100))}%;background:var(--accent3);border-radius:2px"></div>
         </div>
@@ -4413,8 +4482,40 @@ function getTodayShiftCalBonus(){
   }
   return bonusMap[type]||{bonus:0,label:type,color:'var(--text3)'};
 }
+
+// 今日のトレーニング消費カロリー合計
+function getTodayTrainingKcal() {
+  const todayStr = today();
+  const trainings = DB.arr('trainings').filter(t => t.date === todayStr);
+  if (!trainings.length) return { total: 0, detail: '' };
+  let total = 0;
+  const details = [];
+  trainings.forEach(t => {
+    const kcal = t.recordedKcal || t.estimatedKcal || 0;
+    if (kcal > 0) {
+      total += kcal;
+      details.push(`${typeLabel[t.type]||t.type}${kcal}kcal`);
+    }
+  });
+  return { total: Math.round(total), detail: details.join(' + ') };
+}
+
+// 消費カロリーを加味したカロリー目標
+function getTrainingAdjustedTarget(baseTarget) {
+  const trainingKcal = getTodayTrainingKcal().total;
+  // 消費カロリーの50%を目標に加算（食べすぎ防止のため全量は加算しない）
+  // ユーザー設定で調整可能
+  const cfg_ = DB.get('cfg') || {};
+  const ratio = cfg_.trainingKcalRatio ?? 0.5;
+  return Math.round(baseTarget + trainingKcal * ratio);
+}
+
 function getShiftAdjustedTarget(baseTarget){
-  return baseTarget+getTodayShiftCalBonus().bonus;
+  const shiftBonus = getTodayShiftCalBonus().bonus;
+  const trainingKcal = getTodayTrainingKcal().total;
+  const cfg_ = DB.get('cfg') || {};
+  const ratio = cfg_.trainingKcalRatio ?? 0.5;
+  return Math.round(baseTarget + shiftBonus + trainingKcal * ratio);
 }
 
 
@@ -4991,6 +5092,18 @@ function updateNutritionGoals(){
   ['n-cal-target','n-protein-t','n-carb-t','n-fat-t'].forEach((id,i)=>{
     const el=document.getElementById(id);if(el)el.textContent=[calT,macros.protein,macros.carb,macros.fat][i];
   });
+  // トレーニング消費カロリー表示
+  const tKcal = getTodayTrainingKcal();
+  const trainEl = document.getElementById('n-training-kcal-badge');
+  if (trainEl) {
+    if (tKcal.total > 0) {
+      trainEl.style.display = 'block';
+      trainEl.innerHTML = `<span style="color:var(--accent4)">💪 トレ消費 +${tKcal.total}kcal</span>`+
+        `<span style="font-size:10px;color:var(--text3);margin-left:4px">(目標に${Math.round((DB.get('cfg')||{}).trainingKcalRatio??0.5)*100}%反映)</span>`;
+    } else {
+      trainEl.style.display = 'none';
+    }
+  }
   // シフト補正バッジ
   const {bonus,label,color}=getTodayShiftCalBonus();
   const hintEl=document.getElementById('n-mode-hint');
@@ -5506,7 +5619,19 @@ function renderAnalysis(){
   const{atl,ctl,tsb}=computeLoad();const co={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a5a78',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#5a5a78',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}}};
   const tr=DB.arr('trainings');const weeks={};tr.forEach(t=>{const d=new Date(t.date);const mon=new Date(d);mon.setDate(d.getDate()-(d.getDay()===0?6:d.getDay()-1));const wk=mon.toISOString().slice(0,10);weeks[wk]=(weeks[wk]||0)+(parseInt(t.duration)||0)*(parseInt(t.rpe)||5)});
   const wKeys=Object.keys(weeks).sort().slice(-8);if(aWeekly)aWeekly.destroy();if(wKeys.length){aWeekly=new Chart(document.getElementById('a-weekly-chart'),{type:'bar',data:{labels:wKeys.map(d=>d.slice(5)),datasets:[{data:wKeys.map(k=>weeks[k]),backgroundColor:'rgba(74,158,255,0.45)',borderColor:'#4a9eff',borderWidth:1,borderRadius:4}]},options:co});}
-  const sleeps=DB.arr('sleeps').filter(s=>s.weight>0).slice(-30);if(aWeight)aWeight.destroy();if(sleeps.length){aWeight=new Chart(document.getElementById('a-weight-chart'),{type:'line',data:{labels:sleeps.map(s=>s.date.slice(5)),datasets:[{data:sleeps.map(s=>s.weight),borderColor:'#4a9eff',backgroundColor:'rgba(74,158,255,0.08)',tension:0.4,fill:true,borderWidth:2,pointRadius:3}]},options:co});}
+  const sleeps=DB.arr('sleeps').filter(s=>s.weight>0).slice(-30);if(aWeight)aWeight.destroy();if(sleeps.length){
+  // 7日移動平均を計算
+  const weights=sleeps.map(s=>s.weight);
+  const movAvg=weights.map((_,i)=>{
+    const start=Math.max(0,i-6);
+    const slice=weights.slice(start,i+1);
+    return Math.round(slice.reduce((a,b)=>a+b,0)/slice.length*10)/10;
+  });
+  aWeight=new Chart(document.getElementById('a-weight-chart'),{type:'line',data:{labels:sleeps.map(s=>s.date.slice(5)),datasets:[
+    {label:'体重',data:weights,borderColor:'#4a9eff',backgroundColor:'rgba(74,158,255,0.08)',tension:0.3,fill:true,borderWidth:2,pointRadius:2,pointHoverRadius:5},
+    {label:'7日移動平均',data:movAvg,borderColor:'#f97316',backgroundColor:'transparent',tension:0.4,fill:false,borderWidth:2.5,pointRadius:0,borderDash:[],borderCapStyle:'round'}
+  ]},options:{...co,plugins:{...co.plugins,legend:{display:true,labels:{color:'#5a5a78',font:{size:10},boxWidth:20,usePointStyle:true}}}}}
+  );}
   const meals=DB.arr('meals');const mbd={};meals.forEach(m=>{if(!mbd[m.date])mbd[m.date]={cal:0};mbd[m.date].cal+=m.cal||0});const mDates=Object.keys(mbd).sort().slice(-14);const calT=getCalTarget(cfg().goalmode||'maintain');if(aNutr)aNutr.destroy();if(mDates.length){aNutr=new Chart(document.getElementById('a-nutrition-chart'),{type:'bar',data:{labels:mDates.map(d=>d.slice(5)),datasets:[{data:mDates.map(d=>mbd[d].cal),backgroundColor:'rgba(245,166,35,0.45)',borderColor:'#f5a623',borderWidth:1,borderRadius:4},{data:mDates.map(()=>calT),type:'line',borderColor:'rgba(255,69,96,0.6)',borderDash:[5,3],borderWidth:1.5,pointRadius:0}]},options:co});}
   const sl14=DB.arr('sleeps').slice(-14);if(aWell)aWell.destroy();if(sl14.length){aWell=new Chart(document.getElementById('a-wellness-chart'),{type:'line',data:{labels:sl14.map(s=>s.date.slice(5)),datasets:[{data:sl14.map(s=>s.wellness||0),borderColor:'#f5a623',tension:0.4,borderWidth:2,fill:false,pointRadius:3},{data:sl14.map(s=>s.duration||0),borderColor:'#4a9eff',tension:0.4,borderWidth:1.5,fill:false,pointRadius:0,borderDash:[3,3]}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:0,max:10}}}});}
   renderWeeklySummary();
@@ -6029,6 +6154,12 @@ function applyTDEE(){const tdee=parseInt(document.getElementById('td-tdee').text
 function saveSettings(){const c={name:document.getElementById('cfg-name').value,dept:document.getElementById('cfg-dept').value,goalweight:parseFloat(document.getElementById('cfg-goalweight').value)||0,goalmode:document.getElementById('cfg-goalmode').value,tdee:parseInt(document.getElementById('cfg-tdee').value)||2800,water:parseInt(document.getElementById('cfg-water').value)||2500};DB.set('cfg',c);alert('設定を保存しました');}
 
 function loadSettings(){const c=cfg();['cfg-name','cfg-dept','cfg-tdee','cfg-water'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=c[id.replace('cfg-','')]||''});if(document.getElementById('cfg-goalmode'))document.getElementById('cfg-goalmode').value=c.goalmode||'maintain';
+  // トレーニング消費反映率読み込み
+  const trainingRatioEl = document.getElementById('cfg-training-kcal-ratio');
+  const trainingRatioDisp = document.getElementById('training-kcal-ratio-display');
+  const savedRatio = Math.round(((DB.get('cfg')||{}).trainingKcalRatio ?? 0.5) * 100);
+  if (trainingRatioEl) trainingRatioEl.value = savedRatio;
+  if (trainingRatioDisp) trainingRatioDisp.textContent = savedRatio + '%';
   // 勤務補正クイック表示更新
   const userBonus_ = DB.get('pf_shift_bonus_custom') || {};
   [['24h',400,'sbonus-quick-24h'],['off-work',200,'sbonus-quick-off-work'],['rest-work',350,'sbonus-quick-rest-work']].forEach(([k,def,elId])=>{
