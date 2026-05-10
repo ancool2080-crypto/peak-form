@@ -499,7 +499,17 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="divider"></div>
       <div class="h3" style="margin-bottom:12px">種目記録</div>
       <div id="exercise-list"></div>
-      <button class="btn btn-sm" onclick="addExRow()" style="margin-bottom:16px">+ 種目を追加</button>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <button class="btn btn-sm" onclick="addExRow()">＋ 種目を追加</button>
+      <button class="btn btn-sm" id="sort-ex-btn"
+        style="background:rgba(74,158,255,0.1);border-color:rgba(74,158,255,0.4);color:var(--accent2)"
+        onclick="sortExercisesByType()">⚡ 最適順に並び替え</button>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-bottom:10px">
+      <span style="color:var(--accent)">■ COMP</span> コンパウンド（多関節）→
+      <span style="color:var(--accent2)">■ MACH</span> マシン多関節 →
+      <span style="color:var(--accent4)">■ ISO</span> アイソレーション（単関節）の順が推奨
+    </div>
     </div>
     <div class="field"><label class="label">メモ</label><textarea id="t-notes" rows="2" placeholder="体調、気づき、怪我の有無など"></textarea></div>
     <button class="btn btn-primary" onclick="saveTraining()">記録する</button>
@@ -3266,6 +3276,144 @@ function saveTrainingKcalRatio(val) {
   renderDashboard();
 }
 
+
+// ============================================================
+// 種目タイプ判定（コンパウンド→アイソレーション自動ソート用）
+// 根拠: 多関節→単関節の順序が筋肥大・安全性の観点で推奨
+// NSCA CSCS テキスト・Schoenfeld (2010) 準拠
+// ============================================================
+const EXERCISE_TYPE_MAP = {
+  // コンパウンド（C）: 多関節・高重量・CNS負荷大
+  C: ['スクワット','バックスクワット','フロントスクワット','ゴブレットスクワット','ハックスクワット',
+      'デッドリフト','ルーマニアンデッドリフト','スモウデッドリフト','トラップバーデッドリフト',
+      'ベンチプレス','インクラインベンチプレス','デクラインベンチプレス','ダンベルベンチプレス',
+      'オーバーヘッドプレス','ショルダープレス','アーノルドプレス',
+      'チンニング','懸垂','プルアップ','ラットプルダウン','ケーブルロウ',
+      'ベントオーバーロウ','バーベルロウ','シーテッドロウ','Tバーロウ',
+      'ディップス','クローズグリップベンチ','ランジ','ブルガリアンスプリットスクワット',
+      'ヒップスラスト','グルートブリッジ','ルーマニアンDL','スティッフレッグDL'],
+  // マシン多関節（M）: マシン使用・多関節だが安定性高い
+  M: ['レッグプレス','ハックスクワット','スミスマシン','チェストプレス','シーテッドプレス',
+      'アシストチンニング','ケーブルプルダウン','シーテッドロウマシン','ペックデック',
+      'Vスクワット','45度レッグプレス'],
+  // アイソレーション（I）: 単関節・低重量・補助種目
+  I: ['カール','バイセップカール','ハンマーカール','インクラインカール','プリーチャーカール',
+      'トライセップス','トライセップスプッシュダウン','ライイングトライセップスエクステンション','スカルクラッシャー',
+      'サイドレイズ','フロントレイズ','リアレイズ','フェイスプル',
+      'レッグカール','レッグエクステンション','レッグアダクター','レッグアブダクター',
+      'カーフレイズ','シーテッドカーフレイズ',
+      'ケーブルフライ','ダンベルフライ','ペックデックフライ',
+      'クランチ','シットアップ','レッグレイズ','プランク','ロシアンツイスト',
+      'バイセップ','ケーブルカール','コンセントレーションカール'],
+};
+
+// 種目名からタイプを判定（C:3点 / M:2点 / I:1点）
+function getExerciseType(name) {
+  if (!name) return { type: 'I', score: 1, label: 'ISO', color: 'var(--accent4)' };
+  const n = name.replace(/[（）()]/g, '').toLowerCase();
+  for (const key of ['C','M','I']) {
+    for (const ex of EXERCISE_TYPE_MAP[key]) {
+      if (n.includes(ex.toLowerCase()) || ex.toLowerCase().includes(n)) {
+        const labels = { C:'COMP', M:'MACH', I:'ISO' };
+        const colors = { C:'var(--accent)', M:'var(--accent2)', I:'var(--accent4)' };
+        const scores = { C:3, M:2, I:1 };
+        return { type: key, score: scores[key], label: labels[key], color: colors[key] };
+      }
+    }
+  }
+  // プログラムDBから判定
+  const prog = getCurrentProgramData();
+  if (prog) {
+    for (const s of Object.values(prog.sessions)) {
+      const ex = (s.exercises||[]).find(e => e.name === name);
+      if (ex) {
+        const t = ex.rpe || 'I'; // rpeフィールドに種目タイプが入っている
+        const labels = { C:'COMP', M:'MACH', I:'ISO' };
+        const colors = { C:'var(--accent)', M:'var(--accent2)', I:'var(--accent4)' };
+        const scores = { C:3, M:2, I:1 };
+        if (labels[t]) return { type: t, score: scores[t], label: labels[t], color: colors[t] };
+      }
+    }
+  }
+  return { type: 'I', score: 1, label: 'ISO', color: 'var(--accent4)' };
+}
+
+// 種目リストをコンパウンド→アイソレーション順にソート
+function sortExercisesByType() {
+  const list = document.getElementById('exercise-list');
+  if (!list) return;
+  const blocks = Array.from(list.querySelectorAll('.ex-block'));
+  if (blocks.length < 2) return;
+
+  // 各ブロックのスコアを取得
+  const scored = blocks.map(block => {
+    const nameEl = block.querySelector('.ex-name');
+    const name = nameEl ? nameEl.value : '';
+    const { score, type } = getExerciseType(name);
+    return { block, name, score, type };
+  });
+
+  // スコア降順（C=3 > M=2 > I=1）でソート、同スコアは元の順序を維持
+  scored.sort((a, b) => b.score - a.score);
+
+  // DOMを並び替え
+  scored.forEach(({ block }) => list.appendChild(block));
+
+  // ソート後にバッジ更新
+  updateAllExTypeBadges();
+
+  // 並び替え完了メッセージ
+  const btn = document.getElementById('sort-ex-btn');
+  if (btn) {
+    btn.textContent = '✓ 並び替え完了';
+    btn.style.color = 'var(--accent4)';
+    setTimeout(() => {
+      btn.textContent = '⚡ 最適順に並び替え';
+      btn.style.color = '';
+    }, 2000);
+  }
+}
+
+// 種目を1つ上に移動
+function moveExUp(eid) {
+  const block = document.getElementById(eid);
+  if (!block) return;
+  const prev = block.previousElementSibling;
+  if (prev && prev.classList.contains('ex-block')) {
+    block.parentNode.insertBefore(block, prev);
+    updateAllExTypeBadges();
+  }
+}
+
+// 種目を1つ下に移動
+function moveExDown(eid) {
+  const block = document.getElementById(eid);
+  if (!block) return;
+  const next = block.nextElementSibling;
+  if (next && next.classList.contains('ex-block')) {
+    block.parentNode.insertBefore(next, block);
+    updateAllExTypeBadges();
+  }
+}
+
+// 全種目のタイプバッジを更新
+function updateAllExTypeBadges() {
+  const list = document.getElementById('exercise-list');
+  if (!list) return;
+  const blocks = Array.from(list.querySelectorAll('.ex-block'));
+  blocks.forEach((block, idx) => {
+    const nameEl = block.querySelector('.ex-name');
+    const name = nameEl ? nameEl.value : '';
+    const { label, color } = getExerciseType(name);
+    const badge = block.querySelector('.ex-type-badge');
+    if (badge) {
+      badge.textContent = (idx + 1) + ' ' + label;
+      badge.style.color = color;
+      badge.style.borderColor = color.replace(')', ',0.4)').replace('var(', 'rgba(').replace('var(--accent)','rgba(255,69,96,0.4)').replace('var(--accent2)','rgba(74,158,255,0.4)').replace('var(--accent4)','rgba(34,197,94,0.4)');
+    }
+  });
+}
+
 function saveSuppCheck(){
   const suppData=DB.get('pf_supp_checks')||{};
   const todayStr=today();
@@ -3938,12 +4086,17 @@ function addExRow(nameVal, setsData){
   const defaultSets = setsData || (prev ? [{weight: parseFloat(prev.weight)||'', reps: parseInt(prev.reps)||''}] : [{weight:'', reps:''}]);
 
   div.innerHTML = `
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0">
+        <button class="btn btn-sm" style="padding:2px 6px;font-size:11px;line-height:1" onclick="moveExUp('${eid}')">▲</button>
+        <button class="btn btn-sm" style="padding:2px 6px;font-size:11px;line-height:1" onclick="moveExDown('${eid}')">▼</button>
+      </div>
+      <span class="ex-type-badge" style="font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;border:1px solid;white-space:nowrap;flex-shrink:0">1 ISO</span>
       <input type="text" class="ex-name" placeholder="種目名" value="${nameVal||''}"
-        style="flex:2;min-width:160px;font-weight:500"
-        oninput="onExNameInput(this,'${eid}')" autocomplete="off">
+        style="flex:2;min-width:140px;font-weight:500"
+        oninput="onExNameInput(this,'${eid}');updateAllExTypeBadges();" autocomplete="off">
       ${prevHint ? `<div class="ex-prev-hint" id="${eid}-hint">${prevHint}</div>` : `<div class="ex-prev-hint" id="${eid}-hint"></div>`}
-      <button class="btn btn-sm btn-ghost" style="margin-left:auto;color:var(--accent)" onclick="document.getElementById('${eid}').remove()">✕</button>
+      <button class="btn btn-sm btn-ghost" style="margin-left:auto;color:var(--accent);flex-shrink:0" onclick="document.getElementById('${eid}').remove();updateAllExTypeBadges()">✕</button>
     </div>
     <div style="display:grid;grid-template-columns:22px 1fr 1fr 60px 36px;gap:5px;align-items:center;margin-bottom:4px;padding:0 4px">
       <span style="font-size:9px;color:var(--text3);text-align:center">SET</span>
@@ -3964,6 +4117,7 @@ function addExRow(nameVal, setsData){
 
   // デフォルトセットを追加
   defaultSets.forEach(s => addSetRow(eid, s.weight, s.reps));
+  updateAllExTypeBadges();
 }
 
 // セット行を追加
