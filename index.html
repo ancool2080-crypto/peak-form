@@ -650,10 +650,33 @@ input[type=range]:focus{border:none;box-shadow:none}
         <span style="font-size:13px;font-weight:500" id="preset-selected-name">—</span>
         <button class="btn btn-sm btn-ghost" onclick="clearPreset()">✕</button>
       </div>
-      <div class="row" style="gap:10px;align-items:center;flex-wrap:wrap">
-        <div style="font-size:12px;color:var(--text2)">量:</div>
-        <input type="range" id="preset-amount-slider" min="25" max="400" step="25" value="100" oninput="updatePresetAmount(this.value)" style="flex:1;min-width:100px">
-        <span id="preset-amount-display" style="font-family:var(--font-mono);font-size:14px;min-width:45px">100g</span>
+      <!-- 量の入力: 数値直接入力 + ±ボタン + スライダー -->
+      <div style="margin-bottom:8px">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">
+          量 <span id="preset-unit-label" style="color:var(--accent2)">g</span>
+        </div>
+        <!-- 数値入力 + ±ボタン -->
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px">
+          <button class="btn btn-sm" style="font-size:16px;padding:6px 12px;font-weight:600;flex-shrink:0"
+            onclick="stepPresetAmount(-1)">−</button>
+          <input type="number" id="preset-amount-input"
+            style="flex:1;text-align:center;font-size:18px;font-weight:600;font-family:var(--font-mono);padding:8px;min-width:0"
+            value="100" min="1" max="9999"
+            oninput="onPresetAmountInput(this.value)">
+          <button class="btn btn-sm" style="font-size:16px;padding:6px 12px;font-weight:600;flex-shrink:0"
+            onclick="stepPresetAmount(1)">＋</button>
+        </div>
+        <!-- クイック選択ボタン（通常食品） -->
+        <div id="preset-quick-buttons" style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px"></div>
+        <!-- スライダー（補助） -->
+        <input type="range" id="preset-amount-slider" min="1" max="500" step="1" value="100"
+          oninput="onPresetAmountInput(this.value)"
+          style="width:100%;accent-color:var(--accent2)">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:2px">
+          <span id="preset-slider-min">1</span>
+          <span id="preset-amount-display" style="font-family:var(--font-mono);color:var(--accent2);font-weight:600">100g</span>
+          <span id="preset-slider-max">500</span>
+        </div>
       </div>
       <div id="preset-macro-preview" style="font-size:12px;color:var(--text2);margin-top:6px"></div>
       <button class="btn btn-sm btn-primary" style="width:100%;margin-top:8px" onclick="applyPreset()">この食品を記録フォームに入力</button>
@@ -2548,43 +2571,108 @@ function renderFoodList(items, containerEl) {
 
 function selectPreset(f){
   selectedPreset=f;
-  // 個数単位（gramsPerUnit）があれば1個から開始、なければperまたは100g
   selectedPresetAmount = f.gramsPerUnit ? 1 : (f.per||100);
-  const row=document.getElementById('preset-amount-row');
-  const nameEl=document.getElementById('preset-selected-name');
-  const slider=document.getElementById('preset-amount-slider');
-  const unitDisp=document.getElementById('preset-unit-label');
-  if(row)row.style.display='block';
-  if(nameEl)nameEl.textContent=f.name;
+
+  const row     = document.getElementById('preset-amount-row');
+  const nameEl  = document.getElementById('preset-selected-name');
+  const unitDisp= document.getElementById('preset-unit-label');
+  const slider  = document.getElementById('preset-amount-slider');
+  const numInput= document.getElementById('preset-amount-input');
+  const quickBtns=document.getElementById('preset-quick-buttons');
+  const sliderMin=document.getElementById('preset-slider-min');
+  const sliderMax=document.getElementById('preset-slider-max');
+
+  if(row)    row.style.display='block';
+  if(nameEl) nameEl.textContent=f.name;
   if(unitDisp)unitDisp.textContent = f.gramsPerUnit ? f.unit : (f.unit||'g');
-  if(slider){
-    if(f.gramsPerUnit){
-      // 個数モード：1〜20個
-      slider.min=1; slider.max=20; slider.step=1; slider.value=1;
-    } else {
-      slider.min=f.per?Math.round(f.per/4):25;
-      slider.max=f.per?f.per*8:400;
-      slider.step=f.per||25;
-      slider.value=f.per||100;
-    }
+
+  if(f.gramsPerUnit){
+    // 個数モード (卵・おにぎり等)
+    const max = Math.min(20, 10);
+    if(slider){ slider.min=1; slider.max=max; slider.step=1; slider.value=1; }
+    if(numInput){ numInput.min=1; numInput.max=max; numInput.step=1; numInput.value=1; }
+    if(sliderMin) sliderMin.textContent='1';
+    if(sliderMax) sliderMax.textContent=max;
+    // クイックボタン: 1〜5個
+    if(quickBtns) quickBtns.innerHTML=[1,2,3,4,5].map(n=>
+      `<button class="btn btn-sm" style="padding:4px 10px;font-size:12px"
+        onclick="onPresetAmountInput(${n})">${n}${f.unit}</button>`
+    ).join('');
+  } else {
+    // 重量モード
+    const step = f.per >= 50 ? 50 : 10;
+    const max  = Math.max(f.per*8, 500);
+    const init = f.per||100;
+    if(slider){ slider.min=step; slider.max=max; slider.step=step; slider.value=init; }
+    if(numInput){ numInput.min=1; numInput.max=9999; numInput.step=step; numInput.value=init; }
+    if(sliderMin) sliderMin.textContent=step+'g';
+    if(sliderMax) sliderMax.textContent=max+'g';
+    // クイックボタン: よく使う重量
+    const quickVals = f.per >= 200
+      ? [f.per, f.per*2]                     // 牛丼など大きい単位
+      : [50,100,150,200,300].filter(v=>v<=max);
+    if(quickBtns) quickBtns.innerHTML = quickVals.map(v=>
+      `<button class="btn btn-sm" style="padding:4px 10px;font-size:12px"
+        onclick="onPresetAmountInput(${v})">${v}g</button>`
+    ).join('');
   }
   updatePresetAmount(selectedPresetAmount);
+}
+
+
+// 数値入力・スライダー・クイックボタン共通ハンドラ
+function onPresetAmountInput(val) {
+  const v = parseFloat(val) || 1;
+  const slider   = document.getElementById('preset-amount-slider');
+  const numInput = document.getElementById('preset-amount-input');
+  if (slider && parseFloat(slider.value) !== v) slider.value = v;
+  if (numInput && parseFloat(numInput.value) !== v) numInput.value = v;
+  updatePresetAmount(v);
+}
+
+// ±ボタン用: stepで増減（重量は10g刻み・個数は1個刻み）
+function stepPresetAmount(dir) {
+  if (!selectedPreset) return;
+  const numInput = document.getElementById('preset-amount-input');
+  const current  = parseFloat(numInput?.value) || selectedPresetAmount;
+  const step = selectedPreset.gramsPerUnit ? 1
+    : (selectedPreset.per >= 200 ? selectedPreset.per : 10);
+  const min  = selectedPreset.gramsPerUnit ? 1 : 1;
+  const max  = selectedPreset.gramsPerUnit ? 20 : 9999;
+  const next = Math.max(min, Math.min(max, current + dir * step));
+  onPresetAmountInput(next);
 }
 
 function updatePresetAmount(amount){
   if(!selectedPreset)return;
   selectedPresetAmount=parseFloat(amount);
-  const base=selectedPreset.per||100;
-  const ratio=selectedPresetAmount/base;
-  const cal=Math.round(selectedPreset.cal*ratio);
-  const p=Math.round(selectedPreset.p*ratio*10)/10;
-  const c=Math.round(selectedPreset.c*ratio*10)/10;
-  const f=Math.round(selectedPreset.f*ratio*10)/10;
-  const disp=document.getElementById('preset-amount-display');
-  const prev=document.getElementById('preset-macro-preview');
-  const unitLabel=selectedPreset.per?`${selectedPresetAmount}${selectedPreset.unit}`:`${selectedPresetAmount}g`;
-  if(disp)disp.textContent=unitLabel;
-  if(prev)prev.innerHTML=`<span class="mono">${cal}kcal / P${p}g / C${c}g / F${f}g</span>${selectedPreset.note?` <span style="color:var(--text3)">— ${selectedPreset.note}</span>`:''}`;
+
+  // 個数単位の場合はper100g基準で計算
+  const base  = selectedPreset.gramsPerUnit ? 100 : (selectedPreset.per||100);
+  const rawG  = selectedPreset.gramsPerUnit
+    ? selectedPresetAmount * selectedPreset.gramsPerUnit
+    : selectedPresetAmount;
+  const ratio = rawG / base;
+
+  const cal = Math.round(selectedPreset.cal*ratio);
+  const p   = Math.round(selectedPreset.p*ratio*10)/10;
+  const c   = Math.round(selectedPreset.c*ratio*10)/10;
+  const f   = Math.round(selectedPreset.f*ratio*10)/10;
+
+  // 表示更新
+  const unitLabel = selectedPreset.gramsPerUnit
+    ? `${selectedPresetAmount}${selectedPreset.unit}（${Math.round(rawG)}g）`
+    : `${selectedPresetAmount}g`;
+
+  const disp = document.getElementById('preset-amount-display');
+  if(disp) disp.textContent = unitLabel;
+
+  const prev = document.getElementById('preset-macro-preview');
+  if(prev) prev.innerHTML =
+    `<span style="color:var(--accent);font-weight:600">${cal}kcal</span>`+
+    `&nbsp; P:<span style="color:var(--accent2)">${p}g</span>`+
+    `&nbsp; C:<span style="color:var(--accent3)">${c}g</span>`+
+    `&nbsp; F:<span style="color:var(--accent4)">${f}g</span>`;
 }
 
 function applyPreset(){
