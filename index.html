@@ -2630,17 +2630,20 @@ function selectPreset(f){
     ).join('');
   } else {
     // 重量モード
-    const step = f.per >= 50 ? 50 : 10;
-    const max  = Math.max(f.per*8, 500);
+    // step: 通常は10g刻み（20g・30g等が設定できるよう）
+    // per>=200の食事単位（牛丼等）はper刻み
+    const step = f.per >= 200 ? f.per : 10;
+    const max  = Math.max(f.per ? f.per*8 : 800, 500);
     const init = f.per||100;
-    if(slider){ slider.min=step; slider.max=max; slider.step=step; slider.value=init; }
-    if(numInput){ numInput.min=1; numInput.max=9999; numInput.step=step; numInput.value=init; }
+    if(slider){ slider.min=10; slider.max=max; slider.step=10; slider.value=init; }
+    if(numInput){ numInput.min=1; numInput.max=9999; numInput.step=10; numInput.value=init; }
     if(sliderMin) sliderMin.textContent=step+'g';
     if(sliderMax) sliderMax.textContent=max+'g';
     // クイックボタン: よく使う重量
+    // クイックボタン: 10g刻みでよく使う重量
     const quickVals = f.per >= 200
-      ? [f.per, f.per*2]                     // 牛丼など大きい単位
-      : [50,100,150,200,300].filter(v=>v<=max);
+      ? [f.per, f.per*2]                     // 食事単位（牛丼等）
+      : [50,100,130,150,200,250,300].filter(v=>v<=max);
     if(quickBtns) quickBtns.innerHTML = quickVals.map(v=>
       `<button class="btn btn-sm" style="padding:4px 10px;font-size:12px"
         onclick="onPresetAmountInput(${v})">${v}g</button>`
