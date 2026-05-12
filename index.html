@@ -287,7 +287,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div id="d-weekly-volume"><div class="muted">今週のトレーニング記録がありません</div></div>
     <div style="margin-top:10px;font-size:11px;color:var(--text3);line-height:1.6">
       ★ CF種目1セット = 主働筋1.0 + 補助筋0.5セット換算（Henselmans分数カウント）<br>
-      目安：初心者MEV = 部位別週4〜6セット / スイートスポット = 週10〜20セット
+      <span id="volume-level-note">目安：初心者MEV = 部位別週4〜6セット / スイートスポット = 週8セット / MRV = 週16セット</span>
     </div>
   </div>
   <div class="card"><div class="card-header-bar"></div><div class="h3" style="margin-bottom:14px">直近のトレーニング</div><div id="d-recent-trainings"><div class="muted">記録がありません</div></div></div>
@@ -1273,6 +1273,16 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="card" style="margin-bottom:18px">
     <div class="card-header-bar"></div>
     <div class="h3" style="margin-bottom:16px">基本情報</div>
+    <!-- 経験レベル -->
+    <div class="field" style="margin-bottom:14px">
+      <label class="label">トレーニング経験レベル</label>
+      <select id="cfg-experience-level" onchange="saveExperienceLevel(this.value)" style="max-width:200px">
+        <option value="beginner">初心者（〜1年）</option>
+        <option value="intermediate">中級者（1〜3年）</option>
+        <option value="advanced">上級者（3年以上）</option>
+      </select>
+      <div id="exp-level-info" style="margin-top:8px;font-size:12px;line-height:1.7;color:var(--text2)"></div>
+    </div>
     <div class="grid2"><div class="field"><label class="label">性別</label><select id="td-sex"><option value="male">男性</option><option value="female">女性</option></select></div><div class="field"><label class="label">年齢</label><input type="number" id="td-age" placeholder="30"></div></div>
     <div class="grid2"><div class="field"><label class="label">身長 (cm)</label><input type="number" id="td-height" placeholder="175"></div><div class="field"><label class="label">体重 (kg)</label><input type="number" id="td-weight" placeholder="70"></div></div>
     <div class="divider"></div>
@@ -2218,6 +2228,61 @@ const EATING_OUT_DB={
     {name:'牛角 上カルビ（並）',unit:'g',per:100,cal:335,p:14.2,c:1.0,f:30.1,tag:'牛角'},
   ],
 };
+
+
+// ============================================================
+// 経験レベル別ボリューム閾値（収穫逓減モデル）
+// 根拠: Pelland et al. (2025) n=2058 / Israetel et al. 2019
+// シフト補正: 24h勤務後はMRVを0.6倍（睡眠不足による回復能力低下）
+// ============================================================
+const VOLUME_LEVELS = {
+  beginner: {
+    label: '初心者',
+    subLabel: '〜1年',
+    mev: 4,   // 最小有効ボリューム
+    mav: 12,  // 最大適応ボリューム（スイートスポット上限）
+    mrv: 16,  // 最大回復可能ボリューム
+    sweet: 8, // 最効率ゾーン上限
+    color: 'var(--accent4)',
+  },
+  intermediate: {
+    label: '中級者',
+    subLabel: '1〜3年',
+    mev: 6,
+    mav: 16,
+    mrv: 20,
+    sweet: 12,
+    color: 'var(--accent2)',
+  },
+  advanced: {
+    label: '上級者',
+    subLabel: '3年以上',
+    mev: 8,
+    mav: 20,
+    mrv: 26,
+    sweet: 16,
+    color: 'var(--accent3)',
+  },
+};
+
+// 現在の経験レベルを取得（シフト補正込み）
+function getVolumeThresholds() {
+  const cfg_ = DB.get('cfg') || {};
+  const level = cfg_.experienceLevel || 'beginner';
+  const base = { ...VOLUME_LEVELS[level] };
+
+  // 当番日（24h勤務）はMRVを60%に補正
+  const shiftData = DB.get('pf_shift_data') || {};
+  const todayShift = shiftData[today()];
+  const shiftType = typeof todayShift === 'object' ? todayShift.type : todayShift;
+  if (shiftType === '24h') {
+    base.mrv = Math.round(base.mrv * 0.6);
+    base.mav = Math.round(base.mav * 0.7);
+    base.shiftWarning = true;
+  }
+
+  return base;
+}
 
 const FOOD_DB_LABELS = {
   protein:     'タンパク質源',
@@ -3417,6 +3482,48 @@ function updateAllExTypeBadges() {
   });
 }
 
+
+// 経験レベル保存（即時反映）
+function saveExperienceLevel(level) {
+  const c = DB.get('cfg') || {};
+  c.experienceLevel = level;
+  DB.set('cfg', c);
+  updateVolumeLevelNote(level);
+  renderDashboard();
+}
+
+// ダッシュボードのレベル説明文を更新
+function updateVolumeLevelNote(level) {
+  const lv = VOLUME_LEVELS[level] || VOLUME_LEVELS.beginner;
+  const note = document.getElementById('volume-level-note');
+  if (note) {
+    note.innerHTML = `${lv.label}基準 — MEV: 週${lv.mev}セット / 効率ゾーン: 週${lv.sweet}セット / MRV: 週${lv.mrv}セット`;
+    note.style.color = lv.color;
+  }
+  // 経験レベル情報パネル
+  const infoEl = document.getElementById('exp-level-info');
+  if (infoEl) {
+    const shiftNote = '当番日はMRVが自動で60%に補正されます（睡眠不足による回復能力低下）';
+    infoEl.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px">
+        <div style="text-align:center;padding:6px;background:var(--bg3);border-radius:var(--rs)">
+          <div style="font-size:16px;font-weight:600;color:var(--accent);font-family:var(--font-mono)">${lv.mev}</div>
+          <div style="font-size:9px;color:var(--text3)">MEV(最小有効)</div>
+        </div>
+        <div style="text-align:center;padding:6px;background:var(--bg3);border-radius:var(--rs)">
+          <div style="font-size:16px;font-weight:600;color:${lv.color};font-family:var(--font-mono)">${lv.sweet}〜${lv.mav}</div>
+          <div style="font-size:9px;color:var(--text3)">MAV(最適ゾーン)</div>
+        </div>
+        <div style="text-align:center;padding:6px;background:var(--bg3);border-radius:var(--rs)">
+          <div style="font-size:16px;font-weight:600;color:var(--accent3);font-family:var(--font-mono)">${lv.mrv}</div>
+          <div style="font-size:9px;color:var(--text3)">MRV(最大回復)</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--text3)">⚡ ${shiftNote}</div>
+    `;
+  }
+}
+
 function saveSuppCheck(){
   const suppData=DB.get('pf_supp_checks')||{};
   const todayStr=today();
@@ -3554,14 +3661,22 @@ function renderDashboard(){
         {label:'腕',parts:['二頭','三頭','カーフ'],color:'#a78bfa'},
         {label:'体幹',parts:['腹'],color:'#6b7280'},
       ];
-      const mev=4,sweet=10,max=20; // 目安セット数
+      // 経験レベル別閾値（シフト補正込み）
+      const thresh = getVolumeThresholds();
+      const mev=thresh.mev, sweet=thresh.sweet, max=thresh.mrv;
       let html2='<div style="display:flex;flex-direction:column;gap:6px">';
       groups.forEach(g=>{
         const total=g.parts.reduce((a,p)=>a+(wv[p]||0),0);
         const rounded=Math.round(total*10)/10;
         if(rounded===0)return;
         const pct=Math.min(100,Math.round(total/max*100));
-        const zone=total<mev?'(MEV未達)':total<=sweet?'(効率ゾーン)':'(高ボリューム)';
+        const zone = total < mev
+          ? `(MEV未達 目標${mev}+セット)`
+          : total <= sweet
+            ? '✓ 効率ゾーン'
+            : total <= max
+              ? '△ 高ボリューム'
+              : '⚠ MRV超過';
         const barCol=total<mev?'#f5a623':total<=sweet?g.color:'#ff4560';
         html2+=`<div>
           <div class="row-between" style="margin-bottom:3px">
@@ -3582,6 +3697,7 @@ function renderDashboard(){
   if(last21.length){const co={color:'#5a5a78',font:{size:10}};dashChart=new Chart(document.getElementById('dash-load-chart'),{type:'line',data:{labels:last21.map(d=>d.date.slice(5)),datasets:[{label:'CTL',data:last21.map(d=>d.ctl),borderColor:'#4a9eff',tension:0.4,fill:false,borderWidth:2,pointRadius:0},{label:'ATL',data:last21.map(d=>d.atl),borderColor:'#ff4560',tension:0.4,fill:false,borderWidth:2,pointRadius:0},{label:'TSB',data:last21.map(d=>d.tsb),borderColor:'#22c55e',tension:0.4,fill:false,borderWidth:1.5,pointRadius:0,borderDash:[5,4]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:co,grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:co,grid:{color:'rgba(255,255,255,0.04)'}}}}})}
 
   renderTomorrowPrediction();
+  updateVolumeLevelNote((DB.get('cfg')||{}).experienceLevel||'beginner');
 }
 
 function computeLoad(){
@@ -6311,6 +6427,11 @@ function applyTDEE(){const tdee=parseInt(document.getElementById('td-tdee').text
 function saveSettings(){const c={name:document.getElementById('cfg-name').value,dept:document.getElementById('cfg-dept').value,goalweight:parseFloat(document.getElementById('cfg-goalweight').value)||0,goalmode:document.getElementById('cfg-goalmode').value,tdee:parseInt(document.getElementById('cfg-tdee').value)||2800,water:parseInt(document.getElementById('cfg-water').value)||2500};DB.set('cfg',c);alert('設定を保存しました');}
 
 function loadSettings(){const c=cfg();['cfg-name','cfg-dept','cfg-tdee','cfg-water'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=c[id.replace('cfg-','')]||''});if(document.getElementById('cfg-goalmode'))document.getElementById('cfg-goalmode').value=c.goalmode||'maintain';
+  // 経験レベル読み込み
+  const expLevelEl = document.getElementById('cfg-experience-level');
+  const savedLevel = (DB.get('cfg')||{}).experienceLevel || 'beginner';
+  if (expLevelEl) expLevelEl.value = savedLevel;
+  updateVolumeLevelNote(savedLevel);
   // トレーニング消費反映率読み込み
   const trainingRatioEl = document.getElementById('cfg-training-kcal-ratio');
   const trainingRatioDisp = document.getElementById('training-kcal-ratio-display');
