@@ -1614,25 +1614,23 @@ input[type=range]:focus{border:none;box-shadow:none}
   <!-- 重量推移トラッカー -->
   <div class="card card-accent" style="margin-bottom:18px">
     <div class="card-header-bar"></div>
-    <div class="row-between" style="margin-bottom:14px">
-      <div class="h3">重量推移トラッカー</div>
-      <div class="row" style="gap:8px">
-        <label style="font-size:12px;display:flex;align-items:center;gap:5px;cursor:pointer">
+    <div style="margin-bottom:12px">
+      <div class="h3" style="margin-bottom:10px">重量推移トラッカー</div>
+      <!-- 検索 + 期間 + 1RM切替 -->
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <input type="text" id="tracker-search" placeholder="種目名で検索" style="flex:1;min-width:120px;font-size:13px" oninput="searchTrackerExercises()">
+        <select id="tracker-range" style="flex-shrink:0;font-size:12px" onchange="renderWeightTracker()">
+          <option value="30">30日</option>
+          <option value="60" selected>60日</option>
+          <option value="90">90日</option>
+          <option value="180">180日</option>
+          <option value="0">全期間</option>
+        </select>
+        <label style="font-size:11px;display:flex;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;white-space:nowrap">
           <input type="checkbox" id="tracker-use-1rm" onchange="renderWeightTracker()">
-          <span>1RM換算表示</span>
+          <span>1RM換算</span>
         </label>
       </div>
-    </div>
-    <!-- 検索 + 期間選択 -->
-    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-      <input type="text" id="tracker-search" placeholder="種目名で検索" style="flex:1;min-width:140px;font-size:13px" oninput="searchTrackerExercises()">
-      <select id="tracker-range" style="flex-shrink:0;font-size:13px" onchange="renderWeightTracker()">
-        <option value="30">30日</option>
-        <option value="60" selected>60日</option>
-        <option value="90">90日</option>
-        <option value="180">180日</option>
-        <option value="0">全期間</option>
-      </select>
     </div>
     <!-- 種目バッジ一覧 -->
     <div id="tracker-suggestions" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px"></div>
@@ -4260,12 +4258,15 @@ function addSetRow(eid, weightVal, repsVal, isWarmup, rpeVal){
   
   row.style.cssText = `background:${bgColor};border-radius:4px;padding:3px 4px;margin-bottom:3px`;
   row.innerHTML = `
-    <div style="display:grid;grid-template-columns:22px 1fr 1fr 60px 36px;gap:5px;align-items:center">
-      <div style="text-align:center">
+    <div style="display:grid;grid-template-columns:22px 1fr 1fr 60px 36px;gap:5px;align-items:start">
+      <div style="text-align:center;padding-top:8px">
         <span style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">${warmupLabel||setNum}</span>
       </div>
-      <input type="number" class="set-weight" placeholder="kg" value="${weightVal||''}" min="0" max="500" step="0.5"
-        style="text-align:center;font-size:13px;padding:7px 4px" oninput="onSetWeightInput(this,'${eid}')">
+      <div>
+        <input type="number" class="set-weight" placeholder="kg" value="${weightVal||''}" min="0" max="500" step="0.5"
+          style="text-align:center;font-size:13px;padding:7px 4px;width:100%" oninput="onSetWeightInput(this,'${eid}')">
+        <div class="set-rm-hint" style="font-size:9px;color:var(--text3);text-align:center;margin-top:2px;min-height:11px;font-family:var(--font-mono)">${rm1Text}</div>
+      </div>
       <input type="number" class="set-reps" placeholder="rep" value="${repsVal||''}" min="1" max="100"
         style="text-align:center;font-size:13px;padding:7px 4px" onchange="onSetComplete(this,'${eid}')">
       <select class="set-rpe" style="font-size:11px;padding:5px 2px;text-align:center">
@@ -4283,7 +4284,6 @@ function addSetRow(eid, weightVal, repsVal, isWarmup, rpeVal){
       <button class="btn btn-sm btn-ghost" style="padding:3px 6px;color:var(--text3);font-size:11px"
         onclick="this.closest('.set-row').remove();reNumberSets('${eid}')">✕</button>
     </div>
-    <div class="set-rm-hint" style="font-size:9px;color:var(--text3);text-align:right;padding-right:40px;min-height:12px">${rm1Text}</div>
   `;
   container.appendChild(row);
 }
@@ -5337,10 +5337,10 @@ function renderWeightTracker(){
   const statsEl=document.getElementById('tracker-stats');
   if(statsEl)statsEl.style.gridTemplateColumns='repeat(2,1fr)';
   if(statsEl){
-    const statCard=(label,val,sub,col)=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:10px;text-align:center">
-      <div style="font-size:10px;color:var(--text3);letter-spacing:1px;margin-bottom:4px">${label}</div>
-      <div style="font-size:20px;font-weight:500;font-family:var(--font-mono);color:${col||'var(--text)'}">${val}</div>
-      <div style="font-size:10px;color:var(--text3);margin-top:2px">${sub}</div>
+    const statCard=(label,val,sub,col)=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:8px 6px;text-align:center">
+      <div style="font-size:9px;color:var(--text3);letter-spacing:0.5px;margin-bottom:3px;white-space:nowrap">${label}</div>
+      <div style="font-size:18px;font-weight:600;font-family:var(--font-mono);color:${col||'var(--text)'};line-height:1.1">${val}</div>
+      <div style="font-size:9px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sub}</div>
     </div>`;
     statsEl.innerHTML=
       statCard('最高記録',max+'kg',use1RM?'推定1RM':'実重量','var(--accent)')+
