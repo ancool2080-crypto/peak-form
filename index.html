@@ -8402,7 +8402,25 @@ function deleteSleep(id) {
 </body>
 </html
   <div class="card" style="margin-bottom:18px">
-    <div class="card-header-bar blue"></div>
+    <!-- 安静時心拍トレンド & VO2max -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar" style="background:#f97316"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="h3">安静時心拍トレンド（14日）</div>
+      <span style="font-size:10px;color:var(--text3)">毎朝起床時に記録</span>
+    </div>
+    <div id="rhr-vo2max-display" style="margin-bottom:10px">
+      <div class="muted" style="font-size:12px">安静時心拍を記録すると表示されます</div>
+    </div>
+    <div class="chart-wrap" style="height:180px"><canvas id="rhr-trend-chart"></canvas></div>
+    <div style="font-size:10px;color:var(--text3);margin-top:8px;line-height:1.7">
+      <div>📉 持久力向上 → 安静時心拍は下がる</div>
+      <div>⚠️ 通常より5〜10bpm以上高い状態が続く → オーバートレーニングの前兆</div>
+      <div style="margin-top:2px">Uth et al. (2004) / NFPA 1582 推奨 VO2max 42以上</div>
+    </div>
+  </div>
+
+  <div class="card-header-bar blue"></div>
     <div class="h3" style="margin-bottom:12px">睡眠記録一覧</div>
     <div id="sleep-record-list"><div class="muted">記録がありません</div></div>
   </div>
