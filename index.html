@@ -3624,7 +3624,8 @@ function calcInjuryRisk() {
   // 24h勤務（最大15点）
   score += Math.min(15, duty24hDays * 5);
 
-  score = Math.min(100, score);
+  // 年齢係数適用（40代+20%・50代+40%のリスク増加）
+  score = Math.min(100, Math.round(score * ageRiskMult));
 
   // リスクレベル判定
   let level, color, icon, advice;
@@ -3653,43 +3654,107 @@ function calcInjuryRisk() {
 // - ACSM Guidelines: 年齢別タンパク質推奨量
 // ============================================================
 function getAgeAdjustedTargets() {
+  // ============================================================
+  // 年齢可変ピークポイント（消防士特化版）
+  // エビデンス:
+  // - タンパク質: ESPEN (2014) / Frontiers Nutrition (2024)
+  //   同化抵抗性は40歳〜増加、70代で顕著（20g→40g必要）
+  //   消防士: Parpa & Michaelides (2024) 年代別体組成・筋力変化
+  // - 睡眠: Barger et al. (2015) JCSM シフト勤務と心血管リスク
+  //   NSCA TSAC (2023) 消防士の睡眠推奨
+  // - 動作品質: Redshaw (2023) 消防士の動作品質は50歳で急低下
+  //   Volpi (2010) 筋量・筋質の劣化は40歳〜加速、60歳〜再加速
+  // - 心肺機能: Cameron et al. SJMSS 縦断的有酸素能力低下
+  // ============================================================
   const c = DB.get('cfg') || {};
   const age = c.age || 28;
   const weight = c.tdeeweight || 70;
+  const level = c.experienceLevel || 'beginner';
 
-  // タンパク質目標（Morton 2018 + 年齢補正）
-  // 35歳以上は同化抵抗性が高まるため+0.1〜0.2g/kg追加
-  const baseProtein = weight * 1.8; // g/day
-  const ageProteinBonus = age >= 50 ? weight * 0.3
-    : age >= 40 ? weight * 0.2
-    : age >= 35 ? weight * 0.1
-    : 0;
-  const proteinTarget = Math.round(baseProtein + ageProteinBonus);
+  // ── 年齢帯区分（消防士エビデンスに基づく閾値）──
+  // 20-29: 基準期（ピーク適応能力）
+  // 30-39: 軽微低下期（回復に+24h追加）
+  // 40-49: 同化抵抗性開始（Volpi 2010: 筋量劣化加速）
+  // 50-59: 急激低下期（Redshaw 2023: 動作品質50歳で急低下）
+  // 60+  : 高齢期（特別対応）
+  const ageGroup = age >= 60 ? 'senior'
+    : age >= 50 ? 'fifties'
+    : age >= 40 ? 'forties'
+    : age >= 30 ? 'thirties'
+    : 'twenties';
 
-  // 推奨睡眠時間（年齢補正）
-  // NSCA: 消防士は通常より1時間多い睡眠が推奨
-  const baseSleep = age >= 50 ? 8.0 : age >= 40 ? 7.5 : 7.0;
-  const sleepTarget = baseSleep + 0.5; // 消防士補正
+  // ── タンパク質目標（g/day）──
+  // 基準: Morton et al. (2018) 1.6〜2.2g/kg
+  // 年齢補正: ESPEN (2014) / Frontiers (2024)
+  // 40歳〜: 同化抵抗性で+0.2g/kg、50歳〜: +0.4g/kg
+  const proteinPerKg = {
+    twenties: 1.8,
+    thirties:  1.9,  // 軽微な同化抵抗性開始
+    forties:   2.1,  // 同化抵抗性明確（+0.3g/kg）
+    fifties:   2.4,  // 急激な同化抵抗性（+0.5g/kg）
+    senior:    2.6,  // 高齢期（+0.7g/kg）
+  }[ageGroup];
+  const proteinTarget = Math.round(weight * proteinPerKg);
+  const proteinBonus = Math.round(weight * (proteinPerKg - 1.8));
 
-  // MEV/MAV補正（加齢による回復能力低下）
+  // ── 1食あたり推奨タンパク質（同化抵抗性に基づく）──
+  // ESPEN (2014): 高齢者は1食0.4g/kg必要（若者は0.2g/kgで十分）
+  const proteinPerMeal = age >= 50
+    ? Math.round(weight * 0.40)  // 40g相当（72kgなら28.8g）
+    : age >= 40
+      ? Math.round(weight * 0.32)
+      : Math.round(weight * 0.25);
+
+  // ── 推奨睡眠時間（h）──
+  // 基準: NSCA消防士推奨 7.5h
+  // 消防士シフト補正: +0.5h（Barger 2015 慢性睡眠不足対策）
+  // 加齢補正: 40代〜回復に時間が必要
+  const sleepBase = { twenties:7.5, thirties:7.5, forties:8.0, fifties:8.5, senior:8.5 }[ageGroup];
+  const sleepTarget = sleepBase; // 消防士補正込み
+
+  // ── トレーニング回復時間（h）──
+  // 若年: 48h / 中年以降: 72h以上必要になる傾向
+  const recoveryHours = { twenties:48, thirties:60, forties:72, fifties:96, senior:96 }[ageGroup];
+
+  // ── ボリューム補正（MRV×係数）──
+  // Redshaw (2023): 50歳で動作品質が急低下
+  // 40代: 回復能力0.85、50代: 0.70（通常値から急低下）
+  const ageMRVMult = { twenties:1.0, thirties:0.95, forties:0.85, fifties:0.70, senior:0.60 }[ageGroup];
   const thresh = getVolumeThresholds();
-  const ageVolumeMult = age >= 50 ? 0.75 : age >= 45 ? 0.85 : age >= 40 ? 0.90 : 1.0;
-  const adjMRV = Math.round(thresh.mrv * ageVolumeMult);
+  const adjMRV = Math.round(thresh.mrv * ageMRVMult);
 
-  // 有酸素推奨（ACSM 2022: 年齢別心拍数目標）
+  // ── 有酸素心拍域（ACSM 2022: 220-age）──
   const maxHR = 220 - age;
-  const zone2HR = { min: Math.round(maxHR * 0.6), max: Math.round(maxHR * 0.7) };
-  const zone3HR = { min: Math.round(maxHR * 0.7), max: Math.round(maxHR * 0.8) };
+  const zone1HR = { min: Math.round(maxHR*0.50), max: Math.round(maxHR*0.60) }; // 回復
+  const zone2HR = { min: Math.round(maxHR*0.60), max: Math.round(maxHR*0.70) }; // 脂肪燃焼
+  const zone3HR = { min: Math.round(maxHR*0.70), max: Math.round(maxHR*0.80) }; // 有酸素閾値
+  const zone4HR = { min: Math.round(maxHR*0.80), max: Math.round(maxHR*0.90) }; // 消防活動想定
 
-  // 骨密度維持推奨（35歳以降に重要）
+  // ── 年代別アドバイス（消防士特化）──
+  const ageAdvice = {
+    twenties: '適応能力ピーク期。高ボリューム・高強度に積極的に対応可。',
+    thirties:  '軽微な回復低下。週1〜2日の完全休養を意識。コンパウンド中心を維持。',
+    forties:   '同化抵抗性が増加。タンパク質を毎食30g以上確保。回復72h必要。骨密度維持（荷重運動継続）。',
+    fifties:   '動作品質の急低下期（Redshaw 2023）。Zone2有酸素比率を上げてCVDリスク管理。タンパク質は毎食40g目標。',
+    senior:    '筋量・心肺機能の積極的維持が最重要。医師と連携しながら段階的に実施。',
+  }[ageGroup];
+
+  // ── 骨密度注意（35歳〜） ──
   const boneHealthNote = age >= 35
-    ? '骨密度維持: 週2回以上の荷重運動（スクワット・デッドリフト）を継続'
+    ? '骨密度維持: 週2回以上の荷重運動（スクワット・デッドリフト）継続'
+    : null;
+
+  // ── CVDリスク注意（消防士特化：40歳〜心血管イベント急増）──
+  // Smith (2019): 消防士の突然死の大半は心臓イベント
+  const cvdNote = age >= 40
+    ? 'CVDリスク管理: Zone2有酸素（' + zone2HR.min + '〜' + zone2HR.max + 'bpm）を週150分以上'
     : null;
 
   return {
-    age, weight, proteinTarget, ageProteinBonus,
-    sleepTarget, adjMRV, maxHR, zone2HR, zone3HR,
-    boneHealthNote, ageVolumeMult,
+    age, weight, ageGroup, proteinTarget, proteinPerKg, proteinBonus, proteinPerMeal,
+    sleepTarget, recoveryHours, adjMRV, ageMRVMult,
+    maxHR, zone1HR, zone2HR, zone3HR, zone4HR,
+    ageAdvice, boneHealthNote, cvdNote,
   };
 }
 
@@ -3746,40 +3811,78 @@ function renderAgeAdjustedTargets() {
   const el = document.getElementById('a-age-targets');
   if (!el) return;
   const t = getAgeAdjustedTargets();
-  const ageGroup = t.age >= 50 ? '50代' : t.age >= 40 ? '40代' : t.age >= 35 ? '35〜39歳' : '34歳以下';
+  const groupLabel = {twenties:'20代（ピーク期）',thirties:'30代（維持期）',forties:'40代（同化抵抗期）',fifties:'50代（急低下期）',senior:'60代以降（高齢期）'}[t.ageGroup];
 
   el.innerHTML = `
-    <div style="font-size:11px;color:var(--accent2);font-weight:600;margin-bottom:10px">
-      ${t.age}歳・体重${t.weight}kg 基準 — ${ageGroup}向け補正適用中
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600;color:var(--accent2)">${t.age}歳・${t.weight}kg — ${groupLabel}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px;line-height:1.6">${t.ageAdvice}</div>
+      </div>
     </div>
+
+    <!-- 主要指標グリッド -->
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px">
-      <div style="background:var(--bg3);border-radius:var(--rs);padding:10px">
-        <div style="font-size:9px;color:var(--text3);margin-bottom:3px">タンパク質目標</div>
+      <div style="background:var(--bg3);border-radius:var(--rs);padding:10px;border-top:2px solid var(--accent2)">
+        <div style="font-size:9px;color:var(--text3);margin-bottom:3px">日タンパク質目標</div>
         <div style="font-size:20px;font-weight:700;font-family:var(--font-mono);color:var(--accent2)">${t.proteinTarget}g</div>
-        <div style="font-size:9px;color:var(--text3)">${t.ageProteinBonus>0?'+'+Math.round(t.ageProteinBonus)+'g 年齢補正':'/日 基準値'}</div>
+        <div style="font-size:9px;color:var(--text3)">${t.proteinPerKg}g/kg${t.proteinBonus>0?' (+'+t.proteinBonus+'g 年齢補正)':''}</div>
       </div>
-      <div style="background:var(--bg3);border-radius:var(--rs);padding:10px">
-        <div style="font-size:9px;color:var(--text3);margin-bottom:3px">推奨睡眠時間</div>
-        <div style="font-size:20px;font-weight:700;font-family:var(--font-mono);color:var(--accent2)">${t.sleepTarget}h</div>
-        <div style="font-size:9px;color:var(--text3)">消防士+0.5h補正込み</div>
+      <div style="background:var(--bg3);border-radius:var(--rs);padding:10px;border-top:2px solid #4a9eff">
+        <div style="font-size:9px;color:var(--text3);margin-bottom:3px">1食タンパク質目標</div>
+        <div style="font-size:20px;font-weight:700;font-family:var(--font-mono);color:#4a9eff">${t.proteinPerMeal}g</div>
+        <div style="font-size:9px;color:var(--text3)">同化抵抗性対策</div>
       </div>
-      <div style="background:var(--bg3);border-radius:var(--rs);padding:10px">
+      <div style="background:var(--bg3);border-radius:var(--rs);padding:10px;border-top:2px solid #22c55e">
+        <div style="font-size:9px;color:var(--text3);margin-bottom:3px">推奨睡眠</div>
+        <div style="font-size:20px;font-weight:700;font-family:var(--font-mono);color:#22c55e">${t.sleepTarget}h</div>
+        <div style="font-size:9px;color:var(--text3)">消防士シフト補正込み</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:var(--rs);padding:10px;border-top:2px solid #f97316">
+        <div style="font-size:9px;color:var(--text3);margin-bottom:3px">推奨回復間隔</div>
+        <div style="font-size:20px;font-weight:700;font-family:var(--font-mono);color:#f97316">${t.recoveryHours}h</div>
+        <div style="font-size:9px;color:var(--text3)">高強度セッション後</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:var(--rs);padding:10px;border-top:2px solid var(--accent4)">
         <div style="font-size:9px;color:var(--text3);margin-bottom:3px">年齢補正MRV</div>
         <div style="font-size:20px;font-weight:700;font-family:var(--font-mono);color:var(--accent4)">${t.adjMRV}セット</div>
-        <div style="font-size:9px;color:var(--text3)">×${t.ageVolumeMult.toFixed(2)} 回復能力補正</div>
+        <div style="font-size:9px;color:var(--text3)">×${t.ageMRVMult.toFixed(2)} 回復能力補正</div>
       </div>
-      <div style="background:var(--bg3);border-radius:var(--rs);padding:10px">
+      <div style="background:var(--bg3);border-radius:var(--rs);padding:10px;border-top:2px solid #a78bfa">
         <div style="font-size:9px;color:var(--text3);margin-bottom:3px">最大心拍数</div>
-        <div style="font-size:20px;font-weight:700;font-family:var(--font-mono);color:var(--accent3)">${t.maxHR}</div>
-        <div style="font-size:9px;color:var(--text3)">220 - ${t.age}歳</div>
+        <div style="font-size:20px;font-weight:700;font-family:var(--font-mono);color:#a78bfa">${t.maxHR}bpm</div>
+        <div style="font-size:9px;color:var(--text3)">220 − ${t.age}歳</div>
       </div>
     </div>
-    <div style="font-size:11px;line-height:1.8;color:var(--text2)">
-      <div>🫁 <strong>Zone2有酸素</strong>（脂肪燃焼・心肺持久力）: <span style="color:var(--accent2);font-family:var(--font-mono)">${t.zone2HR.min}〜${t.zone2HR.max}bpm</span></div>
-      <div>💪 <strong>Zone3有酸素</strong>（消防活動想定強度）: <span style="color:var(--accent3);font-family:var(--font-mono)">${t.zone3HR.min}〜${t.zone3HR.max}bpm</span></div>
-      ${t.boneHealthNote ? `<div style="margin-top:6px;padding:6px 8px;background:rgba(74,158,255,0.08);border-radius:var(--rs);color:var(--accent2)">🦴 ${t.boneHealthNote}</div>` : ''}
+
+    <!-- 心拍ゾーン -->
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:600;margin-bottom:6px;color:var(--text2)">心拍ゾーン（${t.age}歳基準）</div>
+      ${[
+        ['Zone1 回復', t.zone1HR, '#6b7280'],
+        ['Zone2 脂肪燃焼・心肺持久力', t.zone2HR, '#22c55e'],
+        ['Zone3 有酸素閾値', t.zone3HR, '#f97316'],
+        ['Zone4 消防活動想定強度', t.zone4HR, 'var(--accent)'],
+      ].map(([label,zone,color])=>`
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11px">
+          <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></div>
+          <div style="flex:1;color:var(--text2)">${label}</div>
+          <div style="font-family:var(--font-mono);color:${color};font-weight:600">${zone.min}〜${zone.max}</div>
+        </div>
+      `).join('')}
     </div>
-    <div style="font-size:9px;color:var(--text3);margin-top:8px">Frontera et al. (2000) / ACSM 2022 / Morton et al. (2018)</div>
+
+    <!-- 注意事項 -->
+    ${t.boneHealthNote || t.cvdNote ? `
+    <div style="font-size:11px;line-height:1.8">
+      ${t.boneHealthNote ? `<div style="padding:6px 8px;background:rgba(74,158,255,0.08);border-radius:var(--rs);margin-bottom:4px">🦴 ${t.boneHealthNote}</div>` : ''}
+      ${t.cvdNote ? `<div style="padding:6px 8px;background:rgba(255,69,96,0.08);border-radius:var(--rs)">❤️ ${t.cvdNote}</div>` : ''}
+    </div>
+    ` : ''}
+
+    <div style="font-size:9px;color:var(--text3);margin-top:8px">
+      Parpa &amp; Michaelides (2024) PMC / Redshaw (2023) / ESPEN (2014) / Frontiers Nutr (2024) / Barger et al. (2015) JCSM / ACSM 2022
+    </div>
   `;
 }
 
