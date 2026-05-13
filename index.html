@@ -790,7 +790,8 @@ input[type=range]:focus{border:none;box-shadow:none}
       </div>
       <div style="font-size:10px;color:var(--text3);margin-top:4px">実効睡眠 = (就寝〜起床) − 中断 + 仮眠 で自動計算されます</div>
     </div>
-    <div class="grid2"><div class="field"><label class="label">睡眠の質 (1〜5)</label><input type="number" id="s-quality" placeholder="4" min="1" max="5"></div><div class="field"><label class="label">体重 (kg)</label><input type="number" id="s-weight" placeholder="70.0" step="0.1"></div></div>
+    <div class="grid2"><div class="field"><label class="label">睡眠の質 (1〜5)</label><input type="number" id="s-quality" placeholder="4" min="1" max="5"></div><div class="field"><label class="label">体重 (kg)</label><input type="number" id="s-weight" placeholder="70.0" step="0.1"></div>
+      <div class="field"><label class="label">安静時心拍 (bpm)<span class="muted" style="font-size:10px"> VO2max・CVD推定</span></label><input type="number" id="s-resting-hr" placeholder="60" min="30" max="120"></div></div>
     <div class="divider"></div>
     <div class="h3" style="margin-bottom:14px">ウェルネス問診（各1〜10）</div>
     <div class="grid2">
@@ -1677,6 +1678,115 @@ input[type=range]:focus{border:none;box-shadow:none}
     </div>
     <div id="a-longterm-stats" style="margin-bottom:12px"></div>
     <div class="chart-wrap" style="height:220px"><canvas id="a-longterm-chart"></canvas></div>
+  </div>
+
+
+  <!-- ① 心血管リスク -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar" style="background:#ef4444"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="h3">心血管リスクモニタリング</div>
+      <span style="font-size:10px;color:var(--text3)">Smith (2019) / AHA</span>
+    </div>
+    <div id="a-cvd-risk"><div class="muted">計算中...</div></div>
+  </div>
+
+  <!-- ② FFMI体組成 -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar blue"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="h3">FFMI 体組成指標</div>
+      <span style="font-size:10px;color:var(--text3)">除脂肪体重指数</span>
+    </div>
+    <div id="a-ffmi"><div class="muted">計算中...</div></div>
+  </div>
+
+  <!-- ③ VO2max推定 -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar green"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="h3">VO2max 推定値</div>
+      <span style="font-size:10px;color:var(--text3)">NFPA 1582 / Uth (2004)</span>
+    </div>
+    <div id="a-vo2max"><div class="muted">計算中...</div></div>
+  </div>
+
+  <!-- ④ 年間マクロサイクル -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar amber"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="h3">年間トレーニング周期化</div>
+      <span style="font-size:10px;color:var(--text3)">Issurin (2010)</span>
+    </div>
+    <div id="a-macro-cycle"><div class="muted">計算中...</div></div>
+  </div>
+
+  <!-- ⑤ 出動・火災暴露記録 -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar" style="background:#f97316"></div>
+    <div class="h3" style="margin-bottom:12px">出動・火災暴露記録</div>
+    <div id="fe-summary"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div class="field"><label class="label">日付</label>
+        <input type="date" id="fe-date"></div>
+      <div class="field"><label class="label">種別</label>
+        <select id="fe-type">
+          <option value="fire">建物火災</option>
+          <option value="rescue">救助</option>
+          <option value="training">訓練</option>
+          <option value="drill">消防訓練</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label class="label">活動時間（分）</label>
+      <input type="number" id="fe-duration" placeholder="30" min="0"></div>
+    <div style="display:flex;gap:16px;margin-bottom:10px;font-size:13px">
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer">
+        <input type="checkbox" id="fe-smoke"> 煙・燃焼生成物暴露あり
+      </label>
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer">
+        <input type="checkbox" id="fe-ba"> 空気呼吸器（BA）使用
+      </label>
+    </div>
+    <div class="field" style="margin-bottom:12px"><label class="label">メモ</label>
+      <input type="text" id="fe-notes" placeholder="活動内容・体調など"></div>
+    <button class="btn btn-primary btn-sm" onclick="saveFireExposure()">記録する</button>
+    <div id="fe-log" style="margin-top:14px"></div>
+  </div>
+
+  <!-- ⑥ 関節・筋腱ストレス記録 -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar purple"></div>
+    <div class="h3" style="margin-bottom:4px">関節・筋腱ストレス記録</div>
+    <div class="muted" style="font-size:11px;margin-bottom:12px">不調な部位があれば記録（0=問題なし / 10=激痛）</div>
+    <div class="field" style="margin-bottom:10px"><label class="label">日付</label>
+      <input type="date" id="jr-date"></div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px">
+      <div class="field"><label class="label">🦵 膝</label>
+        <input type="number" id="jr-knee" min="0" max="10" value="0" placeholder="0〜10"></div>
+      <div class="field"><label class="label">💪 肩</label>
+        <input type="number" id="jr-shoulder" min="0" max="10" value="0" placeholder="0〜10"></div>
+      <div class="field"><label class="label">🔧 腰</label>
+        <input type="number" id="jr-lower_back" min="0" max="10" value="0" placeholder="0〜10"></div>
+      <div class="field"><label class="label">💪 肘</label>
+        <input type="number" id="jr-elbow" min="0" max="10" value="0" placeholder="0〜10"></div>
+      <div class="field"><label class="label">🦴 股関節</label>
+        <input type="number" id="jr-hip" min="0" max="10" value="0" placeholder="0〜10"></div>
+      <div class="field"><label class="label">🦶 足首</label>
+        <input type="number" id="jr-ankle" min="0" max="10" value="0" placeholder="0〜10"></div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="saveJointRecord()">記録する</button>
+    <div id="jr-log" style="margin-top:14px"></div>
+  </div>
+
+  <!-- ⑦ 当番日専用栄養プロトコル -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar" style="background:#4a9eff"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="h3">当番日 栄養プロトコル</div>
+      <span style="font-size:10px;color:var(--text3)">Ruby (2023) / Volpe (2013)</span>
+    </div>
+    <div id="duty-day-protocol"><div class="muted">計算中...</div></div>
   </div>
 
 </div>
@@ -4001,6 +4111,608 @@ function renderLongTermTrend() {
       </div>
     `;
   }
+}
+
+
+// ============================================================
+// ① 心血管リスクモニタリング
+// Smith (2019): 消防士の突然死の大半は心臓イベント
+// ACSM (2022): 安静時心拍・体重・BMIから簡易CVDリスク推定
+// ============================================================
+function calcCVDRisk() {
+  const c = DB.get('cfg') || {};
+  const age = c.age || 28;
+  const weight = c.tdeeweight || 70;
+  const height = c.height || 175;
+  const sex = c.sex || 'male';
+
+  // 直近7日の安静時心拍平均
+  const sleeps7 = DB.arr('sleeps').slice(-7);
+  const hrData = sleeps7.filter(s => s.restingHR > 0);
+  const avgRHR = hrData.length
+    ? Math.round(hrData.reduce((a,s)=>a+(s.restingHR||0),0)/hrData.length)
+    : 0;
+
+  // BMI
+  const bmi = Math.round(weight / ((height/100)**2) * 10) / 10;
+
+  // 体重トレンド（直近30日）
+  const sleeps30 = DB.arr('sleeps').filter(s=>s.weight>0).slice(-30);
+  const weightTrend = sleeps30.length >= 2
+    ? sleeps30[sleeps30.length-1].weight - sleeps30[0].weight
+    : 0;
+
+  // CVDリスクスコア（0〜100）
+  let score = 0;
+
+  // 年齢（消防士: 40歳〜CVDリスク急増 Smith 2019）
+  if (age >= 55)      score += 25;
+  else if (age >= 45) score += 15;
+  else if (age >= 40) score += 8;
+
+  // BMI
+  if (bmi >= 30)       score += 20;
+  else if (bmi >= 27)  score += 10;
+  else if (bmi >= 25)  score += 5;
+
+  // 安静時心拍（AHA: >100 tachycardia / >80 elevated）
+  if (avgRHR > 0) {
+    if (avgRHR >= 100)     score += 25;
+    else if (avgRHR >= 85) score += 15;
+    else if (avgRHR >= 75) score += 8;
+    else if (avgRHR <= 55) score -= 5; // アスリート心臓（ポジティブ）
+  }
+
+  // 体重増加傾向（月+2kg以上は警告）
+  if (weightTrend > 2)       score += 15;
+  else if (weightTrend > 1)  score += 7;
+  else if (weightTrend < -3) score += 5; // 急激な減量もリスク
+
+  // 睡眠不足の慢性化（Barger 2015: シフト勤務+睡眠不足でCVDリスク上昇）
+  const poorSleepDays = sleeps7.filter(s=>(s.duration||0)<6).length;
+  score += Math.min(15, poorSleepDays * 3);
+
+  score = Math.max(0, Math.min(100, score));
+
+  let level, color, icon, advice, checkItems;
+  if (score >= 60) {
+    level='要注意'; color='var(--accent)'; icon='❤️‍🔥';
+    advice='医師への相談を強く推奨。激しい運動前に心電図・血圧チェックを。';
+    checkItems=['定期的な血圧測定を開始','かかりつけ医への相談','有酸素強度をZone2以下に制限'];
+  } else if (score >= 35) {
+    level='注意'; color='#f97316'; icon='⚠️';
+    advice='Zone2有酸素を週150分以上継続。体重・睡眠の改善を優先。';
+    checkItems=['安静時心拍を毎朝記録','Zone2有酸素を週3回以上','BMI 25以下を目標に'];
+  } else if (score >= 15) {
+    level='良好'; color='#fbbf24'; icon='💛';
+    advice='現状維持。定期的な有酸素運動と体重管理を継続。';
+    checkItems=['現在のペースを維持','年1回の健康診断を継続'];
+  } else {
+    level='優秀'; color='var(--accent4)'; icon='💚';
+    advice='心血管コンディション良好。このまま維持。';
+    checkItems=['現在のライフスタイルを継続'];
+  }
+
+  return { score, level, color, icon, advice, avgRHR, bmi, weightTrend, checkItems, age, weight };
+}
+
+function renderCVDRisk() {
+  const el = document.getElementById('a-cvd-risk');
+  if (!el) return;
+  const r = calcCVDRisk();
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div style="font-size:32px">${r.icon}</div>
+      <div style="flex:1">
+        <div style="font-size:22px;font-weight:700;color:${r.color};font-family:var(--font-mono)">${r.score}<span style="font-size:13px">/100</span></div>
+        <div style="font-size:14px;font-weight:600;color:${r.color}">${r.level}</div>
+      </div>
+    </div>
+    <div style="height:5px;background:var(--bg4);border-radius:3px;margin-bottom:12px;overflow:hidden">
+      <div style="height:100%;width:${r.score}%;background:${r.color};border-radius:3px;transition:width 0.5s"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px">
+      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:9px;color:var(--text3)">BMI</div>
+        <div style="font-size:16px;font-weight:600;font-family:var(--font-mono);color:${r.bmi>=30?'var(--accent)':r.bmi>=25?'#f97316':'var(--accent4)'}">${r.bmi}</div>
+        <div style="font-size:9px;color:var(--text3)">適正: 18.5〜25</div>
+      </div>
+      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:9px;color:var(--text3)">安静時心拍</div>
+        <div style="font-size:16px;font-weight:600;font-family:var(--font-mono);color:${r.avgRHR>85?'var(--accent)':r.avgRHR>0?'var(--accent4)':'var(--text3)'}">${r.avgRHR>0?r.avgRHR+'bpm':'未記録'}</div>
+        <div style="font-size:9px;color:var(--text3)">推奨: 60〜75</div>
+      </div>
+      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:9px;color:var(--text3)">体重トレンド</div>
+        <div style="font-size:16px;font-weight:600;font-family:var(--font-mono);color:${Math.abs(r.weightTrend)>2?'var(--accent)':'var(--text)'}">${r.weightTrend>=0?'+':''}${r.weightTrend.toFixed(1)}kg</div>
+        <div style="font-size:9px;color:var(--text3)">30日間変化</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text2);padding:8px 10px;background:rgba(255,255,255,0.04);border-radius:var(--rs);margin-bottom:10px;line-height:1.6">${r.advice}</div>
+    <div style="font-size:11px">
+      ${r.checkItems.map(item=>`<div style="padding:4px 0;color:var(--text3)">📋 ${item}</div>`).join('')}
+    </div>
+    <div style="font-size:9px;color:var(--text3);margin-top:8px">Smith (2019) / AHA Guidelines / Barger et al. (2015) JCSM / ACSM 2022<br>※医療診断ではありません。心配な症状は医師に相談してください。</div>
+  `;
+}
+
+// ============================================================
+// ② 出動・火災暴露記録
+// ============================================================
+function saveFireExposure() {
+  const date  = document.getElementById('fe-date')?.value || today();
+  const type  = document.getElementById('fe-type')?.value || 'fire';
+  const duration = parseInt(document.getElementById('fe-duration')?.value) || 0;
+  const smoke = document.getElementById('fe-smoke')?.checked || false;
+  const ba    = document.getElementById('fe-ba')?.checked || false;  // 空気呼吸器使用
+  const notes = document.getElementById('fe-notes')?.value || '';
+  if (!duration) { alert('活動時間を入力してください'); return; }
+  DB.push('fire_exposures', { date, type, duration, smoke, ba, notes, id: Date.now() });
+  renderFireExposureLog();
+  renderInjuryRisk(); // リスクスコアも更新
+  alert('記録しました');
+}
+
+function renderFireExposureLog() {
+  const el = document.getElementById('fe-log');
+  if (!el) return;
+  const records = DB.arr('fire_exposures').slice().reverse().slice(0, 10);
+  if (!records.length) {
+    el.innerHTML = '<div class="muted">記録がありません</div>';
+    return;
+  }
+  const typeLabels = { fire:'建物火災', rescue:'救助', training:'訓練', drill:'消防訓練' };
+  el.innerHTML = records.map(r => `
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px">
+      <div style="flex:1">
+        <span style="font-weight:600">${r.date}</span>
+        <span style="margin-left:6px;color:var(--text2)">${typeLabels[r.type]||r.type}</span>
+        <span style="margin-left:6px;color:var(--text3)">${r.duration}分</span>
+        ${r.smoke?'<span style="margin-left:4px;font-size:10px;color:var(--accent)">🔥煙暴露</span>':''}
+        ${r.ba?'<span style="margin-left:4px;font-size:10px;color:var(--accent2)">🫁BA使用</span>':''}
+        ${r.notes?`<div style="font-size:10px;color:var(--text3);margin-top:2px">${r.notes}</div>`:''}
+      </div>
+      <button class="btn btn-sm btn-danger" style="font-size:10px;padding:3px 7px"
+        onclick="deleteFireExposure(${r.id})">削除</button>
+    </div>
+  `).join('');
+
+  // 暴露サマリー（直近30日）
+  const last30 = DB.arr('fire_exposures').filter(r => {
+    const d = new Date(r.date);
+    const ago30 = new Date(); ago30.setDate(ago30.getDate()-30);
+    return d >= ago30;
+  });
+  const smokeCount = last30.filter(r=>r.smoke).length;
+  const summaryEl = document.getElementById('fe-summary');
+  if (summaryEl && last30.length) {
+    summaryEl.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:11px;margin-bottom:10px">
+        <div style="text-align:center;padding:6px;background:var(--bg3);border-radius:var(--rs)">
+          <div style="font-size:9px;color:var(--text3)">出動回数(30日)</div>
+          <div style="font-size:18px;font-weight:600;font-family:var(--font-mono)">${last30.length}回</div>
+        </div>
+        <div style="text-align:center;padding:6px;background:var(--bg3);border-radius:var(--rs)">
+          <div style="font-size:9px;color:var(--text3)">煙暴露回数</div>
+          <div style="font-size:18px;font-weight:600;font-family:var(--font-mono);color:${smokeCount>3?'var(--accent)':'var(--text)'}">${smokeCount}回</div>
+        </div>
+        <div style="text-align:center;padding:6px;background:var(--bg3);border-radius:var(--rs)">
+          <div style="font-size:9px;color:var(--text3)">総活動時間</div>
+          <div style="font-size:18px;font-weight:600;font-family:var(--font-mono)">${last30.reduce((a,r)=>a+r.duration,0)}分</div>
+        </div>
+      </div>
+      ${smokeCount >= 3 ? `<div style="font-size:11px;padding:8px;background:rgba(255,69,96,0.08);border:1px solid rgba(255,69,96,0.3);border-radius:var(--rs);color:var(--accent)">
+        ⚠️ 煙暴露が${smokeCount}回あります。オメガ3・ビタミンC・クルクミンの摂取を増やし、抗酸化対策を強化してください。
+      </div>` : ''}
+    `;
+  }
+}
+
+function deleteFireExposure(id) {
+  if (!confirm('この記録を削除しますか？')) return;
+  DB.set('fire_exposures', DB.arr('fire_exposures').filter(r=>r.id!==id));
+  renderFireExposureLog();
+}
+
+// ============================================================
+// ③ 関節・筋腱ストレス記録
+// ============================================================
+const BODY_PARTS = [
+  {id:'knee',label:'膝',icon:'🦵'},
+  {id:'shoulder',label:'肩',icon:'💪'},
+  {id:'lower_back',label:'腰',icon:'🔧'},
+  {id:'elbow',label:'肘',icon:'💪'},
+  {id:'hip',label:'股関節',icon:'🦴'},
+  {id:'ankle',label:'足首',icon:'🦶'},
+];
+
+function saveJointRecord() {
+  const date = document.getElementById('jr-date')?.value || today();
+  const entries = BODY_PARTS.map(p => ({
+    part: p.id,
+    level: parseInt(document.getElementById('jr-'+p.id)?.value) || 0,
+  })).filter(e => e.level > 0);
+  if (!entries.length) { alert('不調な部位のスコアを入力してください（0以外）'); return; }
+  DB.push('joint_records', { date, entries, id: Date.now() });
+  renderJointLog();
+  alert('記録しました');
+}
+
+function renderJointLog() {
+  const el = document.getElementById('jr-log');
+  if (!el) return;
+  const records = DB.arr('joint_records').slice(-14);
+  if (!records.length) {
+    el.innerHTML = '<div class="muted">記録がありません（不調なし = 記録不要）</div>';
+    return;
+  }
+
+  // 部位別の最近のトレンド
+  const partData = {};
+  BODY_PARTS.forEach(p => {
+    const vals = records.flatMap(r => r.entries.filter(e=>e.part===p.id).map(e=>e.level));
+    if (vals.length) partData[p.id] = { avg: Math.round(vals.reduce((a,b)=>a+b)/vals.length*10)/10, max: Math.max(...vals), count: vals.length };
+  });
+
+  const activeParts = Object.entries(partData);
+  if (!activeParts.length) {
+    el.innerHTML = '<div class="muted" style="color:var(--accent4)">✅ 直近14日で不調な記録なし</div>';
+    return;
+  }
+
+  el.innerHTML = `
+    <div style="margin-bottom:10px">
+      ${activeParts.map(([partId, data]) => {
+        const part = BODY_PARTS.find(p=>p.id===partId);
+        const color = data.avg>=7?'var(--accent)':data.avg>=4?'#f97316':'#fbbf24';
+        return `
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:18px">${part?.icon||'🔧'}</span>
+            <div style="flex:1">
+              <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+                <span style="font-size:12px;font-weight:500">${part?.label||partId}</span>
+                <span style="font-size:11px;font-family:var(--font-mono);color:${color}">平均${data.avg} / 最大${data.max}</span>
+              </div>
+              <div style="height:4px;background:var(--bg4);border-radius:2px;overflow:hidden">
+                <div style="height:100%;width:${data.avg*10}%;background:${color};border-radius:2px"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    ${activeParts.some(([,d])=>d.avg>=5) ? `
+      <div style="font-size:11px;padding:8px;background:rgba(255,69,96,0.08);border:1px solid rgba(255,69,96,0.3);border-radius:var(--rs)">
+        ⚠️ 慢性障害の前兆の可能性があります。該当部位を酷使するエクササイズを一時的に除外し、様子を見てください。
+      </div>
+    ` : ''}
+  `;
+}
+
+// ============================================================
+// ④ 年齢連動サプリ推奨の自動更新
+// ============================================================
+function getAgeAdjustedSupplements() {
+  const c = DB.get('cfg') || {};
+  const age = c.age || 28;
+
+  // 年代別優先度マッピング
+  const basePriority = ['creatine','vitaminD','omega3','magnesium','protein'];
+
+  // 40代以降: コラーゲン・骨密度系が上位に
+  if (age >= 50) return ['creatine','collagen','vitaminD','omega3','magnesium','protein','curcumin'];
+  if (age >= 40) return ['creatine','vitaminD','omega3','collagen','magnesium','protein','curcumin'];
+  if (age >= 35) return ['creatine','vitaminD','omega3','magnesium','protein','collagen'];
+  return basePriority;
+}
+
+// ============================================================
+// ⑤ 当番日専用栄養プロトコル
+// ============================================================
+function getDutyDayNutrition() {
+  const c = DB.get('cfg') || {};
+  const weight = c.tdeeweight || 70;
+  const tdee = c.tdee || 2800;
+  const age = c.age || 28;
+
+  // 当番日の特殊栄養戦略
+  // 高発汗→電解質補充 / 長時間活動→炭水化物増量
+  return {
+    calories: Math.round(tdee * 1.15),    // +15%（活動量増加）
+    protein:  Math.round(weight * (age >= 40 ? 2.2 : 2.0)), // 高タンパク維持
+    carb:     Math.round(weight * 5.0),   // 炭水化物増量（グリコーゲン確保）
+    fat:      Math.round(weight * 0.8),
+    water:    Math.round(weight * 45),    // mL（通常×1.5倍）
+    electrolytes: {
+      sodium:    2500,  // mg/日（発汗で急消耗）
+      potassium: 4000,  // mg/日
+      magnesium: 400,   // mg/日
+    },
+    timing: [
+      { time:'出勤前2h', note:`炭水化物${Math.round(weight*1.5)}g + タンパク質${Math.round(weight*0.4)}g`, icon:'🍚' },
+      { time:'活動中', note:`30分毎に水200ml + 電解質補給（長時間出動時）`, icon:'💧' },
+      { time:'帰署後30分', note:`ホエイ${age>=40?'40':'25'}g + 炭水化物${Math.round(weight*0.8)}g（グリコーゲン回復）`, icon:'🏋️' },
+      { time:'就寝前', note:`カゼイン30g + Mg200mg（睡眠中の筋肉保護）`, icon:'🌙' },
+    ],
+  };
+}
+
+function renderDutyDayProtocol() {
+  const el = document.getElementById('duty-day-protocol');
+  if (!el) return;
+  const p = getDutyDayNutrition();
+  const c = DB.get('cfg') || {};
+  const age = c.age || 28;
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px">
+      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:9px;color:var(--text3)">目標カロリー</div>
+        <div style="font-size:18px;font-weight:700;font-family:var(--font-mono);color:var(--accent)">${p.calories}kcal</div>
+      </div>
+      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:9px;color:var(--text3)">水分目標</div>
+        <div style="font-size:18px;font-weight:700;font-family:var(--font-mono);color:#4a9eff">${(p.water/1000).toFixed(1)}L</div>
+      </div>
+      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:9px;color:var(--text3)">タンパク質</div>
+        <div style="font-size:18px;font-weight:700;font-family:var(--font-mono);color:var(--accent2)">${p.protein}g</div>
+      </div>
+      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:9px;color:var(--text3)">炭水化物</div>
+        <div style="font-size:18px;font-weight:700;font-family:var(--font-mono);color:var(--accent3)">${p.carb}g</div>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:600;margin-bottom:8px">📋 タイミング別プロトコル</div>
+      ${p.timing.map(t=>`
+        <div style="display:flex;gap:8px;padding:8px;background:var(--bg3);border-radius:var(--rs);margin-bottom:6px;font-size:11px">
+          <div style="font-size:18px;flex-shrink:0">${t.icon}</div>
+          <div>
+            <div style="font-weight:600;color:var(--accent2);margin-bottom:2px">${t.time}</div>
+            <div style="color:var(--text2)">${t.note}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="font-size:11px;line-height:1.7;padding:8px;background:rgba(74,158,255,0.06);border-radius:var(--rs)">
+      <strong>電解質補充目標:</strong>
+      Na ${p.electrolytes.sodium}mg / K ${p.electrolytes.potassium}mg / Mg ${p.electrolytes.magnesium}mg
+      <div style="font-size:9px;color:var(--text3);margin-top:4px">Ruby et al. (2023) 消防士1日消費量 / Volpe (2013) 発汗Mg損失</div>
+    </div>
+  `;
+}
+
+// ============================================================
+// ⑥ FFMI（Fat-Free Mass Index）体組成精度向上
+// ============================================================
+function calcFFMI() {
+  const c = DB.get('cfg') || {};
+  const weight = c.tdeeweight || 70;
+  const height = c.height || 175;
+  const heightM = height / 100;
+
+  // 体脂肪率取得
+  const bfRecords = DB.get('pf_bf_records') || {};
+  const bfDates = Object.keys(bfRecords).sort();
+  const latestBF = bfDates.length ? bfRecords[bfDates[bfDates.length-1]] : null;
+
+  if (!latestBF) return null;
+
+  const bfRate = latestBF / 100;
+  const leanMass = weight * (1 - bfRate);
+  const fatMass  = weight * bfRate;
+
+  // FFMI = 除脂肪体重(kg) / 身長(m)²
+  const ffmi = Math.round(leanMass / (heightM * heightM) * 10) / 10;
+  // 正規化FFMI（身長170cm基準）
+  const normalizedFFMI = Math.round((ffmi + 6.1 * (1.80 - heightM)) * 10) / 10;
+
+  // FFMI評価（男性基準）
+  let level, color, desc;
+  if (ffmi >= 25)      { level='エリート'; color='var(--accent)'; desc='ナチュラルの上限域。非常に優れた筋肉量。'; }
+  else if (ffmi >= 22) { level='優秀'; color='var(--accent2)'; desc='筋肥大トレーニングの成果が十分に出ている。'; }
+  else if (ffmi >= 20) { level='良好'; color='var(--accent4)'; desc='一般的な筋肉量。継続的なトレーニングで向上可能。'; }
+  else if (ffmi >= 18) { level='標準'; color='#fbbf24'; desc='平均的な筋肉量。トレーニングの余地が十分ある。'; }
+  else                  { level='要改善'; color='#f97316'; desc='筋肉量が少ない傾向。筋力トレーニングの強化を推奨。'; }
+
+  // 消防士推奨FFMI（職業的な筋力・機能に必要）
+  const recommendedFFMI = 21.5;
+
+  return {
+    ffmi, normalizedFFMI, leanMass: Math.round(leanMass*10)/10,
+    fatMass: Math.round(fatMass*10)/10, bfRate: latestBF,
+    level, color, desc, weight, height, recommendedFFMI
+  };
+}
+
+function renderFFMI() {
+  const el = document.getElementById('a-ffmi');
+  if (!el) return;
+  const f = calcFFMI();
+  if (!f) {
+    el.innerHTML = '<div class="muted">体脂肪率を入力すると表示されます（分析レポート → ミニカット判定）</div>';
+    return;
+  }
+
+  const progress = Math.min(100, (f.ffmi / 25) * 100);
+  const recProgress = Math.min(100, (f.recommendedFFMI / 25) * 100);
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div style="flex:1">
+        <div style="font-size:26px;font-weight:700;font-family:var(--font-mono);color:${f.color}">${f.ffmi}</div>
+        <div style="font-size:12px;font-weight:600;color:${f.color}">${f.level}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">${f.desc}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:9px;color:var(--text3)">正規化FFMI</div>
+        <div style="font-size:18px;font-weight:600;font-family:var(--font-mono)">${f.normalizedFFMI}</div>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-bottom:3px">
+        <span>現在 ${f.ffmi}</span><span>消防士推奨 ${f.recommendedFFMI}</span><span>上限目安 25</span>
+      </div>
+      <div style="position:relative;height:8px;background:var(--bg4);border-radius:4px;overflow:hidden">
+        <div style="position:absolute;height:100%;width:${progress}%;background:${f.color};border-radius:4px;transition:width 0.5s"></div>
+        <div style="position:absolute;height:100%;left:${recProgress}%;width:2px;background:rgba(255,255,255,0.5)"></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:11px">
+      <div style="text-align:center;padding:6px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:9px;color:var(--text3)">除脂肪体重</div>
+        <div style="font-size:16px;font-weight:600;font-family:var(--font-mono);color:var(--accent2)">${f.leanMass}kg</div>
+      </div>
+      <div style="text-align:center;padding:6px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:9px;color:var(--text3)">体脂肪量</div>
+        <div style="font-size:16px;font-weight:600;font-family:var(--font-mono)">${f.fatMass}kg</div>
+      </div>
+      <div style="text-align:center;padding:6px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:9px;color:var(--text3)">体脂肪率</div>
+        <div style="font-size:16px;font-weight:600;font-family:var(--font-mono);color:var(--accent4)">${f.bfRate}%</div>
+      </div>
+    </div>
+    <div style="font-size:9px;color:var(--text3);margin-top:8px">FFMI = 除脂肪体重(kg) / 身長(m)² / 消防士推奨FFMI: 21.5以上（職業的筋力維持）</div>
+  `;
+}
+
+// VO2max推定
+function estimateVO2max() {
+  const c = DB.get('cfg') || {};
+  const age = c.age || 28;
+  const weight = c.tdeeweight || 70;
+
+  // 安静時心拍からVO2max推定（Uth et al. 2004）
+  const sleeps7 = DB.arr('sleeps').slice(-7).filter(s=>s.restingHR>0);
+  if (!sleeps7.length) return null;
+  const avgRHR = sleeps7.reduce((a,s)=>a+(s.restingHR||0),0)/sleeps7.length;
+  const maxHR = 220 - age;
+  // VO2max ≈ 15 × (HRmax / HRrest)
+  const vo2max = Math.round(15 * (maxHR / avgRHR) * 10) / 10;
+
+  // 消防士基準（NFPA 1582: VO2max 42 mL/kg/min以上推奨）
+  const nfpaMin = 42;
+  const level = vo2max >= 55 ? '優秀' : vo2max >= 48 ? '良好' : vo2max >= 42 ? '合格' : '要改善';
+  const color = vo2max >= 48 ? 'var(--accent4)' : vo2max >= 42 ? '#fbbf24' : 'var(--accent)';
+
+  return { vo2max, avgRHR: Math.round(avgRHR), maxHR, nfpaMin, level, color };
+}
+
+// ============================================================
+// ⑦ 年間トレーニング周期化（マクロサイクル）
+// ============================================================
+function renderMacroCycle() {
+  const el = document.getElementById('a-macro-cycle');
+  if (!el) return;
+  const c = DB.get('cfg') || {};
+  const age = c.age || 28;
+
+  // 年間4フェーズ構成（消防士向け）
+  const phases = [
+    {
+      name: '蓄積期（Accumulation）',
+      months: '1〜3月',
+      color: '#4a9eff',
+      focus: '筋量・筋力の基盤構築',
+      volume: '高ボリューム（MAVゾーン）',
+      intensity: 'RPE 6〜7',
+      cardio: 'Zone2 週3回',
+      notes: 'プログレッシブオーバーロードを軸に。コンパウンド中心。',
+    },
+    {
+      name: '強化期（Intensification）',
+      months: '4〜6月',
+      color: '#f97316',
+      focus: '筋力・神経系の強化',
+      volume: '中ボリューム',
+      intensity: 'RPE 8〜9',
+      cardio: 'Zone3 週2回 + Zone2 週2回',
+      notes: '重量を上げてセット数を下げる。',
+    },
+    {
+      name: '変換期（Conversion）',
+      months: '7〜9月',
+      color: '#22c55e',
+      focus: '消防業務への機能的適応',
+      volume: '低〜中ボリューム',
+      intensity: 'RPE 7〜8（機能的動作）',
+      cardio: '防火装備ランニング週2回',
+      notes: '重量系より消防タスク特異的な動作を増やす。',
+    },
+    {
+      name: '回復期（Transition）',
+      months: '10〜12月',
+      color: '#a78bfa',
+      focus: '疲労解消・体組成改善',
+      volume: 'MEV維持（最小限）',
+      intensity: 'RPE 5〜6',
+      cardio: 'Zone1〜2 リラックス',
+      notes: '怪我の予防処置・弱点部位のケア。',
+    },
+  ];
+
+  // 年齢補正コメント
+  const ageNote = age >= 50
+    ? '⚡ 50代以上: 各フェーズを6週→8週に延長。回復期を2ヶ月に拡大推奨。'
+    : age >= 40
+    ? '⚡ 40代: 強化期のRPEを8以下に抑え、関節への過負荷を防ぐ。'
+    : '';
+
+  el.innerHTML = `
+    ${ageNote ? `<div style="font-size:11px;padding:8px;background:rgba(74,158,255,0.08);border-radius:var(--rs);margin-bottom:12px;color:var(--accent2)">${ageNote}</div>` : ''}
+    ${phases.map((p,i) => `
+      <div style="padding:12px;background:var(--bg3);border-radius:var(--rs);margin-bottom:8px;border-left:3px solid ${p.color}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-size:13px;font-weight:600;color:${p.color}">${p.name}</div>
+          <div style="font-size:11px;color:var(--text3)">${p.months}</div>
+        </div>
+        <div style="font-size:11px;line-height:1.8;color:var(--text2)">
+          <div><strong>目標:</strong> ${p.focus}</div>
+          <div><strong>ボリューム:</strong> ${p.volume} / <strong>強度:</strong> ${p.intensity}</div>
+          <div><strong>有酸素:</strong> ${p.cardio}</div>
+          <div style="color:var(--text3);font-size:10px;margin-top:3px">${p.notes}</div>
+        </div>
+      </div>
+    `).join('')}
+    <div style="font-size:9px;color:var(--text3)">Issurin (2010) ブロック周期化 / NSCA TSAC 消防士向け年間計画</div>
+  `;
+}
+
+// VO2max表示
+function renderVO2max() {
+  const el = document.getElementById('a-vo2max');
+  if (!el) return;
+  const v = estimateVO2max();
+  if (!v) {
+    el.innerHTML = '<div class="muted">睡眠記録で安静時心拍を記録すると推定されます</div>';
+    return;
+  }
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div>
+        <div style="font-size:32px;font-weight:700;font-family:var(--font-mono);color:${v.color}">${v.vo2max}</div>
+        <div style="font-size:11px;color:var(--text3)">mL/kg/min</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;color:${v.color};margin-bottom:4px">${v.level}</div>
+        <div style="font-size:11px;color:var(--text2)">NFPA 1582 消防士推奨: ${v.nfpaMin}以上</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">推定方法: Uth et al. (2004) HRmax/HRrest法</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;font-size:11px">
+      <div style="padding:6px;background:var(--bg3);border-radius:var(--rs);text-align:center">
+        <div style="font-size:9px;color:var(--text3)">安静時心拍（7日平均）</div>
+        <div style="font-size:16px;font-weight:600;font-family:var(--font-mono)">${v.avgRHR}bpm</div>
+      </div>
+      <div style="padding:6px;background:var(--bg3);border-radius:var(--rs);text-align:center">
+        <div style="font-size:9px;color:var(--text3)">最大心拍数（推定）</div>
+        <div style="font-size:16px;font-weight:600;font-family:var(--font-mono)">${v.maxHR}bpm</div>
+      </div>
+    </div>
+    <div style="margin-top:8px;font-size:10px;color:var(--text3)">※睡眠記録の「安静時心拍」欄に毎朝起床時の心拍を入力すると精度が上がります</div>
+  `;
 }
 
 function saveSuppCheck(){
@@ -6399,6 +7111,13 @@ function renderAnalysis(){
   renderInjuryRisk();
   renderAgeAdjustedTargets();
   renderLongTermTrend();
+  renderCVDRisk();
+  renderFFMI();
+  renderVO2max();
+  renderMacroCycle();
+  renderFireExposureLog();
+  renderJointLog();
+  renderDutyDayProtocol();
 }
 
 
