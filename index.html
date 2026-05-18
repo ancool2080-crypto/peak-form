@@ -631,10 +631,22 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="row" style="gap:5px;flex-wrap:wrap;margin-bottom:6px">
         <span style="font-size:10px;color:var(--text3);align-self:center">外食：</span>
         <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_gyudon')">🍚 牛丼</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_fastfood')">🍔 ファーストフード</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_fastfood')">🍔 ファストフード</span>
         <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_family_restaurant')">🍽 ファミレス</span>
         <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_sushi')">🍣 回転寿司</span>
         <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_yakiniku')">🥩 焼肉</span>
+      </div>
+      <!-- 料理タブ -->
+      <div class="row" style="gap:5px;flex-wrap:wrap;margin-bottom:6px">
+        <span style="font-size:10px;color:var(--text3);align-self:center">料理：</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_japanese')">🍱 和食・丼</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_noodles')">🍜 麺類</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_western')">🍝 洋食</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_chinese')">🥟 中華</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_homemade')">🥘 自炊</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_soup')">🍲 鍋・スープ</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_breakfast')">🌅 朝食</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_izakaya')">🍺 居酒屋</span>
       </div>
       <div id="preset-list" style="max-height:260px;overflow-y:auto;margin-top:4px"></div>
     </div>
@@ -2429,6 +2441,158 @@ function getVolumeThresholds() {
   return base;
 }
 
+
+const DISH_DB = {
+  // ===== 和食定食・丼物 =====
+  japanese: [
+    {name:'カレーライス（普通盛り）',unit:'g',per:400,cal:650,p:18,c:95,f:18,tag:'和食'},
+    {name:'カレーライス（大盛り）',unit:'g',per:550,cal:880,p:24,c:130,f:24,tag:'和食'},
+    {name:'カツカレー（普通盛り）',unit:'g',per:500,cal:870,p:28,c:105,f:32,tag:'和食'},
+    {name:'親子丼（普通盛り）',unit:'g',per:380,cal:620,p:28,c:82,f:18,tag:'和食'},
+    {name:'牛丼（自家製・普通盛り）',unit:'g',per:380,cal:640,p:22,c:88,f:18,tag:'和食'},
+    {name:'天丼（普通盛り）',unit:'g',per:380,cal:720,p:20,c:98,f:22,tag:'和食'},
+    {name:'鮭定食（ご飯150g）',unit:'g',per:420,cal:550,p:32,c:65,f:12,tag:'和食'},
+    {name:'焼き魚定食（さば）',unit:'g',per:420,cal:620,p:30,c:68,f:22,tag:'和食'},
+    {name:'唐揚げ定食（ご飯150g）',unit:'g',per:450,cal:780,p:32,c:75,f:30,tag:'和食'},
+    {name:'豚の生姜焼き定食',unit:'g',per:420,cal:700,p:28,c:72,f:28,tag:'和食'},
+    {name:'ハンバーグ定食（和風）',unit:'g',per:430,cal:720,p:28,c:75,f:28,tag:'和食'},
+    {name:'肉じゃが（1人前）',unit:'g',per:250,cal:280,p:12,c:38,f:8,tag:'和食'},
+    {name:'筑前煮（1人前）',unit:'g',per:200,cal:200,p:10,c:28,f:5,tag:'和食'},
+    {name:'おでん（1人前）',unit:'g',per:300,cal:220,p:12,c:28,f:5,tag:'和食'},
+    {name:'豚汁（1杯）',unit:'g',per:200,cal:120,p:7,c:12,f:5,tag:'和食'},
+    {name:'味噌汁（1杯）',unit:'g',per:150,cal:35,p:2,c:4,f:1,tag:'和食'},
+    {name:'冷奴（1丁）',unit:'g',per:150,cal:80,p:7,c:2,f:4,tag:'和食'},
+    {name:'納豆定食（ご飯150g）',unit:'g',per:280,cal:430,p:18,c:70,f:8,tag:'和食'},
+    {name:'卵かけご飯',unit:'g',per:250,cal:370,p:14,c:62,f:8,tag:'和食'},
+    {name:'鶏照り焼き（1枚）',unit:'g',per:150,cal:280,p:24,c:12,f:14,tag:'和食'},
+  ],
+
+  // ===== ラーメン・麺類 =====
+  noodles: [
+    {name:'醤油ラーメン',unit:'g',per:500,cal:470,p:18,c:68,f:12,tag:'麺類'},
+    {name:'味噌ラーメン',unit:'g',per:550,cal:560,p:20,c:72,f:18,tag:'麺類'},
+    {name:'塩ラーメン',unit:'g',per:500,cal:420,p:16,c:64,f:10,tag:'麺類'},
+    {name:'豚骨ラーメン',unit:'g',per:550,cal:580,p:22,c:70,f:20,tag:'麺類'},
+    {name:'つけ麺（普通盛り）',unit:'g',per:450,cal:520,p:22,c:78,f:10,tag:'麺類'},
+    {name:'チャーシュー麺',unit:'g',per:580,cal:620,p:28,c:72,f:18,tag:'麺類'},
+    {name:'カップ麺（標準）',unit:'g',per:95,cal:330,p:8,c:47,f:12,tag:'麺類'},
+    {name:'カップ麺（大盛り）',unit:'g',per:132,cal:460,p:11,c:66,f:16,tag:'麺類'},
+    {name:'うどん（かけ）',unit:'g',per:400,cal:280,p:9,c:55,f:2,tag:'麺類'},
+    {name:'うどん（天ぷら）',unit:'g',per:450,cal:460,p:14,c:65,f:14,tag:'麺類'},
+    {name:'ざるそば',unit:'g',per:300,cal:280,p:13,c:55,f:2,tag:'麺類'},
+    {name:'焼きそば（1人前）',unit:'g',per:300,cal:480,p:15,c:68,f:14,tag:'麺類'},
+    {name:'冷やし中華',unit:'g',per:350,cal:420,p:14,c:68,f:8,tag:'麺類'},
+    {name:'素麺（1束・茹で後）',unit:'g',per:250,cal:250,p:8,c:50,f:1,tag:'麺類'},
+    {name:'パスタ（ナポリタン）',unit:'g',per:350,cal:520,p:16,c:80,f:14,tag:'麺類'},
+    {name:'パスタ（ミートソース）',unit:'g',per:380,cal:560,p:22,c:76,f:16,tag:'麺類'},
+    {name:'パスタ（カルボナーラ）',unit:'g',per:350,cal:620,p:20,c:70,f:26,tag:'麺類'},
+    {name:'パスタ（ペペロンチーノ）',unit:'g',per:320,cal:520,p:14,c:74,f:18,tag:'麺類'},
+  ],
+
+  // ===== 洋食 =====
+  western: [
+    {name:'ハンバーグ（デミグラス）',unit:'g',per:200,cal:380,p:22,c:14,f:24,tag:'洋食'},
+    {name:'チキンソテー',unit:'g',per:180,cal:320,p:30,c:8,f:18,tag:'洋食'},
+    {name:'ポークソテー',unit:'g',per:180,cal:340,p:28,c:6,f:22,tag:'洋食'},
+    {name:'エビフライ（3本）',unit:'g',per:180,cal:360,p:20,c:28,f:16,tag:'洋食'},
+    {name:'コロッケ（2個）',unit:'g',per:150,cal:340,p:8,c:42,f:16,tag:'洋食'},
+    {name:'メンチカツ（1個）',unit:'g',per:120,cal:320,p:14,c:22,f:20,tag:'洋食'},
+    {name:'チキンカツ（1枚）',unit:'g',per:150,cal:380,p:26,c:24,f:20,tag:'洋食'},
+    {name:'ビーフシチュー（1人前）',unit:'g',per:350,cal:380,p:20,c:24,f:18,tag:'洋食'},
+    {name:'クリームシチュー（1人前）',unit:'g',per:350,cal:360,p:18,c:28,f:16,tag:'洋食'},
+    {name:'グラタン（1人前）',unit:'g',per:280,cal:420,p:18,c:32,f:22,tag:'洋食'},
+    {name:'ピザ（マルゲリータ・1枚）',unit:'g',per:200,cal:500,p:20,c:64,f:16,tag:'洋食'},
+    {name:'ピザ（1切れ）',unit:'g',per:80,cal:200,p:8,c:26,f:7,tag:'洋食'},
+    {name:'オムライス',unit:'g',per:380,cal:620,p:20,c:80,f:22,tag:'洋食'},
+    {name:'チャーハン（1人前）',unit:'g',per:300,cal:520,p:16,c:72,f:18,tag:'洋食'},
+    {name:'卵チャーハン',unit:'g',per:280,cal:480,p:14,c:68,f:16,tag:'洋食'},
+    {name:'サンドイッチ（ハム・卵）',unit:'g',per:180,cal:320,p:14,c:36,f:14,tag:'洋食'},
+    {name:'BLTサンドイッチ',unit:'g',per:200,cal:380,p:16,c:38,f:18,tag:'洋食'},
+    {name:'クロワッサン（1個）',unit:'g',per:50,cal:210,p:4,c:24,f:11,tag:'洋食'},
+    {name:'フレンチトースト（2枚）',unit:'g',per:180,cal:360,p:12,c:42,f:16,tag:'洋食'},
+  ],
+
+  // ===== 中華 =====
+  chinese: [
+    {name:'炒飯（1人前）',unit:'g',per:300,cal:520,p:16,c:72,f:18,tag:'中華'},
+    {name:'餃子（5個・焼き）',unit:'g',per:150,cal:290,p:14,c:30,f:12,tag:'中華'},
+    {name:'餃子（5個・水）',unit:'g',per:150,cal:240,p:14,c:32,f:6,tag:'中華'},
+    {name:'シュウマイ（5個）',unit:'g',per:130,cal:240,p:14,c:22,f:10,tag:'中華'},
+    {name:'麻婆豆腐（1人前）',unit:'g',per:250,cal:280,p:16,c:12,f:18,tag:'中華'},
+    {name:'回鍋肉（1人前）',unit:'g',per:200,cal:320,p:18,c:10,f:22,tag:'中華'},
+    {name:'青椒肉絲（1人前）',unit:'g',per:180,cal:280,p:20,c:10,f:18,tag:'中華'},
+    {name:'エビチリ（1人前）',unit:'g',per:200,cal:240,p:20,c:14,f:10,tag:'中華'},
+    {name:'酢豚（1人前）',unit:'g',per:220,cal:320,p:16,c:30,f:14,tag:'中華'},
+    {name:'唐揚げ（3個・中華風）',unit:'g',per:150,cal:350,p:22,c:16,f:22,tag:'中華'},
+    {name:'春巻き（2本）',unit:'g',per:120,cal:280,p:8,c:28,f:14,tag:'中華'},
+    {name:'天津飯（1人前）',unit:'g',per:380,cal:560,p:18,c:80,f:16,tag:'中華'},
+    {name:'中華丼（1人前）',unit:'g',per:380,cal:540,p:18,c:80,f:14,tag:'中華'},
+    {name:'バンバンジー（1人前）',unit:'g',per:180,cal:240,p:18,c:8,f:14,tag:'中華'},
+    {name:'ニラレバ炒め（1人前）',unit:'g',per:180,cal:260,p:20,c:8,f:16,tag:'中華'},
+  ],
+
+  // ===== 自炊・家庭料理 =====
+  homemade: [
+    {name:'鶏むね照り焼き（1枚）',unit:'g',per:150,cal:240,p:28,c:12,f:8,tag:'自炊'},
+    {name:'鶏もも照り焼き（1枚）',unit:'g',per:160,cal:310,p:24,c:14,f:18,tag:'自炊'},
+    {name:'豚肉炒め（1人前）',unit:'g',per:180,cal:320,p:22,c:8,f:22,tag:'自炊'},
+    {name:'鶏むね蒸し（1枚）',unit:'g',per:150,cal:175,p:32,c:0,f:4,tag:'自炊'},
+    {name:'サバの味噌煮（1切れ）',unit:'g',per:130,cal:250,p:22,c:12,f:12,tag:'自炊'},
+    {name:'鮭の塩焼き（1切れ）',unit:'g',per:100,cal:155,p:22,c:0,f:7,tag:'自炊'},
+    {name:'卵焼き（3個分）',unit:'g',per:120,cal:200,p:14,c:6,f:13,tag:'自炊'},
+    {name:'スクランブルエッグ（2個）',unit:'g',per:100,cal:180,p:12,c:1,f:14,tag:'自炊'},
+    {name:'オートミール（調理後）',unit:'g',per:200,cal:200,p:7,c:36,f:4,tag:'自炊'},
+    {name:'プロテインパンケーキ（3枚）',unit:'g',per:200,cal:380,p:28,c:42,f:10,tag:'自炊'},
+    {name:'鶏ハム（スライス4枚）',unit:'g',per:100,cal:110,p:24,c:0,f:1,tag:'自炊'},
+    {name:'ブロッコリー蒸し（1株）',unit:'g',per:150,cal:51,p:5,c:7,f:0,tag:'自炊'},
+    {name:'ほうれん草おひたし',unit:'g',per:100,cal:20,p:2,c:3,f:0,tag:'自炊'},
+    {name:'ポテトサラダ（1人前）',unit:'g',per:150,cal:220,p:4,c:24,f:12,tag:'自炊'},
+    {name:'シーザーサラダ（1人前）',unit:'g',per:200,cal:280,p:8,c:12,f:22,tag:'自炊'},
+    {name:'味付き豆腐（1丁）',unit:'g',per:300,cal:200,p:18,c:6,f:10,tag:'自炊'},
+  ],
+
+  // ===== 鍋・スープ =====
+  soup: [
+    {name:'すき焼き（1人前）',unit:'g',per:400,cal:580,p:28,c:40,f:28,tag:'鍋物'},
+    {name:'しゃぶしゃぶ（豚・1人前）',unit:'g',per:300,cal:380,p:28,c:10,f:24,tag:'鍋物'},
+    {name:'鍋（ちゃんこ・1人前）',unit:'g',per:400,cal:420,p:32,c:30,f:14,tag:'鍋物'},
+    {name:'鍋（豆乳・1人前）',unit:'g',per:400,cal:380,p:24,c:22,f:18,tag:'鍋物'},
+    {name:'水炊き（1人前）',unit:'g',per:350,cal:280,p:26,c:8,f:14,tag:'鍋物'},
+    {name:'クラムチャウダー（1杯）',unit:'g',per:250,cal:220,p:10,c:18,f:12,tag:'スープ'},
+    {name:'コーンスープ（1杯）',unit:'g',per:200,cal:140,p:4,c:20,f:5,tag:'スープ'},
+    {name:'ミネストローネ（1杯）',unit:'g',per:250,cal:120,p:5,c:18,f:3,tag:'スープ'},
+    {name:'玉子スープ（1杯）',unit:'g',per:150,cal:50,p:4,c:4,f:2,tag:'スープ'},
+  ],
+
+  // ===== 朝食・軽食 =====
+  breakfast: [
+    {name:'目玉焼き（2個）',unit:'g',per:110,cal:180,p:13,c:0,f:14,tag:'朝食'},
+    {name:'ハム&エッグ（1人前）',unit:'g',per:130,cal:230,p:16,c:1,f:18,tag:'朝食'},
+    {name:'トースト（バター）1枚',unit:'g',per:70,cal:210,p:5,c:26,f:10,tag:'朝食'},
+    {name:'フレンチトースト（2枚）',unit:'g',per:160,cal:340,p:11,c:40,f:15,tag:'朝食'},
+    {name:'シリアル&牛乳（1杯）',unit:'g',per:250,cal:280,p:9,c:48,f:6,tag:'朝食'},
+    {name:'ギリシャヨーグルト（1カップ）',unit:'g',per:170,cal:100,p:17,c:6,f:0,tag:'朝食'},
+    {name:'グラノーラ（1杯）',unit:'g',per:80,cal:320,p:6,c:50,f:10,tag:'朝食'},
+    {name:'アサイーボウル',unit:'g',per:300,cal:350,p:8,c:56,f:10,tag:'朝食'},
+    {name:'プロテインスムージー',unit:'g',per:350,cal:300,p:28,c:36,f:6,tag:'朝食'},
+  ],
+
+  // ===== おつまみ・居酒屋 =====
+  izakaya: [
+    {name:'枝豆（1皿）',unit:'g',per:100,cal:135,p:11,c:9,f:6,tag:'居酒屋'},
+    {name:'唐揚げ（5個・居酒屋）',unit:'g',per:200,cal:460,p:28,c:22,f:28,tag:'居酒屋'},
+    {name:'焼き鳥（5本）',unit:'g',per:150,cal:280,p:24,c:8,f:16,tag:'居酒屋'},
+    {name:'刺身盛り合わせ（1人前）',unit:'g',per:200,cal:220,p:36,c:2,f:6,tag:'居酒屋'},
+    {name:'冷奴（居酒屋）',unit:'g',per:150,cal:80,p:7,c:2,f:4,tag:'居酒屋'},
+    {name:'ポテトフライ（1人前）',unit:'g',per:150,cal:380,p:4,c:50,f:18,tag:'居酒屋'},
+    {name:'もつ煮（1人前）',unit:'g',per:200,cal:240,p:16,c:12,f:14,tag:'居酒屋'},
+    {name:'だし巻き卵（1本）',unit:'g',per:100,cal:160,p:10,c:6,f:10,tag:'居酒屋'},
+    {name:'シーザーサラダ（居酒屋）',unit:'g',per:200,cal:260,p:7,c:12,f:20,tag:'居酒屋'},
+    {name:'締めラーメン',unit:'g',per:450,cal:430,p:15,c:66,f:10,tag:'居酒屋'},
+    {name:'締めご飯（雑炊）',unit:'g',per:300,cal:250,p:8,c:48,f:2,tag:'居酒屋'},
+  ],
+};
+
 const FOOD_DB_LABELS = {
   protein:     'タンパク質源',
   carb:        '炭水化物・糖質',
@@ -2443,6 +2607,14 @@ const FOOD_DB_LABELS = {
   eating_family_restaurant:'ファミレス',
   eating_sushi:            '回転寿司',
   eating_yakiniku:         '焼肉チェーン',
+  dish_japanese:  '和食・定食・丼物',
+  dish_noodles:   'ラーメン・麺類',
+  dish_western:   '洋食',
+  dish_chinese:   '中華',
+  dish_homemade:  '自炊・家庭料理',
+  dish_soup:      '鍋・スープ',
+  dish_breakfast: '朝食・軽食',
+  dish_izakaya:   '居酒屋・おつまみ',
 };
 
 // タグ検索用インデックス
@@ -2465,6 +2637,15 @@ function searchFoodDB(query) {
       if (item.name.toLowerCase().includes(q) ||
           (item.tag && item.tag.toLowerCase().includes(q))) {
         results.push({ ...item, _cat: cat });
+      }
+    });
+  });
+  // 料理DBも検索対象に
+  Object.entries(DISH_DB).forEach(([cat, items]) => {
+    items.forEach(item => {
+      if (item.name.toLowerCase().includes(q) ||
+          (item.tag && item.tag.toLowerCase().includes(q))) {
+        results.push({ ...item, _cat: 'dish_' + cat });
       }
     });
   });
@@ -2739,7 +2920,9 @@ function showPresetCategory(cat) {
     ? getCustomPresets()
     : cat.startsWith('eating_')
       ? (EATING_OUT_DB[cat.replace('eating_','')] || [])
-      : (FOOD_DB[cat] || FOOD_PRESETS[cat] || []);
+      : cat.startsWith('dish_')
+        ? (DISH_DB[cat.replace('dish_','')] || [])
+        : (FOOD_DB[cat] || FOOD_PRESETS[cat] || []);
   renderFoodList(items, el);
 }
 
