@@ -2167,6 +2167,8 @@ function showPage(id){
   document.querySelectorAll('.nav-item').forEach(n=>{if(n.textContent.trim()===pageNames[id])n.classList.add('active')});
   document.getElementById('topbar-page').textContent=pageNames[id]||id;
   closeSidebar();
+  closeTocDrawer();
+  updateTocFab(id);
   if(id==='dashboard')renderDashboard();
   if(id==='program')initProgramPage();
   if(id==='analysis'){renderAnalysis();updateTocFab('analysis');updateWeeklyWeightPanel();updateMiniCut();initWeightTracker();renderConditionAnalysis();renderBodyComposition();renderWeeklyReview();}
@@ -2177,6 +2179,16 @@ function showPage(id){
   if(id==='supplement')renderSupplementPage();
   if(id==='training')renderTrainingLog();
 }
+// ドロワー外クリックで閉じる
+document.addEventListener('click', function(e) {
+  const drawer = document.getElementById('toc-drawer');
+  const fab = document.getElementById('toc-fab');
+  if (!drawer || !fab) return;
+  if (drawer.style.display === 'block' && !drawer.contains(e.target) && !fab.contains(e.target)) {
+    drawer.style.display = 'none';
+  }
+});
+
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show')}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show')}
 
