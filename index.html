@@ -1842,6 +1842,94 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div id="weekly-review-advice" style="font-size:12px;color:var(--text2);line-height:1.7;padding:10px;background:var(--bg3);border-radius:var(--rs)"></div>
   </div>
 
+  <!-- ===== リバースダイエット管理 ===== -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar"></div>
+    <div class="h3" style="margin-bottom:4px">🔄 リバースダイエット管理</div>
+    <div class="muted" style="font-size:11px;margin-bottom:14px">Da Silva (2025) / Hall et al. (2012) / Dirlewanger et al. (2000)</div>
+
+    <!-- STEP1: メンテナンスkcal逆算 -->
+    <div style="background:var(--bg3);border-radius:var(--rs);padding:14px;margin-bottom:12px">
+      <div class="h4" style="margin-bottom:10px">STEP 1 ▸ メンテナンスカロリー逆算</div>
+      <div class="muted" style="font-size:11px;margin-bottom:10px">減量中のデータから推定メンテナンスカロリーを算出します</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div>
+          <label class="muted" style="font-size:11px">減量中の摂取カロリー (kcal/日)</label>
+          <input type="number" id="rv-diet-kcal" class="inp" placeholder="例: 2300" style="margin-top:4px">
+        </div>
+        <div>
+          <label class="muted" style="font-size:11px">週平均体重減少量 (kg/週)</label>
+          <input type="number" id="rv-weight-loss" class="inp" placeholder="例: 0.4" step="0.1" style="margin-top:4px">
+        </div>
+      </div>
+      <button class="btn btn-accent" onclick="calcReverseDiet()" style="width:100%;margin-bottom:10px">逆算する</button>
+      <div id="rv-result" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+          <div style="background:var(--bg2);border-radius:var(--rs);padding:10px;text-align:center">
+            <div class="muted" style="font-size:10px">カロリー赤字</div>
+            <div class="mono accent" style="font-size:18px" id="rv-deficit">-</div>
+            <div class="muted" style="font-size:10px">kcal/日</div>
+          </div>
+          <div style="background:var(--bg2);border-radius:var(--rs);padding:10px;text-align:center">
+            <div class="muted" style="font-size:10px">推定メンテナンス</div>
+            <div class="mono" style="font-size:18px;color:var(--green)" id="rv-maintenance">-</div>
+            <div class="muted" style="font-size:10px">kcal/日</div>
+          </div>
+          <div style="background:var(--bg2);border-radius:var(--rs);padding:10px;text-align:center">
+            <div class="muted" style="font-size:10px">誤差範囲</div>
+            <div class="mono" style="font-size:14px;color:var(--yellow)" id="rv-range">-</div>
+            <div class="muted" style="font-size:10px">kcal</div>
+          </div>
+        </div>
+        <div id="rv-macro-suggest" style="background:var(--bg2);border-radius:var(--rs);padding:10px;margin-bottom:8px"></div>
+        <div style="font-size:10px;color:var(--text3)">※ 誤差±10%あり。代謝適応・水分・グリコーゲン変動を含まない推定値 (Hall et al. 2012)</div>
+      </div>
+    </div>
+
+    <!-- STEP2: 移行後体重判定 -->
+    <div style="background:var(--bg3);border-radius:var(--rs);padding:14px;margin-bottom:12px">
+      <div class="h4" style="margin-bottom:10px">STEP 2 ▸ 移行後の体重変化を判定</div>
+      <div class="muted" style="font-size:11px;margin-bottom:10px">メンテナンスカロリーへ移行後1〜2週間の体重増加量を入力</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div>
+          <label class="muted" style="font-size:11px">移行前の体重 (kg)</label>
+          <input type="number" id="rv-pre-weight" class="inp" placeholder="例: 70.0" step="0.1" style="margin-top:4px">
+        </div>
+        <div>
+          <label class="muted" style="font-size:11px">現在の体重 (kg)</label>
+          <input type="number" id="rv-cur-weight" class="inp" placeholder="例: 70.8" step="0.1" style="margin-top:4px">
+        </div>
+      </div>
+      <button class="btn" onclick="judgeWeightChange()" style="width:100%;margin-bottom:10px">判定する</button>
+      <div id="rv-weight-result" style="display:none"></div>
+    </div>
+
+    <!-- STEP3: 10%調整ルール -->
+    <div style="background:var(--bg3);border-radius:var(--rs);padding:14px">
+      <div class="h4" style="margin-bottom:8px">STEP 3 ▸ メンテナンスkcal更新（10%調整ルール）</div>
+      <div class="muted" style="font-size:11px;margin-bottom:10px">体重が減り始めたら現在のカロリーを10%引き上げて新しいメンテナンスを確定</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div>
+          <label class="muted" style="font-size:11px">現在の摂取カロリー (kcal)</label>
+          <input type="number" id="rv-current-kcal" class="inp" placeholder="例: 2800" style="margin-top:4px">
+        </div>
+        <div>
+          <label class="muted" style="font-size:11px">体重の傾向</label>
+          <select id="rv-trend" class="inp" style="margin-top:4px">
+            <option value="">選択</option>
+            <option value="decreasing">減少中（+10%推奨）</option>
+            <option value="stable">安定（現状維持）</option>
+            <option value="increasing">増加中（-200kcalへ戻す）</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-accent" onclick="calcReverseAdjust()" style="width:100%;margin-bottom:10px">調整カロリーを計算</button>
+      <div id="rv-adjust-result" style="display:none"></div>
+      <div style="font-size:10px;color:var(--text3);margin-top:6px">
+        ※ 段階的極小増量（週+50kcal）の優位性は否定されつつある。速やかにメンテナンスへ移行し体重変化で調整する戦略が有効 (Da Silva et al. 2025)
+      </div>
+    </div>
+  </div>
 
 </div>
 
@@ -4952,6 +5040,136 @@ function renderDutyDayProtocol() {
     </div>
   `;
 }
+// ============================================================
+// リバースダイエット管理
+// ============================================================
+function calcReverseDiet() {
+  const dietKcal = parseInt(document.getElementById('rv-diet-kcal').value) || 0;
+  const weeklyLoss = parseFloat(document.getElementById('rv-weight-loss').value) || 0;
+  if (!dietKcal || !weeklyLoss) { alert('摂取カロリーと週体重減少量を入力してください'); return; }
+
+  // カロリー赤字逆算: 体脂肪1kg≒7500kcal（Wishnofsky修正値）
+  const dailyDeficit = Math.round((weeklyLoss * 7500) / 7);
+  const maintenance = dietKcal + dailyDeficit;
+  const rangeMin = Math.round(maintenance * 0.90);
+  const rangeMax = Math.round(maintenance * 1.10);
+
+  document.getElementById('rv-deficit').textContent = dailyDeficit;
+  document.getElementById('rv-maintenance').textContent = maintenance;
+  document.getElementById('rv-range').textContent = rangeMin + '〜' + rangeMax;
+
+  // マクロ提案: タンパク質変更なし・脂質+10g・炭水化物で残余埋める
+  const c = DB.get('cfg') || {};
+  const bw = c.tdeeweight || 70;
+  const targets = (typeof getAgeAdjustedTargets === 'function') ? getAgeAdjustedTargets() : {proteinPerKg: 2.0};
+  const protein = Math.round(bw * (targets.proteinPerKg || 2.0));
+  const proteinKcal = protein * 4;
+  const currentFat = Math.round(dietKcal * 0.25 / 9);
+  const newFat = currentFat + 10;
+  const fatKcal = newFat * 9;
+  const carbKcal = maintenance - proteinKcal - fatKcal;
+  const carb = Math.round(Math.max(0, carbKcal) / 4);
+
+  document.getElementById('rv-macro-suggest').innerHTML = `
+    <div style="font-size:11px;color:var(--text2);margin-bottom:6px">📊 推奨マクロ（メンテナンス移行後）</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+      <div style="text-align:center">
+        <div style="font-size:10px;color:var(--text3)">タンパク質</div>
+        <div class="mono" style="color:var(--accent)">${protein}g</div>
+        <div style="font-size:10px;color:var(--text3)">変更なし</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:10px;color:var(--text3)">脂質</div>
+        <div class="mono" style="color:var(--yellow)">${newFat}g</div>
+        <div style="font-size:10px;color:var(--text3)">+10g増量</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:10px;color:var(--text3)">炭水化物</div>
+        <div class="mono" style="color:var(--green)">${carb}g</div>
+        <div style="font-size:10px;color:var(--text3)">優先増量</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:6px">炭水化物1gあたり約3gの水分保持 → 初期体重増加は正常 (Fernandez-Elias et al. 2015)</div>
+  `;
+  document.getElementById('rv-result').style.display = 'block';
+}
+
+function judgeWeightChange() {
+  const pre = parseFloat(document.getElementById('rv-pre-weight').value) || 0;
+  const cur = parseFloat(document.getElementById('rv-cur-weight').value) || 0;
+  if (!pre || !cur) { alert('移行前・現在の体重を入力してください'); return; }
+  const diff = parseFloat((cur - pre).toFixed(2));
+  const el = document.getElementById('rv-weight-result');
+  let html = '';
+  if (diff <= 0) {
+    html = `<div style="background:rgba(0,200,100,0.1);border:1px solid var(--green);border-radius:var(--rs);padding:10px">
+      <div style="color:var(--green);font-weight:700;margin-bottom:4px">✅ 体重減少（${diff}kg）→ メンテナンスカロリー上昇のサイン</div>
+      <div style="font-size:11px;color:var(--text2)">現在の摂取カロリーを<strong>10%引き上げて</strong>新しいメンテナンスを確定してください。TEF・NEATの回復が代謝を押し上げています。</div>
+    </div>`;
+  } else if (diff <= 1.0) {
+    html = `<div style="background:rgba(0,200,100,0.08);border:1px solid var(--green);border-radius:var(--rs);padding:10px">
+      <div style="color:var(--green);font-weight:700;margin-bottom:4px">✅ 正常範囲（+${diff}kg）→ グリコーゲン・水分貯留</div>
+      <div style="font-size:11px;color:var(--text2)">炭水化物増量によるグリコーゲン超回復と結合水（1g×3g）による正常な増加です。体脂肪の蓄積ではありません。このまま継続観察してください。</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:4px">根拠: Bone et al. (2016) グリコーゲン容量上限・水分貯留データ</div>
+    </div>`;
+  } else if (diff <= 1.5) {
+    html = `<div style="background:rgba(255,200,0,0.1);border:1px solid var(--yellow);border-radius:var(--rs);padding:10px">
+      <div style="color:var(--yellow);font-weight:700;margin-bottom:4px">⚠️ 要観察（+${diff}kg）→ もう1週間様子見</div>
+      <div style="font-size:11px;color:var(--text2)">水分・グリコーゲン由来の可能性が高いですが、ストレス・塩分過多・炎症も考えられます。もう1週間継続して体重の方向性を確認してください。</div>
+    </div>`;
+  } else {
+    html = `<div style="background:rgba(255,60,60,0.1);border:1px solid #ff4444;border-radius:var(--rs);padding:10px">
+      <div style="color:#ff6666;font-weight:700;margin-bottom:4px">🔴 要調整（+${diff}kg）→ 200kcal引き下げ</div>
+      <div style="font-size:11px;color:var(--text2)">水分だけでなく体脂肪も蓄積している可能性があります。現在の摂取カロリーを<strong>200kcal引き下げ</strong>て再度1〜2週間観察してください。</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:4px">※ +1.5kg閾値は臨床経験則（一次エビデンス未確立）</div>
+    </div>`;
+  }
+  el.innerHTML = html;
+  el.style.display = 'block';
+}
+
+function calcReverseAdjust() {
+  const currentKcal = parseInt(document.getElementById('rv-current-kcal').value) || 0;
+  const trend = document.getElementById('rv-trend').value;
+  if (!currentKcal || !trend) { alert('現在のカロリーと体重傾向を選択してください'); return; }
+  const el = document.getElementById('rv-adjust-result');
+  let html = '';
+  if (trend === 'decreasing') {
+    const newKcal = Math.round(currentKcal * 1.10);
+    const addKcal = newKcal - currentKcal;
+    html = `<div style="background:rgba(0,200,100,0.1);border:1px solid var(--green);border-radius:var(--rs);padding:10px">
+      <div style="color:var(--green);font-weight:700;margin-bottom:6px">✅ メンテナンスカロリー上昇 → +10%引き上げ</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+        <div style="text-align:center"><div style="font-size:10px;color:var(--text3)">現在</div><div class="mono">${currentKcal}</div></div>
+        <div style="text-align:center"><div style="font-size:10px;color:var(--text3)">増加分</div><div class="mono accent">+${addKcal}</div></div>
+        <div style="text-align:center"><div style="font-size:10px;color:var(--text3)">新目標</div><div class="mono" style="color:var(--green)">${newKcal}</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--text2)">新しいメンテナンスカロリーは <strong>${newKcal} kcal</strong> です。1〜2週間この量で安定するか確認してください。</div>
+    </div>`;
+  } else if (trend === 'stable') {
+    html = `<div style="background:rgba(0,200,100,0.08);border:1px solid var(--green);border-radius:var(--rs);padding:10px">
+      <div style="color:var(--green);font-weight:700;margin-bottom:4px">✅ 現状維持 → ${currentKcal} kcal があなたのメンテナンス</div>
+      <div style="font-size:11px;color:var(--text2)">現在の ${currentKcal} kcal が実際のメンテナンスカロリーです。TEF・NEATが適応するまでさらに2〜4週間観察を続けてください。</div>
+    </div>`;
+  } else {
+    const adjusted = currentKcal - 200;
+    html = `<div style="background:rgba(255,200,0,0.1);border:1px solid var(--yellow);border-radius:var(--rs);padding:10px">
+      <div style="color:var(--yellow);font-weight:700;margin-bottom:4px">⚠️ 増加傾向 → ${adjusted} kcal に調整</div>
+      <div style="font-size:11px;color:var(--text2)">現在のカロリーが実際のメンテナンスを超えています。200kcal引き下げて <strong>${adjusted} kcal</strong> で再度1〜2週間様子を見てください。</div>
+    </div>`;
+  }
+  el.innerHTML = html;
+  el.style.display = 'block';
+}
+
+function renderReverseDiet() {
+  const c = DB.get('cfg') || {};
+  if (c.tdee) {
+    const el = document.getElementById('rv-diet-kcal');
+    if (el) el.placeholder = `例: ${Math.round(c.tdee * 0.85)}（TDEE-15%）`;
+  }
+}
+
 
 // ============================================================
 // ⑥ FFMI（Fat-Free Mass Index）体組成精度向上
@@ -7601,6 +7819,7 @@ function renderAnalysis(){
   renderFireExposureLog();
   renderJointLog();
   renderDutyDayProtocol();
+  renderReverseDiet();
 }
 
 
