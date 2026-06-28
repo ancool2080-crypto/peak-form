@@ -186,13 +186,14 @@ input[type=range]:focus{border:none;box-shadow:none}
   }
   #toc-fab:active { transform:scale(0.92); }
   #toc-drawer {
-    position:fixed; bottom:130px; right:16px; z-index:901;
+    position:fixed; bottom:140px; right:16px; z-index:9998;
     width:240px; max-height:70vh; overflow-y:auto;
-    background:var(--bg2); border:1px solid var(--bg3);
+    background:var(--bg2); border:1px solid rgba(255,255,255,0.1);
     border-radius:12px; padding:12px;
-    box-shadow:0 4px 24px rgba(0,0,0,0.5);
+    box-shadow:0 4px 24px rgba(0,0,0,0.6);
     display:none;
   }
+  #toc-drawer.open { display:block; }
   #toc-drawer.open { display:block; }
   .toc-drawer-title { font-size:11px; color:var(--text3); margin-bottom:8px; font-family:'DM Mono',monospace; }
   .toc-drawer-item {
@@ -9211,69 +9212,39 @@ function deleteSleep(id) {
 <button id="toc-fab" onclick="toggleTocDrawer()" title="メニュー / 目次">☰</button>
 <div id="toc-drawer">
   <div class="toc-drawer-title">🗂 QUICK NAV</div>
-  <div style="font-size:10px;color:var(--text3);margin-bottom:4px;padding:0 8px">— ページ移動 —</div>
-    <button class="toc-drawer-item" onclick="showPage('dashboard');updateTocFab('dashboard')"><span class="toc-num">◈</span>ダッシュボード</button>
-    <button class="toc-drawer-item" onclick="showPage('peaking');closeTocDrawer()"><span class="toc-num">◎</span>ピーキングプランナー</button>
-    <button class="toc-drawer-item" onclick="showPage('training');closeTocDrawer()"><span class="toc-num">▲</span>トレーニング記録</button>
-    <button class="toc-drawer-item" onclick="showPage('program');closeTocDrawer()"><span class="toc-num">◀</span>今日のメニュー</button>
-    <button class="toc-drawer-item" onclick="showPage('nutrition');closeTocDrawer()"><span class="toc-num">◆</span>栄養管理</button>
-    <button class="toc-drawer-item" onclick="showPage('sleep');closeTocDrawer()"><span class="toc-num">◑</span>睡眠・回復</button>
-    <button class="toc-drawer-item" onclick="showPage('shift');closeTocDrawer()"><span class="toc-num">📅</span>シフト管理</button>
-    <button class="toc-drawer-item" onclick="showPage('tdee');closeTocDrawer()"><span class="toc-num">≡</span>TDEEカリキュレーター</button>
-    <button class="toc-drawer-item" onclick="showPage('settings');closeTocDrawer()"><span class="toc-num">⊙</span>設定</button>
+  <div style="font-size:10px;color:var(--text3);margin-bottom:6px;padding:0 2px">— ページ移動 —</div>
+  <button class="toc-drawer-item" onclick="showPage('dashboard');closeTocDrawer()"><span class="toc-num">◈</span>ダッシュボード</button>
+  <button class="toc-drawer-item" onclick="showPage('peaking');closeTocDrawer()"><span class="toc-num">◎</span>ピーキングプランナー</button>
+  <button class="toc-drawer-item" onclick="showPage('program');closeTocDrawer()"><span class="toc-num">▲</span>今日のメニュー</button>
+  <button class="toc-drawer-item" onclick="showPage('training');closeTocDrawer()"><span class="toc-num">●</span>トレーニング記録</button>
+  <button class="toc-drawer-item" onclick="showPage('nutrition');closeTocDrawer()"><span class="toc-num">◆</span>栄養管理</button>
+  <button class="toc-drawer-item" onclick="showPage('sleep');closeTocDrawer()"><span class="toc-num">◑</span>睡眠・回復</button>
+  <button class="toc-drawer-item" onclick="showPage('shift');closeTocDrawer()"><span class="toc-num">📅</span>シフト管理</button>
+  <button class="toc-drawer-item" onclick="showPage('analysis');closeTocDrawer()"><span class="toc-num">📊</span>分析レポート</button>
+  <button class="toc-drawer-item" onclick="showPage('settings');closeTocDrawer()"><span class="toc-num">⚙</span>設定・TDEE</button>
   <div id="toc-divider-analysis" style="height:1px;background:var(--bg3);margin:8px 0"></div>
-  <div id="toc-section-analysis" style="font-size:10px;color:var(--text3);margin-bottom:4px;padding:0 8px">— 分析レポート内 —</div>
-    <button class="toc-drawer-item" onclick="tocJump('anc-cond');closeTocDrawer()"><span class="toc-num">01</span>コンディション分析</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-weight');closeTocDrawer()"><span class="toc-num">02</span>体重モニター</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-calorie');closeTocDrawer()"><span class="toc-num">03</span>減量カロリー設定</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-minicut');closeTocDrawer()"><span class="toc-num">04</span>ミニカット & バルク</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-bodycomp');closeTocDrawer()"><span class="toc-num">05</span>体組成トラッカー</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-weekly');closeTocDrawer()"><span class="toc-num">06</span>週次サマリー</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-tracker');closeTocDrawer()"><span class="toc-num">07</span>重量推移</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-load');closeTocDrawer()"><span class="toc-num">08</span>負荷グラフ</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-nutrition');closeTocDrawer()"><span class="toc-num">09</span>栄養グラフ</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-sleep');closeTocDrawer()"><span class="toc-num">10</span>睡眠グラフ</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-injury');closeTocDrawer()"><span class="toc-num">11</span>怪我リスク</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-cvd');closeTocDrawer()"><span class="toc-num">12</span>心血管リスク</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-ffmi');closeTocDrawer()"><span class="toc-num">13</span>FFMI</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-vo2max');closeTocDrawer()"><span class="toc-num">14</span>VO2max</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-macro');closeTocDrawer()"><span class="toc-num">15</span>マクロサイクル</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-fire');closeTocDrawer()"><span class="toc-num">16</span>出動記録</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-joint');closeTocDrawer()"><span class="toc-num">17</span>関節記録</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-duty');closeTocDrawer()"><span class="toc-num">18</span>当番日栄養</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-review');closeTocDrawer()"><span class="toc-num">19</span>週次レビュー</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-reverse');closeTocDrawer()"><span class="toc-num">20</span>🔄 リバースダイエット</button>
+  <div id="toc-section-analysis" style="font-size:10px;color:var(--text3);margin-bottom:6px;padding:0 2px">— 分析レポート内 —</div>
+  <button class="toc-drawer-item" onclick="tocJump('anc-cond');closeTocDrawer()"><span class="toc-num">01</span>コンディション分析</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-weight');closeTocDrawer()"><span class="toc-num">02</span>体重モニター</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-calorie');closeTocDrawer()"><span class="toc-num">03</span>減量カロリー設定</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-minicut');closeTocDrawer()"><span class="toc-num">04</span>ミニカット & バルク</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-bodycomp');closeTocDrawer()"><span class="toc-num">05</span>体組成トラッカー</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-weekly');closeTocDrawer()"><span class="toc-num">06</span>週次サマリー</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-tracker');closeTocDrawer()"><span class="toc-num">07</span>重量推移</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-load');closeTocDrawer()"><span class="toc-num">08</span>負荷グラフ</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-nutrition');closeTocDrawer()"><span class="toc-num">09</span>栄養グラフ</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-sleep');closeTocDrawer()"><span class="toc-num">10</span>睡眠グラフ</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-injury');closeTocDrawer()"><span class="toc-num">11</span>怪我リスク</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-cvd');closeTocDrawer()"><span class="toc-num">12</span>心血管リスク</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-ffmi');closeTocDrawer()"><span class="toc-num">13</span>FFMI</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-vo2max');closeTocDrawer()"><span class="toc-num">14</span>VO2max</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-macro');closeTocDrawer()"><span class="toc-num">15</span>マクロサイクル</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-fire');closeTocDrawer()"><span class="toc-num">16</span>出動記録</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-joint');closeTocDrawer()"><span class="toc-num">17</span>関節記録</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-duty');closeTocDrawer()"><span class="toc-num">18</span>当番日栄養</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-review');closeTocDrawer()"><span class="toc-num">19</span>週次レビュー</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-reverse');closeTocDrawer()"><span class="toc-num">20</span>🔄 リバースダイエット</button>
 </div>
-    <button class="toc-drawer-item" onclick="tocJump('anc-cond');closeTocDrawer()"><span class="toc-num">01</span>コンディション長期分析</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-weight');closeTocDrawer()"><span class="toc-num">02</span>週平均体重モニター</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-calorie');closeTocDrawer()"><span class="toc-num">03</span>減量カロリー設定</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-alcohol');closeTocDrawer()"><span class="toc-num">04</span>アルコールと体脂肪</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-minicut');closeTocDrawer()"><span class="toc-num">05</span>ミニカット & バルク判定</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-bulk');closeTocDrawer()"><span class="toc-num">06</span>バルクサイクル基準</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-cardio');closeTocDrawer()"><span class="toc-num">07</span>有酸素の位置づけ</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-mindset');closeTocDrawer()"><span class="toc-num">08</span>規律マインドセット</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-sets');closeTocDrawer()"><span class="toc-num">09</span>セット数と収穫逓減</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-bodycomp');closeTocDrawer()"><span class="toc-num">10</span>体組成推移トラッカー</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-weekly');closeTocDrawer()"><span class="toc-num">11</span>週次トレーニングサマリー</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-tracker');closeTocDrawer()"><span class="toc-num">12</span>重量推移トラッカー</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-load');closeTocDrawer()"><span class="toc-num">13</span>週次負荷グラフ</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-weightgraph');closeTocDrawer()"><span class="toc-num">14</span>体重推移グラフ</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-nutrition');closeTocDrawer()"><span class="toc-num">15</span>栄養摂取推移</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-sleep');closeTocDrawer()"><span class="toc-num">16</span>睡眠×ウェルネス</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-injury');closeTocDrawer()"><span class="toc-num">17</span>怪我リスクスコア</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-age');closeTocDrawer()"><span class="toc-num">18</span>年齢別目標値</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-longterm');closeTocDrawer()"><span class="toc-num">19</span>長期トレンド</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-cvd');closeTocDrawer()"><span class="toc-num">20</span>心血管リスク</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-ffmi');closeTocDrawer()"><span class="toc-num">21</span>FFMI 体組成指標</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-vo2max');closeTocDrawer()"><span class="toc-num">22</span>VO2max 推定値</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-macro');closeTocDrawer()"><span class="toc-num">23</span>年間マクロサイクル</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-fire');closeTocDrawer()"><span class="toc-num">24</span>出動・火災暴露記録</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-joint');closeTocDrawer()"><span class="toc-num">25</span>関節ストレス記録</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-duty');closeTocDrawer()"><span class="toc-num">26</span>当番日栄養プロトコル</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-review');closeTocDrawer()"><span class="toc-num">27</span>週次レビュー</button>
-    <button class="toc-drawer-item" onclick="tocJump('anc-reverse');closeTocDrawer()"><span class="toc-num">28</span>🔄 リバースダイエット</button>
-</div>
-
 </body>
 </html
   <div class="card" style="margin-bottom:18px">
