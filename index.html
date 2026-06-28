@@ -177,16 +177,13 @@ input[type=range]:focus{border:none;box-shadow:none}
 
   /* フローティングTOCボタン */
   #toc-fab {
-    position:fixed; bottom:76px; right:16px; z-index:900;
-    width:44px; height:44px; border-radius:50%;
+    position:fixed; bottom:80px; right:16px; z-index:9999;
+    width:48px; height:48px; border-radius:50%;
     background:var(--accent); border:none; cursor:pointer;
-    font-size:18px; color:#fff;
-    box-shadow:0 2px 12px rgba(0,0,0,0.4);
-    display:flex; align-items:center; justify-content:center;
-    transition:transform 0.15s, opacity 0.2s;
-    opacity:0; pointer-events:none;
+    font-size:20px; color:#fff;
+    box-shadow:0 3px 16px rgba(0,0,0,0.6);
+    display:flex !important; align-items:center; justify-content:center;
   }
-  #toc-fab.visible { opacity:1; pointer-events:auto; }
   #toc-fab:active { transform:scale(0.92); }
   #toc-drawer {
     position:fixed; bottom:130px; right:16px; z-index:901;
@@ -2154,20 +2151,12 @@ function closeTocDrawer() {
   if (d) d.classList.remove('open');
 }
 function updateTocFab(pageId) {
-  const fab = document.getElementById('toc-fab');
-  if (!fab) return;
-  // 全ページで常時表示
-  fab.classList.add('visible');
   closeTocDrawer();
-  // 分析ページ以外では目次セクションを非表示
   const tocSection = document.getElementById('toc-section-analysis');
-  if (tocSection) tocSection.style.display = (pageId === 'analysis') ? 'block' : 'none';
   const tocDivider = document.getElementById('toc-divider-analysis');
-  if (tocDivider) tocDivider.style.display = (pageId === 'analysis') ? 'block' : 'none';
-  // 現在ページのナビアイテムをハイライト
-  document.querySelectorAll('.toc-drawer-item[data-page]').forEach(el => {
-    el.style.color = (el.dataset.page === pageId) ? 'var(--accent)' : '';
-  });
+  const isAnalysis = pageId === 'analysis';
+  if (tocSection) tocSection.style.display = isAnalysis ? 'block' : 'none';
+  if (tocDivider) tocDivider.style.display = isAnalysis ? 'block' : 'none';
 }
 
 function showPage(id){
