@@ -1272,6 +1272,17 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div id="supp-timing-now" style="display:flex;gap:8px;flex-wrap:wrap"></div>
     <div style="margin-top:10px;font-size:12px;color:var(--text3)">次のタイミング：<span id="supp-next-timing" style="color:var(--accent2);font-weight:600"></span></div>
   </div>
+  <!-- 年齢連動サプリ推奨 -->
+  <div class="card" style="margin-bottom:14px;border:1px solid var(--accent2)">
+    <div class="card-header-bar"></div>
+    <div class="row-between" style="margin-bottom:10px">
+      <div class="h3">🎂 年代別サプリ最適化</div>
+      <span id="supp-age-badge" class="badge" style="font-size:10px"></span>
+    </div>
+    <div id="supp-age-recommend" style="font-size:12px;color:var(--text2);line-height:1.7"></div>
+    <div style="font-size:10px;color:var(--text3);margin-top:8px">エビデンス: ESPEN (2014) / Frontiers Nutrition (2024) / Smith (2019) 消防士CVD</div>
+  </div>
+
   <!-- 消防士版1日プロトコル（docx第4.2節） -->
   <div class="card card-blue" style="margin-bottom:14px">
     <div class="card-header-bar blue"></div>
@@ -3440,6 +3451,14 @@ const SUPPS={
      evidence:'ISSFAL 2019 / Smith 2011 / docx第3.1.3節',
      firefighter:'火災ガス（アクロレイン等）暴露による酸化ストレスへの化学的バリア。日本人約半数のALDH2不活性型（rs671）は脂質過酸化物の解毒能力が低い→オメガ3+ビタミンEの積極摂取が特に重要（docx第3.1.3節）。',
      foodAlt:'サバ100g≈1,800mg / イワシ100g≈2,000mg。週3〜4回の青魚でサプリ不要になる場合あり。'},
+    {id:'electrolyte',
+     name:'電解質（Na/K/Mg 複合）',
+     dose:'Na 500〜1,000mg / K 200〜400mg / Mg 100mg（大量発汗時に追加）',
+     timing:'活動前・活動中・活動後（発汗量に応じて）',
+     effect:'脱水予防 / 熱中症リスク↓ / 筋痙攣予防 / 神経伝達維持 / 集中力保持',
+     evidence:'ACSM水分補給GL 2007 / Baker 2019 / NFPA熱ストレス指針',
+     firefighter:'防火装備下の活動で1時間あたり1〜2Lの発汗も珍しくなく、水だけの補給は低ナトリウム血症（希釈性低Na）を招く。ナトリウム補充が熱中症・パフォーマンス低下・判断力低下の予防に直結（消防活動の最重要電解質）。夏季・長時間出動・訓練時は特に必須。',
+     foodAlt:'経口補水液・味噌汁・梅干し・塩タブレットで代替可能。ただし大量発汗時は専用電解質が確実。'},
   ],
   tier2:[
     {id:'magnesium',
@@ -3568,6 +3587,110 @@ const SUPP_TIMINGS=[
   {hour:[17,18,19],label:'🍽️ 夕食時',items:['オメガ3（1,000mg）','マルチビタミン'],color:'var(--accent2)'},
   {hour:[20,21,22,23],label:'🌙 就寝前',items:['マグネシウム（200mg）','カゼインプロテイン（30g）'],color:'#a78bfa'},
 ];
+
+
+// ======================
+// 年齢連動サプリ推奨
+// ======================
+function renderSuppAgeRecommend() {
+  const badgeEl = document.getElementById('supp-age-badge');
+  const recEl = document.getElementById('supp-age-recommend');
+  if (!recEl) return;
+
+  const c = DB.get('cfg') || {};
+  const age = c.age || 0;
+
+  if (!age) {
+    if (badgeEl) badgeEl.textContent = '年齢未設定';
+    if (badgeEl) badgeEl.style.background = 'var(--bg4)';
+    recEl.innerHTML = '<div style="color:var(--text3)">設定ページで年齢を入力すると、年代に応じたサプリの用量調整・優先順位が表示されます。</div>';
+    return;
+  }
+
+  const t = getAgeAdjustedTargets();
+  const groupLabels = {
+    twenties: '20代', thirties: '30代', forties: '40代', fifties: '50代', senior: '60代+'
+  };
+  const groupColors = {
+    twenties: 'var(--accent4)', thirties: 'var(--accent4)',
+    forties: 'var(--accent3)', fifties: 'var(--accent3)', senior: 'var(--accent-red,#e74c3c)'
+  };
+
+  if (badgeEl) {
+    badgeEl.textContent = groupLabels[t.ageGroup] + ' 最適化';
+    badgeEl.style.background = groupColors[t.ageGroup];
+    badgeEl.style.color = '#fff';
+  }
+
+  // 年代別のサプリ調整内容
+  const recommendations = {
+    twenties: {
+      priority: 'クレアチン・ビタミンD3・電解質を基礎に。',
+      adjust: [
+        ['クレアチン', '5g/日 標準量で十分'],
+        ['ビタミンD3', '2,000IU（屋内勤務が多ければ増量）'],
+        ['マグネシウム', '発汗量に応じて。睡眠の質改善に有効'],
+      ],
+      note: '適応能力ピーク期。サプリよりも食事・睡眠・トレーニングの土台作りを優先。'
+    },
+    thirties: {
+      priority: 'クレアチン・ビタミンD3・オメガ3を軸に、回復サポートを追加。',
+      adjust: [
+        ['クレアチン', '5g/日 継続'],
+        ['オメガ3', '1,500mg（炎症・回復サポートの重要度上昇）'],
+        ['マグネシウム', '100〜200mg（睡眠・回復に）'],
+      ],
+      note: '軽微な回復低下期。オメガ3の抗炎症作用で回復を底上げ。'
+    },
+    forties: {
+      priority: '同化抵抗性対策が最重要。タンパク質サポート＋抗炎症を強化。',
+      adjust: [
+        ['ホエイ/EAA', '毎食30g確保のため補助的に活用（同化抵抗性対策）'],
+        ['ビタミンD3+K2', '3,000〜4,000IU（骨密度維持・K2併用必須）'],
+        ['オメガ3', '2,000mg（慢性炎症・CVD予防に増量）'],
+        ['マグネシウム', '200mg（睡眠・筋機能・心血管保護）'],
+      ],
+      note: '⚠️ 同化抵抗性が明確化（Volpi 2010）。CVDリスク管理としてオメガ3を積極摂取。'
+    },
+    fifties: {
+      priority: 'CVD予防・筋量維持・関節保護を総合的に。',
+      adjust: [
+        ['ホエイ/EAA', '毎食40g目標。ロイシン強化型が有効'],
+        ['ビタミンD3+K2', '4,000IU（疲労骨折・筋力低下予防）'],
+        ['オメガ3', '2,000mg（心血管保護の最重要期）'],
+        ['クルクミン', '関節・慢性炎症対策として追加推奨'],
+        ['コラーゲン+VC', '腱・靱帯保護（動作品質低下期）'],
+      ],
+      note: '⚠️ 動作品質急低下期（Redshaw 2023）。関節保護サプリの優先度上昇。'
+    },
+    senior: {
+      priority: '筋量・骨密度・心肺機能の積極的維持。医師連携推奨。',
+      adjust: [
+        ['ホエイ/EAA', '毎食40g以上。吸収効率重視でEAA併用'],
+        ['ビタミンD3+K2', '4,000IU（骨折予防の最重要栄養素）'],
+        ['オメガ3', '2,000mg（認知・心血管の総合保護）'],
+        ['クルクミン', '慢性炎症・関節対策を継続'],
+        ['マグネシウム', '200mg（心機能・睡眠・筋機能）'],
+      ],
+      note: '⚠️ 各サプリは医師・薬剤師と相談の上で。薬剤との相互作用に注意。'
+    }
+  };
+
+  const r = recommendations[t.ageGroup];
+  let html = `<div style="margin-bottom:8px;color:var(--accent2);font-weight:600">${r.priority}</div>`;
+  html += `<div style="margin-bottom:8px;padding:8px;background:var(--bg3);border-radius:6px">`;
+  html += `<div style="font-size:11px;color:var(--text3);margin-bottom:6px">推奨タンパク質: <span class="mono" style="color:var(--accent)">${t.proteinTarget}g/日</span>（毎食${t.proteinPerMeal}g）</div>`;
+  r.adjust.forEach(([name, dose]) => {
+    html += `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:12px;font-weight:600">${name}</span>
+      <span style="font-size:11px;color:var(--text2);text-align:right;max-width:60%">${dose}</span>
+    </div>`;
+  });
+  html += `</div>`;
+  html += `<div style="font-size:11px;color:var(--text2);padding:6px 8px;background:rgba(74,158,255,0.06);border-radius:6px">${r.note}</div>`;
+
+  recEl.innerHTML = html;
+}
 
 function renderSuppTiming(){
   const timeEl=document.getElementById('supp-current-time');
@@ -3744,6 +3867,7 @@ function renderWeeklyReview(){
 
 function renderSupplementPage(){
   renderSuppTiming();
+  renderSuppAgeRecommend();
   const suppData=DB.get('pf_supp_checks')||{};
   const todayStr=today();
   const todayChecks=suppData[todayStr]||[];
