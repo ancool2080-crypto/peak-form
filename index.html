@@ -560,35 +560,6 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="card"><div class="card-header-bar"></div><div class="h3" style="margin-bottom:14px">記録一覧（直近20件）</div><div id="training-log-table"></div></div>
 </div>
 
-  <!-- インターバルタイマー設定 -->
-  <div class="card" style="margin-bottom:18px">
-    <div class="card-header-bar blue"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div class="h3">インターバルタイマー設定</div>
-      <button class="btn btn-sm" onclick="toggleRestSettings()" id="rest-settings-toggle">▼ 設定を開く</button>
-    </div>
-    <div id="rest-settings-panel" style="display:none"></div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
-        <div style="font-size:20px;font-weight:600;font-family:var(--font-mono);color:var(--accent)" id="rest-display-C">3:00</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:2px">コンパウンド</div>
-        <div style="font-size:9px;color:var(--text3)">スクワット・チン等</div>
-      </div>
-      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
-        <div style="font-size:20px;font-weight:600;font-family:var(--font-mono);color:var(--accent2)" id="rest-display-M">2:30</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:2px">マシン多関節</div>
-        <div style="font-size:9px;color:var(--text3)">レッグプレス等</div>
-      </div>
-      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
-        <div style="font-size:20px;font-weight:600;font-family:var(--font-mono);color:var(--accent4)" id="rest-display-I">1:30</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:2px">アイソレーション</div>
-        <div style="font-size:9px;color:var(--text3)">カール・レイズ等</div>
-      </div>
-    </div>
-    <div style="font-size:10px;color:var(--text3);margin-top:8px;text-align:center">
-      根拠: Schoenfeld (2016) + Singer (2024) — 種目タイプで自動判定 <span onclick="openEvidence('休憩')" style="color:var(--accent2);cursor:pointer">📚</span>
-    </div>
-  </div>
 
 <!-- NUTRITION -->
 <div class="page" id="page-nutrition">
@@ -944,39 +915,6 @@ input[type=range]:focus{border:none;box-shadow:none}
     </div>
   </div>
   <div style="display:none"><!-- modal placeholder --></div>
-  </div>
-  <div class="grid2" style="margin-bottom:18px">
-    <div class="card card-blue">
-      <div class="card-header-bar blue"></div>
-      <div class="h3" style="margin-bottom:12px">今月のシフト集計</div>
-      <div id="shift-summary" style="display:flex;flex-direction:column;gap:8px"></div>
-    </div>
-    <div class="card card-amber">
-      <div class="card-header-bar amber"></div>
-      <div class="h3" style="margin-bottom:12px">ACWR計算（負荷管理）</div>
-      <div id="shift-acwr"></div>
-      <div class="muted" style="font-size:11px;margin-top:10px;line-height:1.6">24h勤務 = 800 / 週休出勤 = 700 / 非番出勤 = 600 / 有酸素 = 200 / 非番 = 100 / 週休 = 0。ACWR 0.8〜1.3がスイートスポット（Firefighter Nation 2024）。</div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-header-bar green"></div>
-    <div class="h3" style="margin-bottom:10px">シフトパターン設定（繰り返し登録）</div>
-    <div class="muted" style="margin-bottom:12px;font-size:12px">東京消防庁の標準パターン（3日サイクル：24h勤務→非番→週休）を一括登録できます。</div>
-    <div class="grid3" style="margin-bottom:12px">
-      <div class="field"><label class="label">開始日</label><input type="date" id="shift-pattern-start"></div>
-      <div class="field"><label class="label">登録週数</label><input type="number" id="shift-pattern-weeks" value="8" min="1" max="26"></div>
-      <div class="field"><label class="label">パターン</label>
-        <select id="shift-pattern-type">
-          <option value="cycle1">①当番→非番→週休→当番→非番→当番→非番</option>
-          <option value="cycle2">②週休→当番→非番→週休→当番→非番→当番</option>
-          <option value="cycle3">③非番→週休→当番→非番→日勤→週休→週休</option>
-          <option value="full21">①②③フルサイクル（21日）</option>
-          <option value="custom">カスタム</option>
-        </select>
-      </div>
-    </div>
-    <button class="btn btn-primary" onclick="applyShiftPattern()">パターンを一括登録</button>
-    <button class="btn btn-danger btn-sm" onclick="clearShiftMonth()" style="margin-left:10px">今月をクリア</button>
   </div>
 </div>
   <!-- トレーニング自動配置プラン -->
@@ -1410,32 +1348,26 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="toc-grid">
         <button class="toc-btn" onclick="tocJump('anc-cond')"><span class="toc-num">01</span>コンディション長期分析</button>
         <button class="toc-btn" onclick="tocJump('anc-weight')"><span class="toc-num">02</span>週平均体重モニター</button>
-        <button class="toc-btn" onclick="tocJump('anc-calorie')"><span class="toc-num">03</span>減量カロリー設定</button>
-        <button class="toc-btn" onclick="tocJump('anc-alcohol')"><span class="toc-num">04</span>アルコールと体脂肪</button>
-        <button class="toc-btn" onclick="tocJump('anc-minicut')"><span class="toc-num">05</span>ミニカット & バルク判定</button>
-        <button class="toc-btn" onclick="tocJump('anc-bulk')"><span class="toc-num">06</span>バルクサイクル基準</button>
-        <button class="toc-btn" onclick="tocJump('anc-cardio')"><span class="toc-num">07</span>有酸素の位置づけ</button>
-        <button class="toc-btn" onclick="tocJump('anc-mindset')"><span class="toc-num">08</span>規律マインドセット</button>
-        <button class="toc-btn" onclick="tocJump('anc-sets')"><span class="toc-num">09</span>セット数と収穫逓減</button>
-        <button class="toc-btn" onclick="tocJump('anc-bodycomp')"><span class="toc-num">10</span>体組成推移トラッカー</button>
-        <button class="toc-btn" onclick="tocJump('anc-weekly')"><span class="toc-num">11</span>週次トレーニングサマリー</button>
-        <button class="toc-btn" onclick="tocJump('anc-tracker')"><span class="toc-num">12</span>重量推移トラッカー</button>
-        <button class="toc-btn" onclick="tocJump('anc-load')"><span class="toc-num">13</span>週次負荷グラフ</button>
-        <button class="toc-btn" onclick="tocJump('anc-weightgraph')"><span class="toc-num">14</span>体重推移グラフ</button>
-        <button class="toc-btn" onclick="tocJump('anc-nutrition')"><span class="toc-num">15</span>栄養摂取推移</button>
-        <button class="toc-btn" onclick="tocJump('anc-sleep')"><span class="toc-num">16</span>睡眠×ウェルネス</button>
-        <button class="toc-btn" onclick="tocJump('anc-injury')"><span class="toc-num">17</span>怪我リスクスコア</button>
-        <button class="toc-btn" onclick="tocJump('anc-age')"><span class="toc-num">18</span>年齢別目標値</button>
-        <button class="toc-btn" onclick="tocJump('anc-longterm')"><span class="toc-num">19</span>長期トレンド</button>
-        <button class="toc-btn" onclick="tocJump('anc-cvd')"><span class="toc-num">20</span>心血管リスク</button>
-        <button class="toc-btn" onclick="tocJump('anc-ffmi')"><span class="toc-num">21</span>FFMI 体組成指標</button>
-        <button class="toc-btn" onclick="tocJump('anc-vo2max')"><span class="toc-num">22</span>VO2max 推定値</button>
-        <button class="toc-btn" onclick="tocJump('anc-macro')"><span class="toc-num">23</span>年間マクロサイクル</button>
-        <button class="toc-btn" onclick="tocJump('anc-fire')"><span class="toc-num">24</span>出動・火災暴露記録</button>
-        <button class="toc-btn" onclick="tocJump('anc-joint')"><span class="toc-num">25</span>関節ストレス記録</button>
-        <button class="toc-btn" onclick="tocJump('anc-duty')"><span class="toc-num">26</span>当番日栄養プロトコル</button>
-        <button class="toc-btn" onclick="tocJump('anc-review')"><span class="toc-num">27</span>週次レビュー</button>
-        <button class="toc-btn" onclick="tocJump('anc-reverse')"><span class="toc-num">28</span>🔄 リバースダイエット</button>
+        <button class="toc-btn" onclick="tocJump('anc-minicut')"><span class="toc-num">03</span>ミニカット & バルク判定</button>
+        <button class="toc-btn" onclick="tocJump('anc-bodycomp')"><span class="toc-num">04</span>体組成推移トラッカー</button>
+        <button class="toc-btn" onclick="tocJump('anc-weekly')"><span class="toc-num">05</span>週次トレーニングサマリー</button>
+        <button class="toc-btn" onclick="tocJump('anc-tracker')"><span class="toc-num">06</span>重量推移トラッカー</button>
+        <button class="toc-btn" onclick="tocJump('anc-load')"><span class="toc-num">07</span>週次負荷グラフ</button>
+        <button class="toc-btn" onclick="tocJump('anc-weightgraph')"><span class="toc-num">08</span>体重推移グラフ</button>
+        <button class="toc-btn" onclick="tocJump('anc-nutrition')"><span class="toc-num">09</span>栄養摂取推移</button>
+        <button class="toc-btn" onclick="tocJump('anc-sleep')"><span class="toc-num">10</span>睡眠×ウェルネス</button>
+        <button class="toc-btn" onclick="tocJump('anc-injury')"><span class="toc-num">11</span>怪我リスクスコア</button>
+        <button class="toc-btn" onclick="tocJump('anc-age')"><span class="toc-num">12</span>年齢別目標値</button>
+        <button class="toc-btn" onclick="tocJump('anc-longterm')"><span class="toc-num">13</span>長期トレンド</button>
+        <button class="toc-btn" onclick="tocJump('anc-cvd')"><span class="toc-num">14</span>心血管リスク</button>
+        <button class="toc-btn" onclick="tocJump('anc-ffmi')"><span class="toc-num">15</span>FFMI 体組成指標</button>
+        <button class="toc-btn" onclick="tocJump('anc-vo2max')"><span class="toc-num">16</span>VO2max 推定値</button>
+        <button class="toc-btn" onclick="tocJump('anc-macro')"><span class="toc-num">17</span>年間マクロサイクル</button>
+        <button class="toc-btn" onclick="tocJump('anc-fire')"><span class="toc-num">18</span>出動・火災暴露記録</button>
+        <button class="toc-btn" onclick="tocJump('anc-joint')"><span class="toc-num">19</span>関節ストレス記録</button>
+        <button class="toc-btn" onclick="tocJump('anc-duty')"><span class="toc-num">20</span>当番日栄養プロトコル</button>
+        <button class="toc-btn" onclick="tocJump('anc-review')"><span class="toc-num">21</span>週次レビュー</button>
+        <button class="toc-btn" onclick="tocJump('anc-reverse')"><span class="toc-num">22</span>🔄 リバースダイエット</button>
       </div>
     </div>
   </div>
@@ -1494,65 +1426,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     </div>
   </div>
 
-  <!-- 減量カロリー設定 -->
-  <div class="card card-accent" style="margin-bottom:18px">
-    <div id="anc-calorie" class="card-header-bar"></div>
-    <div class="h3" style="margin-bottom:5px">減量カロリー設定（SGIR式）</div>
-    <div class="muted" style="font-size:12px;margin-bottom:16px">体重ベースの簡易計算。体脂肪が多い人ほど係数が低くなる（体内に貯蔵エネルギーが多いため少ない摂取カロリーでも身体機能を維持できる）。</div>
-    <div class="grid2" style="margin-bottom:16px;gap:10px">
-      <div>
-        <div class="label" style="margin-bottom:8px">男性 — 目標カロリー係数</div>
-        <table style="font-size:12px">
-          <thead><tr><th>体重</th><th>係数</th><th>目安カロリー例</th></tr></thead>
-          <tbody>
-            <tr><td>70kg</td><td class="mono">×25〜30</td><td class="muted">1,750〜2,100kcal</td></tr>
-            <tr><td>80kg</td><td class="mono">×22〜28</td><td class="muted">1,760〜2,240kcal</td></tr>
-            <tr><td>90kg</td><td class="mono">×19〜23</td><td class="muted">1,710〜2,070kcal</td></tr>
-            <tr><td>100kg</td><td class="mono">×17〜20</td><td class="muted">1,700〜2,000kcal</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div>
-        <div class="label" style="margin-bottom:8px">マクロ設定の順序（重要）</div>
-        <div class="card-sm" style="padding:12px;border-color:rgba(255,69,96,0.2)">
-          <div style="font-size:12px;line-height:1.9;color:var(--text2)">
-            <strong style="color:var(--text)">① タンパク質を先に決める</strong>（身長基準）<br>
-            男性：身長(cm) - 10 〜 身長(cm) が最低摂取量(g)<br>
-            女性：男性の約2/3が目安<br><br>
-            <strong style="color:var(--text)">② 脂質を決める</strong>（身長基準）<br>
-            男性：身長(cm) ÷ 3 程度(g) が最低量<br><br>
-            <strong style="color:var(--text)">③ 炭水化物で残りカロリーを埋める</strong><br>
-            (総カロリー - P×4 - F×9) ÷ 4 = 炭水化物(g)
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="alert alert-info" style="font-size:12px">
-      💡 週7日間の<strong>平均摂取カロリー</strong>が目標値に合っていれば十分です。平日は少なめ・週末は少し多めという戦略も有効。毎日完全に同じカロリーでなくてもOK。
-    </div>
-  </div>
 
-  <!-- アルコールの影響 -->
-  <div class="card card-accent" style="margin-bottom:18px">
-    <div id="anc-alcohol" class="card-header-bar"></div>
-    <div class="h3" style="margin-bottom:5px">アルコールと体脂肪減少</div>
-    <div class="muted" style="font-size:12px;margin-bottom:14px">減量目的ならアルコールのメリットはゼロ、むしろマイナスです（研究による事実）。</div>
-    <div class="grid3" style="margin-bottom:14px;gap:8px">
-      <div class="card-sm" style="border-color:rgba(255,69,96,0.3);text-align:center;padding:14px">
-        <div style="font-size:28px;font-weight:700;color:var(--accent);font-family:var(--font-mono)">36%</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:4px">脂肪酸化量の最大減少量。飲酒中、体は脂肪燃焼をやめてアルコール処理を優先する（NEJM, Jequier 1992）</div>
-      </div>
-      <div class="card-sm" style="border-color:rgba(255,69,96,0.3);text-align:center;padding:14px">
-        <div style="font-size:28px;font-weight:700;color:var(--accent);font-family:var(--font-mono)">7kcal</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:4px">アルコール1gあたりのカロリー。タンパク質・炭水化物の4kcalより高く、栄養価はゼロ</div>
-      </div>
-      <div class="card-sm" style="border-color:rgba(255,69,96,0.3);text-align:center;padding:14px">
-        <div style="font-size:28px;font-weight:700;color:var(--accent);font-family:var(--font-mono)">REM↓</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:4px">飲酒後は深い回復睡眠（REM睡眠）が抑制→翌日の食欲ホルモン増加→カロリーコントロール困難（Sleep Medicine Reviews, 2025）</div>
-      </div>
-    </div>
-    <div class="alert alert-danger" style="font-size:12px">アルコールは「カロリーを加えるだけでなく、脂肪燃焼を止め・睡眠を壊し・ホルモンを乱す」という3重のダメージがあります。飲む場合はその影響を十分に理解した上で選択してください。テストステロン産生も直接抑制されます。</div>
-  </div>
 
   <!-- ミニカット判定 -->
   <div class="card" style="margin-bottom:18px">
@@ -1564,130 +1438,10 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="metric"><div class="metric-label">推奨カットkcal</div><div class="metric-val" id="mc-cut-cal">—</div><div class="metric-sub">kcal</div></div>
     </div>
     <div id="mc-advice"></div>
-    <div class="divider"></div>
-    <div id="anc-bulk" class="h3" style="margin-bottom:10px;font-size:13px">バルクサイクル基準</div>
-    <table style="font-size:12px">
-      <thead><tr><th>体脂肪率</th><th>フェーズ</th><th>期間目安</th><th>カロリー調整</th></tr></thead>
-      <tbody>
-        <tr><td>8〜12%</td><td><span class="badge badge-green">バルク最適</span></td><td>制限なし</td><td>TDEE+100〜300</td></tr>
-        <tr><td>12〜15%</td><td><span class="badge badge-blue">バルク継続</span></td><td>注意しながら継続</td><td>TDEE+100〜200</td></tr>
-        <tr><td>15〜18%</td><td><span class="badge badge-amber">ミニカット推奨</span></td><td>4〜6週間</td><td>ピーク比-1000〜-1500</td></tr>
-        <tr><td>18〜20%</td><td><span class="badge badge-amber">ミニカット必須</span></td><td>6〜8週間</td><td>ピーク比-1200〜-1800</td></tr>
-        <tr><td>20%超</td><td><span class="badge badge-red">本格減量</span></td><td>10週間以上</td><td>計画的ダイエット</td></tr>
-      </tbody>
-    </table>
   </div>
 
-  <!-- 有酸素運動の位置づけ -->
-  <div class="card card-green" style="margin-bottom:18px">
-    <div id="anc-cardio" class="card-header-bar green"></div>
-    <div class="h3" style="margin-bottom:5px">有酸素運動の正しい位置づけ</div>
-    <div class="muted" style="font-size:12px;margin-bottom:14px">有酸素運動は「体脂肪を直接燃やす魔法」ではなく、<strong>カロリー収支を広げるためのツールの一つ</strong>です。</div>
-    <div class="grid2" style="gap:10px;margin-bottom:14px">
-      <div class="card-sm" style="border-color:rgba(34,197,94,0.3)">
-        <div style="font-size:11px;font-weight:700;color:var(--accent4);margin-bottom:6px">✓ 有酸素のメリット</div>
-        <div style="font-size:12px;color:var(--text2);line-height:1.7">食事量を高い状態にキープしながらアンダーカロリーを作れる<br>心肺機能・健康維持<br>精神的なストレス発散</div>
-      </div>
-      <div class="card-sm" style="border-color:rgba(255,69,96,0.3)">
-        <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">✗ 有酸素の注意点</div>
-        <div style="font-size:12px;color:var(--text2);line-height:1.7">量と強度によっては筋トレパフォーマンスを低下させる<br>筋肉も落ちる可能性がある<br>いくらやっても食べすぎればゼロ</div>
-      </div>
-    </div>
-    <div class="label" style="margin-bottom:8px">カロリー収支を広げる際のバランス調整（NG vs 理想）</div>
-    <div class="grid3" style="gap:8px;margin-bottom:12px">
-      <div class="card-sm" style="padding:12px;border-color:rgba(255,69,96,0.2)">
-        <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:4px">NG: 食事だけで削る</div>
-        <div style="font-size:11px;color:var(--text2)">食事量が極端に少なくなり継続困難。代謝が低下しリバウンドリスク上昇。</div>
-      </div>
-      <div class="card-sm" style="padding:12px;border-color:rgba(255,69,96,0.2)">
-        <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:4px">NG: 有酸素だけで増やす</div>
-        <div style="font-size:11px;color:var(--text2)">疲労蓄積で筋トレパフォーマンスが低下。筋肉量の維持が困難になる。</div>
-      </div>
-      <div class="card-sm" style="padding:12px;border-color:rgba(34,197,94,0.3)">
-        <div style="font-size:11px;font-weight:700;color:var(--accent4);margin-bottom:4px">理想: 両方バランス調整</div>
-        <div style="font-size:11px;color:var(--text2)">食事から150kcal削減 ＋ ゾーン2有酸素20分（約150kcal消費）= 300kcal収支を確保</div>
-      </div>
-    </div>
-    <div class="label" style="margin-bottom:8px">有酸素で筋トレパフォーマンスへの影響を最小化する3原則</div>
-    <div class="grid3" style="gap:8px">
-      <div class="card-sm" style="padding:12px">
-        <div style="font-size:11px;font-weight:700;margin-bottom:4px">① マシン選び</div>
-        <div style="font-size:11px;color:var(--text2)">関節・筋肉へのダメージが少ないもの。<strong>クロストレーナー（最推奨）</strong>・ローイング・バイク・傾斜トレッドミルウォーク</div>
-      </div>
-      <div class="card-sm" style="padding:12px">
-        <div style="font-size:11px;font-weight:700;margin-bottom:4px">② 筋トレと時間を離す</div>
-        <div style="font-size:11px;color:var(--text2)">理想は「朝に有酸素・夜に筋トレ」で最低5〜6時間空ける。同日の場合は必ず筋トレ後に有酸素。</div>
-      </div>
-      <div class="card-sm" style="padding:12px">
-        <div style="font-size:11px;font-weight:700;margin-bottom:4px">③ 1回60分以内</div>
-        <div style="font-size:11px;color:var(--text2)">低強度でも1時間超えると神経・筋疲労が大きくなる。必要なら「30分×2回」に分割する。</div>
-      </div>
-    </div>
-  </div>
 
-  <!-- モチベーション vs 規律 -->
-  <div class="card card-purple" style="margin-bottom:18px">
-    <div id="anc-mindset" class="card-header-bar purple"></div>
-    <div class="h3" style="margin-bottom:5px">モチベーションは捨てる — 規律で動く</div>
-    <div class="muted" style="font-size:12px;margin-bottom:14px">ダイエット成功と失敗の最大の差は「モチベーションを失った時に継続できるかどうか」です。モチベーションは感情の一つであり、感情に大きく左右されます。</div>
-    <div class="grid2" style="gap:10px;margin-bottom:12px">
-      <div class="card-sm" style="border-color:rgba(255,69,96,0.2)">
-        <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">モチベーション駆動（失敗しやすい）</div>
-        <div style="font-size:12px;color:var(--text2);line-height:1.7">「したい」という感情に基づく<br>感情に左右されやすい<br>短期的なエネルギー源<br>変動が大きく持続性が低い<br>「やる気がある時しか動けない」</div>
-      </div>
-      <div class="card-sm" style="border-color:rgba(167,139,250,0.3)">
-        <div style="font-size:11px;font-weight:700;color:var(--accent5);margin-bottom:6px">規律駆動（成功しやすい）</div>
-        <div style="font-size:12px;color:var(--text2);line-height:1.7">「すべき」という意識に基づく<br>感情に左右されにくい<br>長期的な安定した行動<br>習慣として定着しやすい<br>「気分関係なく自動的に動ける」</div>
-      </div>
-    </div>
-    <div style="padding:12px;background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.2);border-radius:var(--rs)">
-      <div style="font-size:12px;font-weight:700;color:var(--accent5);margin-bottom:6px">モチベーションがない時こそ最低限のルールを死守する</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.7">目標歩数・筋トレのメニュー・摂取カロリー・有酸素運動。完璧でなくていい。0の努力より1の努力の方が絶対に良い。0%の完璧主義より80%で継続できる方が100倍良い結果になる。</div>
-    </div>
-    <div class="divider"></div>
-    <div style="font-size:12px;color:var(--text2);line-height:1.7">
-      <strong style="color:var(--text)">マインドセットシフト：</strong>
-      「〜ねばならない」→「〜したい」へ（強制ではなく自らの意思でダイエットする）｜「完璧主義」→「継続主義」へ（少くらいの失敗があっても継続することに価値を置く）｜「結果志向」→「プロセス志向」へ（日々の努力や成長そのものを楽しむ）｜「一時的な我慢」→「一生の習慣」へ（短期的イベントではなく健康的なライフスタイルへの投資）
-    </div>
-  </div>
 
-  <!-- ボリューム上限研究カード -->
-  <div class="card card-purple" style="margin-bottom:18px">
-    <div id="anc-sets" class="card-header-bar purple"></div>
-    <div class="row-between" style="margin-bottom:5px">
-      <div class="h3">週間セット数と筋肥大 — 収穫逓減モデル</div>
-      <span class="badge badge-purple" style="font-size:10px">Pelland et al. 2025</span>
-    </div>
-    <div class="muted" style="font-size:12px;margin-bottom:14px">「週10〜12セットで打ち止め」説の根拠だったBarbalho et al. (2019) は2020年にデータ不正が指摘され、関連論文は著者自ら撤回。現在の正確なモデルは「収穫逓減（Diminishing Returns）」です。</div>
-    <div class="grid3" style="margin-bottom:14px;gap:8px">
-      <div class="card-sm" style="border-color:rgba(255,69,96,0.3);background:rgba(255,69,96,0.04);text-align:center;padding:14px">
-        <div style="font-size:16px;font-weight:500;color:var(--accent)">撤回済み</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:4px">Barbalho (2019)「打ち止め」根拠論文</div>
-      </div>
-      <div class="card-sm" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.04);text-align:center;padding:14px">
-        <div style="font-size:16px;font-weight:500;color:var(--accent4)">100%</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:4px">ボリュームを増やすと筋肥大が増える確率（Pelland 2025, n=2058）</div>
-      </div>
-      <div class="card-sm" style="border-color:rgba(74,158,255,0.3);background:rgba(74,158,255,0.04);text-align:center;padding:14px">
-        <div style="font-size:16px;font-weight:500;color:var(--accent2)">80%+</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:4px">週8セット以下でも全利益の80%以上を確保できる</div>
-      </div>
-    </div>
-    <div class="grid2" style="gap:8px;margin-bottom:12px">
-      <div class="card-sm">
-        <div style="font-size:11px;font-weight:700;color:var(--accent5);margin-bottom:6px">収穫逓減曲線の意味</div>
-        <div class="muted">「打ち止め」ではなく「対数関数的な逓減」が正解。最初の数セットが最大の利益をもたらし、セット数が増えるほど1セットあたりの追加効果は小さくなる。週3〜8セットは「最も急激に成長する」黄金領域を射抜いている。</div>
-      </div>
-      <div class="card-sm">
-        <div style="font-size:11px;font-weight:700;color:var(--accent3);margin-bottom:6px">消防士への特別な意味</div>
-        <div class="muted">24時間勤務後の慢性睡眠不足は回復能力（MRV）を平常時の50%程度まで押し下げる。週20セット以上は過剰どころか有害。PEAK FORMの低ボリューム全身法設計は「現場パフォーマンスを守りながら筋肉を発達させる」科学的最適解。</div>
-      </div>
-    </div>
-    <div style="padding:10px 12px;background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.2);border-radius:var(--rs)">
-      <div style="font-size:11px;font-weight:700;color:var(--accent5);margin-bottom:4px">コンパウンド種目の「間接ボリューム」（Henselmans / Krieger）</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.6">分数カウント理論：ベンチプレス1セット = 大胸筋1.0 + 三頭筋0.5 / ロウイング1セット = 広背筋1.0 + 二頭筋0.5。週3回のFull Body SplitでPush・Pull・Squatが各1種目含まれると、二頭・三頭などの小筋群には直接種目がなくとも週4.5〜6セット相当の実効刺激が入っている。これは初心者MEVを十分カバーする量。</div>
-    </div>
-  </div>
 
 
 
@@ -2054,6 +1808,197 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="alert alert-info" style="margin-bottom:14px;font-size:12px">
     アプリ内の各機能が依拠している一次資料を分野別に収録しています。数値の根拠を確認したいときはここを参照してください。
   </div>
+
+  <!-- ▼ 分析レポートから移設した解説・規律セクション ▼ -->
+  <div class="h3" style="margin:4px 0 12px;font-size:14px">📖 解説・規律</div>
+  <!-- 減量カロリー設定 -->
+  <div class="card card-accent" style="margin-bottom:18px">
+    <div id="anc-calorie" class="card-header-bar"></div>
+    <div class="h3" style="margin-bottom:5px">減量カロリー設定（SGIR式）</div>
+    <div class="muted" style="font-size:12px;margin-bottom:16px">体重ベースの簡易計算。体脂肪が多い人ほど係数が低くなる（体内に貯蔵エネルギーが多いため少ない摂取カロリーでも身体機能を維持できる）。</div>
+    <div class="grid2" style="margin-bottom:16px;gap:10px">
+      <div>
+        <div class="label" style="margin-bottom:8px">男性 — 目標カロリー係数</div>
+        <table style="font-size:12px">
+          <thead><tr><th>体重</th><th>係数</th><th>目安カロリー例</th></tr></thead>
+          <tbody>
+            <tr><td>70kg</td><td class="mono">×25〜30</td><td class="muted">1,750〜2,100kcal</td></tr>
+            <tr><td>80kg</td><td class="mono">×22〜28</td><td class="muted">1,760〜2,240kcal</td></tr>
+            <tr><td>90kg</td><td class="mono">×19〜23</td><td class="muted">1,710〜2,070kcal</td></tr>
+            <tr><td>100kg</td><td class="mono">×17〜20</td><td class="muted">1,700〜2,000kcal</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="label" style="margin-bottom:8px">マクロ設定の順序（重要）</div>
+        <div class="card-sm" style="padding:12px;border-color:rgba(255,69,96,0.2)">
+          <div style="font-size:12px;line-height:1.9;color:var(--text2)">
+            <strong style="color:var(--text)">① タンパク質を先に決める</strong>（身長基準）<br>
+            男性：身長(cm) - 10 〜 身長(cm) が最低摂取量(g)<br>
+            女性：男性の約2/3が目安<br><br>
+            <strong style="color:var(--text)">② 脂質を決める</strong>（身長基準）<br>
+            男性：身長(cm) ÷ 3 程度(g) が最低量<br><br>
+            <strong style="color:var(--text)">③ 炭水化物で残りカロリーを埋める</strong><br>
+            (総カロリー - P×4 - F×9) ÷ 4 = 炭水化物(g)
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="alert alert-info" style="font-size:12px">
+      💡 週7日間の<strong>平均摂取カロリー</strong>が目標値に合っていれば十分です。平日は少なめ・週末は少し多めという戦略も有効。毎日完全に同じカロリーでなくてもOK。
+    </div>
+  </div>
+
+  <!-- アルコールの影響 -->
+  <div class="card card-accent" style="margin-bottom:18px">
+    <div id="anc-alcohol" class="card-header-bar"></div>
+    <div class="h3" style="margin-bottom:5px">アルコールと体脂肪減少</div>
+    <div class="muted" style="font-size:12px;margin-bottom:14px">減量目的ならアルコールのメリットはゼロ、むしろマイナスです（研究による事実）。</div>
+    <div class="grid3" style="margin-bottom:14px;gap:8px">
+      <div class="card-sm" style="border-color:rgba(255,69,96,0.3);text-align:center;padding:14px">
+        <div style="font-size:28px;font-weight:700;color:var(--accent);font-family:var(--font-mono)">36%</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">脂肪酸化量の最大減少量。飲酒中、体は脂肪燃焼をやめてアルコール処理を優先する（NEJM, Jequier 1992）</div>
+      </div>
+      <div class="card-sm" style="border-color:rgba(255,69,96,0.3);text-align:center;padding:14px">
+        <div style="font-size:28px;font-weight:700;color:var(--accent);font-family:var(--font-mono)">7kcal</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">アルコール1gあたりのカロリー。タンパク質・炭水化物の4kcalより高く、栄養価はゼロ</div>
+      </div>
+      <div class="card-sm" style="border-color:rgba(255,69,96,0.3);text-align:center;padding:14px">
+        <div style="font-size:28px;font-weight:700;color:var(--accent);font-family:var(--font-mono)">REM↓</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">飲酒後は深い回復睡眠（REM睡眠）が抑制→翌日の食欲ホルモン増加→カロリーコントロール困難（Sleep Medicine Reviews, 2025）</div>
+      </div>
+    </div>
+    <div class="alert alert-danger" style="font-size:12px">アルコールは「カロリーを加えるだけでなく、脂肪燃焼を止め・睡眠を壊し・ホルモンを乱す」という3重のダメージがあります。飲む場合はその影響を十分に理解した上で選択してください。テストステロン産生も直接抑制されます。</div>
+  </div>
+
+  <!-- バルクサイクル基準（ミニカット判定カードから分離） -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar amber"></div>
+    <div id="anc-bulk" class="h3" style="margin-bottom:10px;font-size:13px">バルクサイクル基準</div>
+    <table style="font-size:12px">
+      <thead><tr><th>体脂肪率</th><th>フェーズ</th><th>期間目安</th><th>カロリー調整</th></tr></thead>
+      <tbody>
+        <tr><td>8〜12%</td><td><span class="badge badge-green">バルク最適</span></td><td>制限なし</td><td>TDEE+100〜300</td></tr>
+        <tr><td>12〜15%</td><td><span class="badge badge-blue">バルク継続</span></td><td>注意しながら継続</td><td>TDEE+100〜200</td></tr>
+        <tr><td>15〜18%</td><td><span class="badge badge-amber">ミニカット推奨</span></td><td>4〜6週間</td><td>ピーク比-1000〜-1500</td></tr>
+        <tr><td>18〜20%</td><td><span class="badge badge-amber">ミニカット必須</span></td><td>6〜8週間</td><td>ピーク比-1200〜-1800</td></tr>
+        <tr><td>20%超</td><td><span class="badge badge-red">本格減量</span></td><td>10週間以上</td><td>計画的ダイエット</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 有酸素運動の位置づけ -->
+  <div class="card card-green" style="margin-bottom:18px">
+    <div id="anc-cardio" class="card-header-bar green"></div>
+    <div class="h3" style="margin-bottom:5px">有酸素運動の正しい位置づけ</div>
+    <div class="muted" style="font-size:12px;margin-bottom:14px">有酸素運動は「体脂肪を直接燃やす魔法」ではなく、<strong>カロリー収支を広げるためのツールの一つ</strong>です。</div>
+    <div class="grid2" style="gap:10px;margin-bottom:14px">
+      <div class="card-sm" style="border-color:rgba(34,197,94,0.3)">
+        <div style="font-size:11px;font-weight:700;color:var(--accent4);margin-bottom:6px">✓ 有酸素のメリット</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.7">食事量を高い状態にキープしながらアンダーカロリーを作れる<br>心肺機能・健康維持<br>精神的なストレス発散</div>
+      </div>
+      <div class="card-sm" style="border-color:rgba(255,69,96,0.3)">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">✗ 有酸素の注意点</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.7">量と強度によっては筋トレパフォーマンスを低下させる<br>筋肉も落ちる可能性がある<br>いくらやっても食べすぎればゼロ</div>
+      </div>
+    </div>
+    <div class="label" style="margin-bottom:8px">カロリー収支を広げる際のバランス調整（NG vs 理想）</div>
+    <div class="grid3" style="gap:8px;margin-bottom:12px">
+      <div class="card-sm" style="padding:12px;border-color:rgba(255,69,96,0.2)">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:4px">NG: 食事だけで削る</div>
+        <div style="font-size:11px;color:var(--text2)">食事量が極端に少なくなり継続困難。代謝が低下しリバウンドリスク上昇。</div>
+      </div>
+      <div class="card-sm" style="padding:12px;border-color:rgba(255,69,96,0.2)">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:4px">NG: 有酸素だけで増やす</div>
+        <div style="font-size:11px;color:var(--text2)">疲労蓄積で筋トレパフォーマンスが低下。筋肉量の維持が困難になる。</div>
+      </div>
+      <div class="card-sm" style="padding:12px;border-color:rgba(34,197,94,0.3)">
+        <div style="font-size:11px;font-weight:700;color:var(--accent4);margin-bottom:4px">理想: 両方バランス調整</div>
+        <div style="font-size:11px;color:var(--text2)">食事から150kcal削減 ＋ ゾーン2有酸素20分（約150kcal消費）= 300kcal収支を確保</div>
+      </div>
+    </div>
+    <div class="label" style="margin-bottom:8px">有酸素で筋トレパフォーマンスへの影響を最小化する3原則</div>
+    <div class="grid3" style="gap:8px">
+      <div class="card-sm" style="padding:12px">
+        <div style="font-size:11px;font-weight:700;margin-bottom:4px">① マシン選び</div>
+        <div style="font-size:11px;color:var(--text2)">関節・筋肉へのダメージが少ないもの。<strong>クロストレーナー（最推奨）</strong>・ローイング・バイク・傾斜トレッドミルウォーク</div>
+      </div>
+      <div class="card-sm" style="padding:12px">
+        <div style="font-size:11px;font-weight:700;margin-bottom:4px">② 筋トレと時間を離す</div>
+        <div style="font-size:11px;color:var(--text2)">理想は「朝に有酸素・夜に筋トレ」で最低5〜6時間空ける。同日の場合は必ず筋トレ後に有酸素。</div>
+      </div>
+      <div class="card-sm" style="padding:12px">
+        <div style="font-size:11px;font-weight:700;margin-bottom:4px">③ 1回60分以内</div>
+        <div style="font-size:11px;color:var(--text2)">低強度でも1時間超えると神経・筋疲労が大きくなる。必要なら「30分×2回」に分割する。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- モチベーション vs 規律 -->
+  <div class="card card-purple" style="margin-bottom:18px">
+    <div id="anc-mindset" class="card-header-bar purple"></div>
+    <div class="h3" style="margin-bottom:5px">モチベーションは捨てる — 規律で動く</div>
+    <div class="muted" style="font-size:12px;margin-bottom:14px">ダイエット成功と失敗の最大の差は「モチベーションを失った時に継続できるかどうか」です。モチベーションは感情の一つであり、感情に大きく左右されます。</div>
+    <div class="grid2" style="gap:10px;margin-bottom:12px">
+      <div class="card-sm" style="border-color:rgba(255,69,96,0.2)">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">モチベーション駆動（失敗しやすい）</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.7">「したい」という感情に基づく<br>感情に左右されやすい<br>短期的なエネルギー源<br>変動が大きく持続性が低い<br>「やる気がある時しか動けない」</div>
+      </div>
+      <div class="card-sm" style="border-color:rgba(167,139,250,0.3)">
+        <div style="font-size:11px;font-weight:700;color:var(--accent5);margin-bottom:6px">規律駆動（成功しやすい）</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.7">「すべき」という意識に基づく<br>感情に左右されにくい<br>長期的な安定した行動<br>習慣として定着しやすい<br>「気分関係なく自動的に動ける」</div>
+      </div>
+    </div>
+    <div style="padding:12px;background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.2);border-radius:var(--rs)">
+      <div style="font-size:12px;font-weight:700;color:var(--accent5);margin-bottom:6px">モチベーションがない時こそ最低限のルールを死守する</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.7">目標歩数・筋トレのメニュー・摂取カロリー・有酸素運動。完璧でなくていい。0の努力より1の努力の方が絶対に良い。0%の完璧主義より80%で継続できる方が100倍良い結果になる。</div>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:12px;color:var(--text2);line-height:1.7">
+      <strong style="color:var(--text)">マインドセットシフト：</strong>
+      「〜ねばならない」→「〜したい」へ（強制ではなく自らの意思でダイエットする）｜「完璧主義」→「継続主義」へ（少くらいの失敗があっても継続することに価値を置く）｜「結果志向」→「プロセス志向」へ（日々の努力や成長そのものを楽しむ）｜「一時的な我慢」→「一生の習慣」へ（短期的イベントではなく健康的なライフスタイルへの投資）
+    </div>
+  </div>
+
+  <!-- ボリューム上限研究カード -->
+  <div class="card card-purple" style="margin-bottom:18px">
+    <div id="anc-sets" class="card-header-bar purple"></div>
+    <div class="row-between" style="margin-bottom:5px">
+      <div class="h3">週間セット数と筋肥大 — 収穫逓減モデル</div>
+      <span class="badge badge-purple" style="font-size:10px">Pelland et al. 2025</span>
+    </div>
+    <div class="muted" style="font-size:12px;margin-bottom:14px">「週10〜12セットで打ち止め」説の根拠だったBarbalho et al. (2019) は2020年にデータ不正が指摘され、関連論文は著者自ら撤回。現在の正確なモデルは「収穫逓減（Diminishing Returns）」です。</div>
+    <div class="grid3" style="margin-bottom:14px;gap:8px">
+      <div class="card-sm" style="border-color:rgba(255,69,96,0.3);background:rgba(255,69,96,0.04);text-align:center;padding:14px">
+        <div style="font-size:16px;font-weight:500;color:var(--accent)">撤回済み</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">Barbalho (2019)「打ち止め」根拠論文</div>
+      </div>
+      <div class="card-sm" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.04);text-align:center;padding:14px">
+        <div style="font-size:16px;font-weight:500;color:var(--accent4)">100%</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">ボリュームを増やすと筋肥大が増える確率（Pelland 2025, n=2058）</div>
+      </div>
+      <div class="card-sm" style="border-color:rgba(74,158,255,0.3);background:rgba(74,158,255,0.04);text-align:center;padding:14px">
+        <div style="font-size:16px;font-weight:500;color:var(--accent2)">80%+</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">週8セット以下でも全利益の80%以上を確保できる</div>
+      </div>
+    </div>
+    <div class="grid2" style="gap:8px;margin-bottom:12px">
+      <div class="card-sm">
+        <div style="font-size:11px;font-weight:700;color:var(--accent5);margin-bottom:6px">収穫逓減曲線の意味</div>
+        <div class="muted">「打ち止め」ではなく「対数関数的な逓減」が正解。最初の数セットが最大の利益をもたらし、セット数が増えるほど1セットあたりの追加効果は小さくなる。週3〜8セットは「最も急激に成長する」黄金領域を射抜いている。</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:11px;font-weight:700;color:var(--accent3);margin-bottom:6px">消防士への特別な意味</div>
+        <div class="muted">24時間勤務後の慢性睡眠不足は回復能力（MRV）を平常時の50%程度まで押し下げる。週20セット以上は過剰どころか有害。PEAK FORMの低ボリューム全身法設計は「現場パフォーマンスを守りながら筋肉を発達させる」科学的最適解。</div>
+      </div>
+    </div>
+    <div style="padding:10px 12px;background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.2);border-radius:var(--rs)">
+      <div style="font-size:11px;font-weight:700;color:var(--accent5);margin-bottom:4px">コンパウンド種目の「間接ボリューム」（Henselmans / Krieger）</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6">分数カウント理論：ベンチプレス1セット = 大胸筋1.0 + 三頭筋0.5 / ロウイング1セット = 広背筋1.0 + 二頭筋0.5。週3回のFull Body SplitでPush・Pull・Squatが各1種目含まれると、二頭・三頭などの小筋群には直接種目がなくとも週4.5〜6セット相当の実効刺激が入っている。これは初心者MEVを十分カバーする量。</div>
+    </div>
+  </div>
+
+  <div class="h3" style="margin:24px 0 12px;font-size:14px">📚 一次資料データベース</div>
   <div class="card" style="margin-bottom:18px">
     <div class="card-header-bar blue"></div>
     <input type="text" id="ev-search" placeholder="🔍 著者・トピック・キーワードで検索（例: 睡眠、Gabbett、ACWR）"
@@ -2137,6 +2082,103 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div id="shift-bonus-settings-panel" style="display:none"></div>
   </div>
 
+
+  <!-- ▼ 各ページから集約した運用設定 ▼ -->
+  <div class="h3" style="margin:4px 0 12px;font-size:14px">⚙ 運用設定</div>
+  <!-- インターバルタイマー設定 -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar blue"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="h3">インターバルタイマー設定</div>
+      <button class="btn btn-sm" onclick="toggleRestSettings()" id="rest-settings-toggle">▼ 設定を開く</button>
+    </div>
+    <div id="rest-settings-panel" style="display:none"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:20px;font-weight:600;font-family:var(--font-mono);color:var(--accent)" id="rest-display-C">3:00</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">コンパウンド</div>
+        <div style="font-size:9px;color:var(--text3)">スクワット・チン等</div>
+      </div>
+      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:20px;font-weight:600;font-family:var(--font-mono);color:var(--accent2)" id="rest-display-M">2:30</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">マシン多関節</div>
+        <div style="font-size:9px;color:var(--text3)">レッグプレス等</div>
+      </div>
+      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="font-size:20px;font-weight:600;font-family:var(--font-mono);color:var(--accent4)" id="rest-display-I">1:30</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">アイソレーション</div>
+        <div style="font-size:9px;color:var(--text3)">カール・レイズ等</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:8px;text-align:center">
+      根拠: Schoenfeld (2016) + Singer (2024) — 種目タイプで自動判定 <span onclick="openEvidence('休憩')" style="color:var(--accent2);cursor:pointer">📚</span>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar blue"></div>
+    <div class="h3" style="margin-bottom:12px">シフト集計・ACWR</div>
+  <div class="grid2" style="margin-bottom:18px">
+    <div class="card card-blue">
+      <div class="card-header-bar blue"></div>
+      <div class="h3" style="margin-bottom:12px">今月のシフト集計</div>
+      <div id="shift-summary" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="card card-amber">
+      <div class="card-header-bar amber"></div>
+      <div class="h3" style="margin-bottom:12px">ACWR計算（負荷管理）</div>
+      <div id="shift-acwr"></div>
+      <div class="muted" style="font-size:11px;margin-top:10px;line-height:1.6">24h勤務 = 800 / 週休出勤 = 700 / 非番出勤 = 600 / 有酸素 = 200 / 非番 = 100 / 週休 = 0。ACWR 0.8〜1.3がスイートスポット（Firefighter Nation 2024）。</div>
+    </div>
+  </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header-bar green"></div>
+    <div class="h3" style="margin-bottom:10px">シフトパターン設定（繰り返し登録）</div>
+    <div class="muted" style="margin-bottom:12px;font-size:12px">東京消防庁の標準パターン（3日サイクル：24h勤務→非番→週休）を一括登録できます。</div>
+    <div class="grid3" style="margin-bottom:12px">
+      <div class="field"><label class="label">開始日</label><input type="date" id="shift-pattern-start"></div>
+      <div class="field"><label class="label">登録週数</label><input type="number" id="shift-pattern-weeks" value="8" min="1" max="26"></div>
+      <div class="field"><label class="label">パターン</label>
+        <select id="shift-pattern-type">
+          <option value="cycle1">①当番→非番→週休→当番→非番→当番→非番</option>
+          <option value="cycle2">②週休→当番→非番→週休→当番→非番→当番</option>
+          <option value="cycle3">③非番→週休→当番→非番→日勤→週休→週休</option>
+          <option value="full21">①②③フルサイクル（21日）</option>
+          <option value="custom">カスタム</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="applyShiftPattern()">パターンを一括登録</button>
+    <button class="btn btn-danger btn-sm" onclick="clearShiftMonth()" style="margin-left:10px">今月をクリア</button>
+  </div>
+
+  <!-- 安静時心拍トレンド & VO2max -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar" style="background:#f97316"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="h3">安静時心拍トレンド（14日）</div>
+      <span style="font-size:10px;color:var(--text3)">毎朝起床時に記録</span>
+    </div>
+    <div id="rhr-vo2max-display" style="margin-bottom:10px">
+      <div class="muted" style="font-size:12px">睡眠記録の「安静時心拍」欄に入力すると表示されます</div>
+    </div>
+    <div class="chart-wrap" style="height:180px"><canvas id="rhr-trend-chart"></canvas></div>
+    <div style="font-size:10px;color:var(--text3);margin-top:8px;line-height:1.7">
+      <div>📉 持久力向上 → 安静時心拍は下がる</div>
+      <div>⚠️ 通常より5〜10bpm以上高い状態が続く → オーバートレーニングの前兆</div>
+      <div style="margin-top:2px">Uth et al. (2004) / NFPA 1582 推奨 VO2max 42以上 <span onclick="openEvidence('VO2max')" style="color:var(--accent2);cursor:pointer">📚</span></div>
+    </div>
+  </div>
+
+  <!-- 睡眠記録一覧 -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar blue"></div>
+    <div class="h3" style="margin-bottom:12px">睡眠記録一覧</div>
+    <div id="sleep-record-list"><div class="muted">記録がありません</div></div>
+  </div>
+
   <div style="margin-bottom:18px"><div class="card-header-bar"></div><div class="h3" style="margin-bottom:12px">データ管理</div><div class="row" style="gap:10px;flex-wrap:wrap"><button class="btn" onclick="exportData()">JSONエクスポート</button><button class="btn btn-danger" onclick="clearAll()">全データリセット</button></div><div class="muted" style="margin-top:10px;font-size:12px">エクスポートしたJSONはExcel・Google Sheetsにインポート可能。ブラウザのlocalStorageに永続保存されます。</div></div>
   <div class="card"><div class="card-header-bar blue"></div><div class="h3" style="margin-bottom:8px">科学的根拠</div>
     <div class="muted" style="font-size:12px;line-height:1.7;margin-bottom:12px">
@@ -2209,6 +2251,7 @@ function showPage(id){
   if(id==='supplement')renderSupplementPage();
   if(id==='training')renderTrainingLog();
   if(id==='evidence')renderEvidencePage();
+  if(id==='settings')renderSettingsPage();
 }
 // ドロワー外クリックで閉じる
 document.addEventListener('click', function(e) {
@@ -7974,7 +8017,9 @@ function saveSleep(){
     duration: effectiveDur,   // ← ATL/CTL等で使う実効値
     wellness, fatigue: fat, soreness: sor, motivation: mot, mood,
     weight: parseFloat(document.getElementById('s-weight').value) || 0,
-    rhr:    parseInt(document.getElementById('s-rhr')?.value) || 0,
+    // 入力欄のIDは s-resting-hr。読み出し側は restingHR を参照するため両方を保存する
+    restingHR: parseInt(document.getElementById('s-resting-hr')?.value) || 0,
+    rhr:       parseInt(document.getElementById('s-resting-hr')?.value) || 0,
   };
 
   if (editId) {
@@ -7989,7 +8034,7 @@ function saveSleep(){
   }
 
   // フォームリセット
-  ['s-date','s-bed','s-wake','s-weight','s-rhr','s-fatigue','s-soreness','s-motivation','s-mood']
+  ['s-date','s-bed','s-wake','s-weight','s-resting-hr','s-fatigue','s-soreness','s-motivation','s-mood']
     .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   const intEl = document.getElementById('s-interrupt-min');
   const napEl = document.getElementById('s-nap-min');
@@ -8003,6 +8048,11 @@ function saveSleep(){
 
 function renderSleepCharts(){const sl=DB.arr('sleeps').slice(-7);if(!sl.length)return;const labels=sl.map(s=>s.date.slice(5));const co={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a5a78',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#5a5a78',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}}};if(sleepChart)sleepChart.destroy();sleepChart=new Chart(document.getElementById('sleep-chart'),{type:'bar',data:{labels,datasets:[{data:sl.map(s=>s.duration||0),backgroundColor:'rgba(74,158,255,0.45)',borderColor:'#4a9eff',borderWidth:1,borderRadius:4}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:0,max:12}}}});if(wellnessChart)wellnessChart.destroy();wellnessChart=new Chart(document.getElementById('wellness-chart'),{type:'line',data:{labels,datasets:[{data:sl.map(s=>s.wellness||0),borderColor:'#f5a623',tension:0.4,borderWidth:2,fill:false,pointRadius:5,pointBackgroundColor:'#f5a623'}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:0,max:10}}}});
   // 睡眠記録リスト（直近10件）
+  renderSleepRecordList();
+}
+
+// 睡眠記録一覧（設定ページに集約。renderSleepChartsは記録0件で早期returnするため独立させる）
+function renderSleepRecordList() {
   const sleepListEl = document.getElementById('sleep-record-list');
   if (sleepListEl) {
     const allSleeps = DB.arr('sleeps').slice().reverse().slice(0, 10);
@@ -9714,6 +9764,68 @@ function saveOcrAsPreset(result) {
 }
 
 // ============================================================
+// 設定ページ — 各メニューから集約した運用設定の描画
+// ============================================================
+let rhrTrendChart = null;
+
+// 安静時心拍トレンド（14日）＋ VO2max推定
+function renderRestingHRTrend() {
+  const disp = document.getElementById('rhr-vo2max-display');
+  const cv   = document.getElementById('rhr-trend-chart');
+  if (!disp && !cv) return;
+
+  const sleeps = DB.arr('sleeps').slice(-14).filter(s => (s.restingHR || s.rhr) > 0);
+
+  if (disp) {
+    if (!sleeps.length) {
+      disp.innerHTML = '<div class="muted" style="font-size:12px">睡眠記録の「安静時心拍」欄に入力すると表示されます</div>';
+    } else {
+      const vals = sleeps.map(s => s.restingHR || s.rhr);
+      const avg  = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+      const v    = typeof estimateVO2max === 'function' ? estimateVO2max() : null;
+      const latest = vals[vals.length - 1];
+      const delta  = latest - avg;
+      disp.innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+          <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
+            <div style="font-size:18px;font-weight:600;font-family:var(--font-mono)">${latest}</div>
+            <div style="font-size:9px;color:var(--text3)">最新 bpm</div></div>
+          <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
+            <div style="font-size:18px;font-weight:600;font-family:var(--font-mono);color:${delta >= 5 ? 'var(--accent)' : 'var(--text)'}">${avg}</div>
+            <div style="font-size:9px;color:var(--text3)">14日平均</div></div>
+          <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:var(--rs)">
+            <div style="font-size:18px;font-weight:600;font-family:var(--font-mono);color:var(--accent2)">${v && v.vo2max ? v.vo2max : '—'}</div>
+            <div style="font-size:9px;color:var(--text3)">推定VO2max</div></div>
+        </div>
+        ${delta >= 5 ? '<div style="font-size:11px;color:var(--accent);margin-top:8px">⚠️ 直近の安静時心拍が平均より+' + delta + 'bpm。回復不足の可能性があります。</div>' : ''}`;
+    }
+  }
+
+  if (cv && typeof Chart !== 'undefined') {
+    if (rhrTrendChart) { rhrTrendChart.destroy(); rhrTrendChart = null; }
+    if (sleeps.length) {
+      rhrTrendChart = new Chart(cv, {
+        type: 'line',
+        data: { labels: sleeps.map(s => s.date.slice(5)),
+                datasets: [{ data: sleeps.map(s => s.restingHR || s.rhr), borderColor: '#f97316',
+                             backgroundColor: 'rgba(249,115,22,0.08)', tension: 0.35, fill: true,
+                             borderWidth: 2, pointRadius: 3 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                   scales: { x: { ticks: { color: '#5a5a78', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+                             y: { ticks: { color: '#5a5a78', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } } } },
+      });
+    }
+  }
+}
+
+function renderSettingsPage() {
+  updateRestDisplays();      // インターバルタイマー設定
+  renderShiftPage();         // シフト集計・ACWR（カレンダー要素は無いので内部でガードされる）
+  renderSleepRecordList();   // 睡眠記録一覧
+  renderRestingHRTrend();    // 安静時心拍トレンド
+}
+
+// ============================================================
 // ① サプリ摂取タイミング通知（ブラウザ通知API）
 // ============================================================
 // 制約: 静的ホスティングのためプッシュサーバーを持てない。
@@ -10342,7 +10454,7 @@ function editSleep(id) {
   setVal('s-soreness', s.soreness || '');
   setVal('s-motivation', s.motivation || '');
   setVal('s-mood', s.mood || '');
-  setVal('s-rhr', s.rhr || '');
+  setVal('s-resting-hr', s.restingHR || s.rhr || '');
 
   const form = document.getElementById('s-date')?.closest('.card');
   if (form) form.dataset.editId = id;
@@ -10385,49 +10497,23 @@ function deleteSleep(id) {
   <div id="toc-section-analysis" style="font-size:10px;color:var(--text3);margin-bottom:6px">— 分析レポート内 —</div>
   <button class="toc-drawer-item" onclick="tocJump('anc-cond');closeTocDrawer()"><span class="toc-num">01</span>コンディション分析</button>
   <button class="toc-drawer-item" onclick="tocJump('anc-weight');closeTocDrawer()"><span class="toc-num">02</span>体重モニター</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-calorie');closeTocDrawer()"><span class="toc-num">03</span>減量カロリー</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-minicut');closeTocDrawer()"><span class="toc-num">04</span>ミニカット&バルク</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-bodycomp');closeTocDrawer()"><span class="toc-num">05</span>体組成トラッカー</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-weekly');closeTocDrawer()"><span class="toc-num">06</span>週次サマリー</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-tracker');closeTocDrawer()"><span class="toc-num">07</span>重量推移</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-load');closeTocDrawer()"><span class="toc-num">08</span>負荷グラフ</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-nutrition');closeTocDrawer()"><span class="toc-num">09</span>栄養グラフ</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-sleep');closeTocDrawer()"><span class="toc-num">10</span>睡眠グラフ</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-injury');closeTocDrawer()"><span class="toc-num">11</span>怪我リスク</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-cvd');closeTocDrawer()"><span class="toc-num">12</span>心血管リスク</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-ffmi');closeTocDrawer()"><span class="toc-num">13</span>FFMI</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-vo2max');closeTocDrawer()"><span class="toc-num">14</span>VO2max</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-macro');closeTocDrawer()"><span class="toc-num">15</span>マクロサイクル</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-fire');closeTocDrawer()"><span class="toc-num">16</span>出動記録</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-joint');closeTocDrawer()"><span class="toc-num">17</span>関節記録</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-duty');closeTocDrawer()"><span class="toc-num">18</span>当番日栄養</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-review');closeTocDrawer()"><span class="toc-num">19</span>週次レビュー</button>
-  <button class="toc-drawer-item" onclick="tocJump('anc-reverse');closeTocDrawer()"><span class="toc-num">20</span>リバースダイエット</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-minicut');closeTocDrawer()"><span class="toc-num">03</span>ミニカット&バルク</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-bodycomp');closeTocDrawer()"><span class="toc-num">04</span>体組成トラッカー</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-weekly');closeTocDrawer()"><span class="toc-num">05</span>週次サマリー</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-tracker');closeTocDrawer()"><span class="toc-num">06</span>重量推移</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-load');closeTocDrawer()"><span class="toc-num">07</span>負荷グラフ</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-nutrition');closeTocDrawer()"><span class="toc-num">08</span>栄養グラフ</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-sleep');closeTocDrawer()"><span class="toc-num">09</span>睡眠グラフ</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-injury');closeTocDrawer()"><span class="toc-num">10</span>怪我リスク</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-cvd');closeTocDrawer()"><span class="toc-num">11</span>心血管リスク</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-ffmi');closeTocDrawer()"><span class="toc-num">12</span>FFMI</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-vo2max');closeTocDrawer()"><span class="toc-num">13</span>VO2max</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-macro');closeTocDrawer()"><span class="toc-num">14</span>マクロサイクル</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-fire');closeTocDrawer()"><span class="toc-num">15</span>出動記録</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-joint');closeTocDrawer()"><span class="toc-num">16</span>関節記録</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-duty');closeTocDrawer()"><span class="toc-num">17</span>当番日栄養</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-review');closeTocDrawer()"><span class="toc-num">18</span>週次レビュー</button>
+  <button class="toc-drawer-item" onclick="tocJump('anc-reverse');closeTocDrawer()"><span class="toc-num">19</span>リバースダイエット</button>
 </div>
 </body>
-</html
-  <div class="card" style="margin-bottom:18px">
-    <!-- 安静時心拍トレンド & VO2max -->
-  <div class="card" style="margin-bottom:18px">
-    <div class="card-header-bar" style="background:#f97316"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div class="h3">安静時心拍トレンド（14日）</div>
-      <span style="font-size:10px;color:var(--text3)">毎朝起床時に記録</span>
-    </div>
-    <div id="rhr-vo2max-display" style="margin-bottom:10px">
-      <div class="muted" style="font-size:12px">安静時心拍を記録すると表示されます</div>
-    </div>
-    <div class="chart-wrap" style="height:180px"><canvas id="rhr-trend-chart"></canvas></div>
-    <div style="font-size:10px;color:var(--text3);margin-top:8px;line-height:1.7">
-      <div>📉 持久力向上 → 安静時心拍は下がる</div>
-      <div>⚠️ 通常より5〜10bpm以上高い状態が続く → オーバートレーニングの前兆</div>
-      <div style="margin-top:2px">Uth et al. (2004) / NFPA 1582 推奨 VO2max 42以上</div>
-    </div>
-  </div>
-
-  <div class="card-header-bar blue"></div>
-    <div class="h3" style="margin-bottom:12px">睡眠記録一覧</div>
-    <div id="sleep-record-list"><div class="muted">記録がありません</div></div>
-  </div>
-
->
+</html>
