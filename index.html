@@ -638,7 +638,7 @@ input[type=range]:focus{border:none;box-shadow:none}
 
     <!-- 食品プリセット -->
     <div style="margin-bottom:14px">
-      <div class="label" style="margin-bottom:8px">プリセットから選ぶ（278品（外食95品含む）/ 文部科学省成分表2020準拠）</div>
+      <div class="label" style="margin-bottom:8px">プリセットから選ぶ（395品：食材183 / 外食95 / 料理117・文部科学省成分表2020準拠）</div>
       <!-- OCR撮影ボタン -->
       <div style="margin-bottom:10px">
         <button class="btn btn-primary" style="width:100%;font-size:13px;padding:10px;display:flex;align-items:center;justify-content:center;gap:8px"
@@ -656,7 +656,10 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div style="display:flex;gap:6px;margin-bottom:8px">
         <input type="text" id="food-search-input" placeholder="🔍 食品名で検索（例: 鶏むね、バナナ）"
           style="flex:1;font-size:13px;padding:8px 10px" oninput="showFoodSearch(this.value)">
+        <button class="btn btn-sm" id="web-search-btn" style="flex-shrink:0;font-size:12px;white-space:nowrap"
+          onclick="searchFoodOnline()">🌐 ネット検索</button>
       </div>
+      <div id="web-food-panel" style="display:none;background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.25);border-radius:var(--rs);padding:12px;margin-bottom:10px"></div>
       <!-- カテゴリタブ -->
       <div class="row" style="gap:5px;flex-wrap:wrap;margin-bottom:6px">
         <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('protein')">🥩 タンパク質</span>
@@ -3208,6 +3211,14 @@ function showFoodSearch(query) {
   }
   const results = searchFoodDB(query.trim());
   renderFoodList(results, el);
+  // DBに無い商品はネット検索へ誘導する
+  if (!results.length) {
+    el.innerHTML = `
+      <div class="muted" style="padding:12px;font-size:12px">
+        「${query.trim()}」はプリセットにありません。<br>
+        <button class="btn btn-sm btn-primary" style="margin-top:8px" onclick="searchFoodOnline()">🌐 ネットで栄養情報を検索</button>
+      </div>`;
+  }
 }
 
 
@@ -9422,6 +9433,237 @@ function saveApiKeyFromSettings() {
   if (keyEl) keyEl.value = '';
 }
 
+// ============================================================
+// ネット検索で栄養情報を取得（Claude API + Web検索ツール）
+// ============================================================
+// 商品名・料理名から実際にWeb検索を行い、栄養成分を推定して取り込む。
+// 既存のOCR用APIキー（pf_claude_api_key）をそのまま利用する。
+// ※ 検索結果は推定値。記録前に必ずユーザーが確認・修正できる設計にしている。
+let _lastWebFood = null;
+let _webSearchBusy = false;
+
+// レスポンスの全テキストブロックを連結（Web検索時は複数ブロックに分かれるため）
+function joinTextBlocks(content) {
+  return (content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+}
+
+// Web検索ツールの結果から参照URLを抽出
+function extractSearchSources(content) {
+  const urls = [];
+  (content || []).forEach(b => {
+    if (b.type !== 'web_search_tool_result') return;
+    const items = Array.isArray(b.content) ? b.content : [];
+    items.forEach(r => { if (r && r.url && !urls.includes(r.url)) urls.push(r.url); });
+  });
+  return urls.slice(0, 5);
+}
+
+async function fetchFoodNutritionOnline(query) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    alert('APIキーが設定されていません。設定ページからAnthropicのAPIキーを入力してください。');
+    showPage('settings');
+    return null;
+  }
+
+  const prompt = `「${query}」の栄養成分をWeb検索で調べてください。
+
+優先する情報源:
+1. メーカー・外食チェーンの公式サイトの栄養成分表
+2. 日本食品標準成分表2020年版（八訂）
+3. 信頼できる栄養情報サイト
+
+調べたら、以下のJSONのみを返してください（説明文・マークダウンの装飾は不要）。
+
+{
+  "found": true または false（信頼できる情報が見つからなければ false）,
+  "name": "正式な商品名・料理名",
+  "serving": "1食分の説明（例: 1個、並盛1杯、100g）",
+  "serving_g": 1食分のグラム数（数値。不明なら0）,
+  "cal": 1食分のカロリー（kcal、数値）,
+  "protein": 1食分のタンパク質（g、数値）,
+  "carb": 1食分の炭水化物（g、数値）,
+  "fat": 1食分の脂質（g、数値）,
+  "salt": 1食分の食塩相当量（g、数値。不明なら0）,
+  "confidence": "high"（公式の成分表を確認できた）/ "medium"（複数の二次情報が一致）/ "low"（推定・類似品からの概算）,
+  "note": "情報源と注意点を1〜2文で"
+}
+
+重要:
+- 数値は必ず1食分あたりの実数値にしてください。
+- 公式値が見つからない場合も、類似品から概算して found:true / confidence:"low" として返してください。
+- どうしても不明な項目は0にしてください。`;
+
+  const body = {
+    model: 'claude-opus-5',
+    max_tokens: 4096,
+    tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 5 }],
+    messages: [{ role: 'user', content: prompt }],
+  };
+
+  try {
+    let messages = body.messages;
+    let sources = [];
+    let text = '';
+
+    // Web検索は pause_turn で中断されることがあるため継続ループを回す
+    for (let i = 0; i < 4; i++) {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({ ...body, messages }),
+      });
+
+      if (!res.ok) {
+        let msg = 'APIエラー: ' + res.status;
+        try { const e = await res.json(); msg = e.error?.message || msg; } catch {}
+        throw new Error(msg);
+      }
+
+      const data = await res.json();
+      sources = sources.concat(extractSearchSources(data.content));
+      text += joinTextBlocks(data.content);
+
+      if (data.stop_reason !== 'pause_turn') break;
+      // 中断された場合はアシスタントの応答を積んで再送する
+      messages = messages.concat([{ role: 'assistant', content: data.content }]);
+    }
+
+    const m = text.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('栄養情報を読み取れませんでした');
+    const r = JSON.parse(m[0]);
+    r.sources = [...new Set(sources)].slice(0, 5);
+    return r;
+
+  } catch (e) {
+    alert('ネット検索エラー: ' + e.message);
+    return null;
+  }
+}
+
+async function searchFoodOnline() {
+  if (_webSearchBusy) return;
+  const q = (document.getElementById('food-search-input')?.value || '').trim();
+  if (!q) { alert('検索したい商品名・料理名を入力してください'); return; }
+
+  const panel = document.getElementById('web-food-panel');
+  const btn = document.getElementById('web-search-btn');
+  _webSearchBusy = true;
+  if (btn) { btn.disabled = true; btn.textContent = '検索中…'; }
+  if (panel) {
+    panel.style.display = 'block';
+    panel.innerHTML = `<div style="font-size:12px;color:var(--accent2)">🌐 「${q}」をネットで検索中…（10〜30秒かかります）</div>`;
+  }
+
+  const r = await fetchFoodNutritionOnline(q);
+
+  _webSearchBusy = false;
+  if (btn) { btn.disabled = false; btn.textContent = '🌐 ネット検索'; }
+
+  if (!r || r.found === false) {
+    if (panel) panel.innerHTML = `<div style="font-size:12px;color:var(--accent)">❌ 「${q}」の信頼できる栄養情報が見つかりませんでした。商品名を正確に入力するか、成分表の撮影をお試しください。</div>`;
+    return;
+  }
+
+  _lastWebFood = r;
+  renderWebFoodPanel(r, q);
+}
+
+function renderWebFoodPanel(r, query) {
+  const panel = document.getElementById('web-food-panel');
+  if (!panel) return;
+
+  const conf = {
+    high:   { label: '公式の成分表を確認', color: 'var(--accent4)' },
+    medium: { label: '複数の情報が一致',   color: '#fbbf24' },
+    low:    { label: '概算・要確認',       color: 'var(--accent)' },
+  }[r.confidence] || { label: '推定値', color: 'var(--text3)' };
+
+  const g = parseFloat(r.serving_g) || 0;
+  const per100 = g > 0 ? {
+    cal: Math.round((r.cal || 0) / g * 100),
+    p:   Math.round((r.protein || 0) / g * 1000) / 10,
+    c:   Math.round((r.carb || 0) / g * 1000) / 10,
+    f:   Math.round((r.fat || 0) / g * 1000) / 10,
+  } : null;
+
+  // PFC整合性チェック（表示カロリーと計算値の乖離）
+  const est = Math.round((r.protein || 0) * 4 + (r.carb || 0) * 4 + (r.fat || 0) * 9);
+  const gap = r.cal > 0 ? Math.abs(r.cal - est) / r.cal * 100 : 0;
+
+  panel.style.display = 'block';
+  panel.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+      <span style="font-size:12px;font-weight:700;color:var(--accent2)">🌐 ネット検索結果</span>
+      <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:${conf.color};color:#0a0a0f">${conf.label}</span>
+    </div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:2px">${r.name || query}</div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:8px">${r.serving || ''}${g > 0 ? `（約${g}g）` : ''}</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px">
+      <div class="card-sm" style="text-align:center;padding:6px">
+        <div style="font-size:16px;font-weight:500;color:var(--accent)">${r.cal || 0}</div>
+        <div style="font-size:9px;color:var(--text3)">kcal</div></div>
+      <div class="card-sm" style="text-align:center;padding:6px">
+        <div style="font-size:16px;font-weight:500;color:var(--accent2)">${r.protein || 0}g</div>
+        <div style="font-size:9px;color:var(--text3)">タンパク質</div></div>
+      <div class="card-sm" style="text-align:center;padding:6px">
+        <div style="font-size:16px;font-weight:500;color:var(--accent3)">${r.carb || 0}g</div>
+        <div style="font-size:9px;color:var(--text3)">炭水化物</div></div>
+      <div class="card-sm" style="text-align:center;padding:6px">
+        <div style="font-size:16px;font-weight:500;color:var(--accent4)">${r.fat || 0}g</div>
+        <div style="font-size:9px;color:var(--text3)">脂質</div></div>
+    </div>
+    ${gap > 20 ? `<div style="font-size:10px;color:var(--accent);margin-bottom:8px">⚠️ PFCから計算すると${est}kcalで、表示値と${Math.round(gap)}%乖離しています。数値を確認してください。</div>` : ''}
+    ${r.note ? `<div style="font-size:11px;color:var(--text3);line-height:1.6;margin-bottom:8px">${r.note}</div>` : ''}
+    ${(r.sources && r.sources.length) ? `
+      <div style="font-size:10px;color:var(--text3);margin-bottom:8px;word-break:break-all">
+        参照: ${r.sources.map(u => `<a href="${u}" target="_blank" rel="noopener noreferrer" style="color:var(--accent2)">${(u.split('/')[2] || u)}</a>`).join(' / ')}
+      </div>` : ''}
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-sm btn-primary" onclick="applyWebFoodToForm()">記録フォームに反映</button>
+      ${per100 ? `<button class="btn btn-sm" onclick="saveWebFoodAsPreset()">⭐ マイプリセットに登録</button>` : ''}
+      <button class="btn btn-sm btn-ghost" onclick="document.getElementById('web-food-panel').style.display='none'">閉じる</button>
+    </div>
+    <div style="font-size:9px;color:var(--text3);margin-top:8px;line-height:1.5">
+      ※ 検索結果は推定値です。記録する前に数値を確認・修正してください。
+    </div>`;
+}
+
+function applyWebFoodToForm() {
+  const r = _lastWebFood;
+  if (!r) return;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+  set('n-food', r.name || '');
+  set('n-cal', r.cal || 0);
+  set('n-protein', r.protein || 0);
+  set('n-carb', r.carb || 0);
+  set('n-fat', r.fat || 0);
+  document.getElementById('n-food')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function saveWebFoodAsPreset() {
+  const r = _lastWebFood;
+  if (!r) return;
+  const g = parseFloat(r.serving_g) || 0;
+  if (!g) { alert('1食分のグラム数が不明なため、100g基準のプリセットを作成できません。'); return; }
+  // マイプリセットは per100g 基準（ratio = 入力量 / per）で扱われるため換算する
+  saveOcrAsPreset({
+    name: r.name,
+    tag: 'ネット検索',
+    source: 'web',
+    per: 100,
+    cal: Math.round((r.cal || 0) / g * 100),
+    protein: Math.round((r.protein || 0) / g * 1000) / 10,
+    carb: Math.round((r.carb || 0) / g * 1000) / 10,
+    fat: Math.round((r.fat || 0) / g * 1000) / 10,
+  });
+}
+
 function saveOcrAsPreset(result) {
   const name = result.name || prompt('食品名を入力してください:', result.name || '');
   if (!name) return;
@@ -9434,8 +9676,8 @@ function saveOcrAsPreset(result) {
     p: result.protein || 0,
     c: result.carb || 0,
     f: result.fat || 0,
-    tag: 'OCR登録',
-    source: 'ocr',
+    tag: result.tag || 'OCR登録',
+    source: result.source || 'ocr',
     registeredAt: today(),
   };
 
