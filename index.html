@@ -256,6 +256,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="nav-label">TOOLS</div>
     <div class="nav-item" onclick="showPage('tdee')"><span class="nav-icon">≡</span>TDEEカリキュレーター</div>
     <div class="nav-item" onclick="showPage('analysis')"><span class="nav-icon">∿</span>分析レポート</div>
+    <div class="nav-item" onclick="showPage('evidence')"><span class="nav-icon">📚</span>エビデンス</div>
     <div class="nav-item" onclick="showPage('settings')"><span class="nav-icon">⊙</span>設定</div>
   </nav>
   <div class="sidebar-footer"><div class="version">PEAK FORM v3.2</div><div class="version" style="margin-top:2px;opacity:0.5">based on sports science</div></div>
@@ -2031,6 +2032,23 @@ input[type=range]:focus{border:none;box-shadow:none}
 
 </div>
 
+<!-- EVIDENCE -->
+<div class="page" id="page-evidence">
+  <div class="row-between" style="margin-bottom:18px">
+    <div><div class="h1">EVIDENCE</div><div class="muted" style="margin-top:4px" id="ev-count">—</div></div>
+  </div>
+  <div class="alert alert-info" style="margin-bottom:14px;font-size:12px">
+    アプリ内の各機能が依拠している一次資料を分野別に収録しています。数値の根拠を確認したいときはここを参照してください。
+  </div>
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar blue"></div>
+    <input type="text" id="ev-search" placeholder="🔍 著者・トピック・キーワードで検索（例: 睡眠、Gabbett、ACWR）"
+      style="width:100%;font-size:13px;padding:9px 11px;margin-bottom:10px" oninput="renderEvidenceList()">
+    <div id="ev-tabs" class="row" style="gap:5px;flex-wrap:wrap"></div>
+  </div>
+  <div id="ev-list"></div>
+</div>
+
 <!-- SETTINGS -->
 <div class="page" id="page-settings">
   <div class="h2">設定・プロフィール</div>
@@ -2106,30 +2124,11 @@ input[type=range]:focus{border:none;box-shadow:none}
   </div>
 
   <div style="margin-bottom:18px"><div class="card-header-bar"></div><div class="h3" style="margin-bottom:12px">データ管理</div><div class="row" style="gap:10px;flex-wrap:wrap"><button class="btn" onclick="exportData()">JSONエクスポート</button><button class="btn btn-danger" onclick="clearAll()">全データリセット</button></div><div class="muted" style="margin-top:10px;font-size:12px">エクスポートしたJSONはExcel・Google Sheetsにインポート可能。ブラウザのlocalStorageに永続保存されます。</div></div>
-  <div class="card"><div class="card-header-bar blue"></div><div class="h3" style="margin-bottom:12px">科学的根拠</div>
-    <table><thead><tr><th>機能</th><th>根拠</th></tr></thead><tbody>
-      <tr><td>TDEE算出</td><td class="muted">Mifflin-St Jeor式（JADA 2005）</td></tr>
-      <tr><td>ATL/CTL/TSBモデル</td><td class="muted">Banister et al. (1975) フィットネス-疲労モデル</td></tr>
-      <tr><td>タンパク質目標</td><td class="muted">Morton et al. (2018) BJSM — 1.6〜2.2g/kg/日</td></tr>
-      <tr><td>睡眠推奨</td><td class="muted">NSCA・ACSM指針 — 7〜9時間</td></tr>
-      <tr><td>ピーキング設計</td><td class="muted">Issurin (2010) ブロック周期化理論</td></tr>
-      <tr><td>腸脳相関</td><td class="muted">Cryan et al. (2019) Nature Reviews — 腸脳軸と腸内フローラ</td></tr>
-      <tr><td>アルコールと脂肪燃焼</td><td class="muted">Jequier (1992) NEJM — 飲酒中の脂肪酸化量36%減少</td></tr>
-      <tr><td>アルコールと睡眠</td><td class="muted">Gardiner et al. (2025) Sleep Medicine Reviews — 27研究のメタ分析</td></tr>
-      <tr><td>脂肪分解メカニズム</td><td class="muted">Grabner et al. (2021) Nature Metabolism / Duncan et al. (2007) Annual Review of Nutrition</td></tr>
-      <tr><td>レップ数と筋肥大の同等性</td><td class="muted">Morton et al. (2016) JAP / Schoenfeld et al. (2017) JSCR — 6〜8repでも8〜12repと同等の筋肥大</td></tr>
-      <tr><td>RPE/Failure近傍と筋肥大</td><td class="muted">Refalo et al. (2022) PMC — Failure到達の追加効果は有意でなく種目タイプ別の強度設計を推奨</td></tr>
-      <tr><td>週間セット数と収穫逓減</td><td class="muted">Pelland et al. (2025) n=2058 / Baz-Valle et al. (2022) — 打ち止めではなく対数関数的逓減</td></tr>
-      <tr><td>ボリューム上限説の撤回</td><td class="muted">Barbalho et al. (2019) — 2020年にデータ不正指摘、男性対象論文は著者自ら撤回</td></tr>
-      <tr><td>プログレッシブオーバーロード</td><td class="muted">Ralston et al. (2017/2020) — Double Progression法（回数達成後→重量UP）が最も実用的</td></tr>
-      <tr><td>消防士のACWR管理</td><td class="muted">Firefighter Nation (2024) — ACWR 0.8〜1.3を維持することで怪我リスク最小化</td></tr>
-      <tr><td>ビタミンD欠乏（消防士）</td><td class="muted">Colorado州消防士研究で75%が不足水準。シフトワーカー全般では80%（職業別レビュー）。日本DRI 340IUは現場推奨値の10分の1以下</td></tr>
-      <tr><td>カリウム欠乏（発汗・消防士）</td><td class="muted">発汗1時間で最大200mg以上のカリウム喪失。特定の「98.7%」数値の一次研究は未特定。発汗量が多い職種では補充が重要</td></tr>
-      <tr><td>マグネシウム欠乏（運動・発汗）</td><td class="muted">激しい運動・発汗でMg需要が10〜20%増加（Volpe 2013）。特定の「94.0%」数値の一次研究は未特定。運動強度の高い消防士での不足リスクは高い</td></tr>
-      <tr><td>火災現場エネルギー消費</td><td class="muted">Ruby et al. (2023) — 山岳消防士の1日の消費量は2,946〜6,260kcal/日。建物火災消防士の平均は約3,600〜4,900kcal/日（1時間でなく1日あたり）</td></tr>
-      <tr><td>ALDH2多型と栄養戦略</td><td class="muted">docx第3.1.3節 — 日本人約半数のALDH2不活性型はオメガ3+VitE積極摂取が特に重要</td></tr>
-      <tr><td>クルクミン吸収率</td><td class="muted">Hewlings 2017 — BCM-95形態は標準ウコン粉末の6〜7倍の吸収率</td></tr>
-    </tbody></table>
+  <div class="card"><div class="card-header-bar blue"></div><div class="h3" style="margin-bottom:8px">科学的根拠</div>
+    <div class="muted" style="font-size:12px;line-height:1.7;margin-bottom:12px">
+      アプリ内の各機能が依拠する一次資料は「エビデンス」ページに集約しました。分野別タブとキーワード検索で参照できます。
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="showPage('evidence')">📚 エビデンス一覧を開く</button>
   </div>
 </div>
 
@@ -2150,7 +2149,7 @@ const fmtInt=n=>isFinite(n)?Math.round(n):'—';
 const fmt1=n=>isFinite(n)?Number(n).toFixed(1):'—';
 const typeLabel={strength:'筋力',hiit:'HIIT',cardio:'有酸素',functional:'機能',mobility:'回復',firefighting:'消防訓練',firefighter_run:'🔥防火装備RUN'};
 const mealLabel={breakfast:'朝食',preworkout:'トレ前',postworkout:'トレ後',lunch:'昼食',dinner:'夕食',snack:'間食'};
-const pageNames={dashboard:'ダッシュボード',peaking:'ピーキングプランナー',program:'今日のメニュー',training:'トレーニング記録',nutrition:'栄養管理',sleep:'睡眠・回復',shift:'シフト管理',gut:'腸内環境管理',supplement:'サプリメント',tdee:'TDEEカリキュレーター',analysis:'分析レポート',settings:'設定'};
+const pageNames={dashboard:'ダッシュボード',peaking:'ピーキングプランナー',program:'今日のメニュー',training:'トレーニング記録',nutrition:'栄養管理',sleep:'睡眠・回復',shift:'シフト管理',gut:'腸内環境管理',supplement:'サプリメント',tdee:'TDEEカリキュレーター',analysis:'分析レポート',evidence:'エビデンス',settings:'設定'};
 
 // ===== 分析ページ目次 =====
 function tocJump(anchorId) {
@@ -2180,7 +2179,8 @@ function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const pg=document.getElementById('page-'+id);if(pg)pg.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>{if(n.textContent.trim()===pageNames[id])n.classList.add('active')});
+  // nav-itemのtextContentにはアイコン文字が含まれるため、onclickのページIDで判定する
+  document.querySelectorAll('.nav-item').forEach(n=>{const m=(n.getAttribute('onclick')||'').match(/showPage\('([\w-]+)'\)/);if(m&&m[1]===id)n.classList.add('active')});
   document.getElementById('topbar-page').textContent=pageNames[id]||id;
   closeSidebar();
   closeTocDrawer();
@@ -2194,6 +2194,7 @@ function showPage(id){
   if(id==='gut')renderGutPage();
   if(id==='supplement')renderSupplementPage();
   if(id==='training')renderTrainingLog();
+  if(id==='evidence')renderEvidencePage();
 }
 // ドロワー外クリックで閉じる
 document.addEventListener('click', function(e) {
@@ -9694,6 +9695,226 @@ function saveOcrAsPreset(result) {
   alert(`「${name}」をマイプリセットに登録しました！\n次回から「⭐ マイプリセット」カテゴリから選べます。`);
 }
 
+// ============================================================
+// エビデンスDB — アプリ内で使用している一次資料の集約
+// ============================================================
+// 各機能に散在していた引用をデータベース化し、分野別に参照できるようにする。
+// finding は「その文献が示したこと」、usedIn は「アプリ内のどこで使っているか」。
+// caveat には限界・注意点を明記する（未確立の推論を断定的に扱わないため）。
+const EVIDENCE_DOMAINS = {
+  training:   { label: 'トレーニング',   icon: '▲', color: 'var(--accent2)' },
+  nutrition:  { label: '栄養・食事',     icon: '◆', color: '#f5a623' },
+  sleep:      { label: '睡眠・回復',     icon: '◑', color: '#a78bfa' },
+  bodycomp:   { label: '体組成・減量',   icon: '⚖', color: '#22c55e' },
+  injury:     { label: '傷害予防',       icon: '🩹', color: 'var(--accent)' },
+  firefighter:{ label: '消防士特有',     icon: '🚒', color: '#f97316' },
+  supplement: { label: 'サプリメント',   icon: '💊', color: '#38bdf8' },
+  gut:        { label: '腸内環境',       icon: '🌿', color: '#4ade80' },
+};
+
+const EVIDENCE_DB = [
+  // ── トレーニング ──
+  { d:'training', topic:'ATL/CTL/TSB（トレーニング負荷モデル）', ref:'Banister et al. (1975)', src:'フィットネス-疲労モデル',
+    finding:'トレーニング負荷を急性(ATL)と慢性(CTL)に分け、その差(TSB)でコンディションを表現するモデルを提唱。', usedIn:['ダッシュボード','分析レポート','ピーキング'] },
+  { d:'training', topic:'週間セット数と筋肥大（収穫逓減）', ref:'Pelland et al. (2025)', src:'n=2058 / Baz-Valle et al. (2022)',
+    finding:'週間セット数を増やすと筋肥大は増えるが、増分は対数関数的に逓減する。特定のセット数で「打ち止め」にはならない。', usedIn:['ダッシュボード（MEV/MAV/MRV判定）','分析レポート'] },
+  { d:'training', topic:'ボリューム上限説の撤回', ref:'Barbalho et al. (2019)', src:'—',
+    finding:'「週10〜12セットで打ち止め」説の根拠論文。2020年にデータ不正が指摘され、男性対象論文は著者自ら撤回。', usedIn:['分析レポート（収穫逓減モデルの解説）'],
+    caveat:'撤回済み。この説を根拠にセット数を制限しないこと。' },
+  { d:'training', topic:'レップ数と筋肥大の同等性', ref:'Morton et al. (2016) / Schoenfeld et al. (2017)', src:'JAP / JSCR',
+    finding:'6〜8repでも8〜12repと同等の筋肥大が起こる。神経系適応（最大筋力）では6〜8repが優れる。', usedIn:['今日のメニュー（フェーズ別RIR指針）'] },
+  { d:'training', topic:'RPE / Failure近傍と筋肥大', ref:'Refalo et al. (2022)', src:'PMC',
+    finding:'Failure到達による追加の筋肥大効果は有意でなく、種目タイプ別に強度を設計することが推奨される。', usedIn:['今日のメニュー（RIR指針）'] },
+  { d:'training', topic:'プログレッシブオーバーロード', ref:'Ralston et al. (2017/2020)', src:'—',
+    finding:'Double Progression法（レップ数の上限達成→重量UP）が最も実用的で継続的な過負荷を実現する。', usedIn:['今日のメニュー'] },
+  { d:'training', topic:'セット間休憩時間', ref:'Schoenfeld et al. (2016) / Singer et al. (2024)', src:'JSCR / Frontiers',
+    finding:'3分休憩は1分より筋肥大・筋力ともに有意に優れる。ただし90秒超では差がほぼ無く、60秒超 > 60秒以下の小差にとどまる。', usedIn:['トレーニング記録（インターバルタイマー）'] },
+  { d:'training', topic:'種目順序（多関節→単関節）', ref:'Schoenfeld (2010)', src:'NSCA CSCS テキスト準拠',
+    finding:'多関節種目を先に行う順序が筋肥大・安全性の観点で推奨される。', usedIn:['今日のメニュー（⚡自動ソート）'] },
+  { d:'training', topic:'RPEによる強度管理', ref:'Foster et al. (2001)', src:'sRPE法',
+    finding:'セッションRPEと時間の積でトレーニング負荷を定量化する手法を確立。', usedIn:['トレーニング記録（消費kcal推定）'] },
+  { d:'training', topic:'1RM推定', ref:'Epley (1985)', src:'Epley式',
+    finding:'挙上重量と反復回数から1RMを推定する式。', usedIn:['トレーニング記録','分析レポート（重量推移）'] },
+  { d:'training', topic:'ブロック周期化', ref:'Issurin (2010)', src:'—',
+    finding:'蓄積期→強化期→変換期の順にブロックを配置する周期化理論。', usedIn:['ピーキングプランナー','分析レポート（年間マクロサイクル）'] },
+  { d:'training', topic:'消費kcal推定（MET法）', ref:'Ainsworth et al. (2011)', src:'Compendium of Physical Activities',
+    finding:'身体活動ごとのMET値を体系化。筋力トレーニングの消費カロリー推定の基礎。', usedIn:['トレーニング記録'],
+    caveat:'実セッションは休憩を含むため、アプリ側でMETを0.55倍に補正している。' },
+  { d:'training', topic:'消費kcal推定（心拍法）', ref:'Keytel et al. (2005)', src:'—',
+    finding:'心拍数・体重・年齢・性別からエネルギー消費量を推定する式。', usedIn:['トレーニング記録（有酸素）'] },
+
+  // ── 栄養・食事 ──
+  { d:'nutrition', topic:'TDEE算出', ref:'Mifflin-St Jeor (2005)', src:'JADA',
+    finding:'除脂肪体重を用いない基礎代謝推定式の中で最も誤差が小さいとされる式。', usedIn:['TDEEカリキュレーター'] },
+  { d:'nutrition', topic:'タンパク質目標', ref:'Morton et al. (2018)', src:'BJSM',
+    finding:'筋肥大に必要なタンパク質摂取量は1.6〜2.2g/kg/日。それ以上の増量による追加効果は乏しい。', usedIn:['栄養管理','TDEEカリキュレーター'] },
+  { d:'nutrition', topic:'同化抵抗性（加齢によるタンパク質必要量増加）', ref:'ESPEN (2014) / Frontiers Nutrition (2024)', src:'—',
+    finding:'加齢により筋タンパク質合成の感受性が低下する。高齢者は1食あたり0.4g/kgが必要（若年は0.2g/kgで十分）。', usedIn:['分析レポート（年齢別目標値）','サプリメント（年代別推奨）'] },
+  { d:'nutrition', topic:'筋量・筋質の加齢劣化', ref:'Volpi (2010)', src:'—',
+    finding:'筋量・筋質の劣化は40歳から加速し、60歳から再加速する。', usedIn:['分析レポート（年齢別目標値）'] },
+  { d:'nutrition', topic:'加齢による筋力低下率', ref:'Frontera et al. (2000)', src:'—',
+    finding:'加齢による筋力低下は年0.5〜1%程度。', usedIn:['分析レポート（年齢別目標値）'] },
+  { d:'nutrition', topic:'アルコールと脂肪燃焼', ref:'Jequier (1992)', src:'NEJM',
+    finding:'飲酒中は脂肪酸化量が約36%減少する。', usedIn:['分析レポート（アルコールと体脂肪減少）'] },
+  { d:'nutrition', topic:'脂肪分解のメカニズム', ref:'Grabner et al. (2021) / Duncan et al. (2007)', src:'Nature Metabolism / Annual Review of Nutrition',
+    finding:'脂肪分解経路（ATGL・HSL等）の制御機構を整理。', usedIn:['分析レポート'] },
+
+  // ── 体組成・減量 ──
+  { d:'bodycomp', topic:'動的エネルギーバランスモデル', ref:'Hall et al. (2012)', src:'—',
+    finding:'減量に伴う代謝適応を織り込んだ動的予測モデル。静的なWishnofskyルール（3500kcal/lb）は長期予測で減量幅を過大評価する。', usedIn:['分析レポート（リバースダイエット管理）'],
+    caveat:'アプリの逆算は簡易式のため誤差±10%程度を見込むこと。' },
+  { d:'bodycomp', topic:'リバースダイエットの有効性', ref:'Da Silva et al. (2025)', src:'RCT',
+    finding:'週+50kcalのような段階的極小増量の優位性は否定されつつある。速やかにメンテナンスへ移行し体重変化で調整する戦略が有効。', usedIn:['分析レポート（リバースダイエット管理）'] },
+  { d:'bodycomp', topic:'炭水化物と水分保持', ref:'Fernandez-Elias et al. (2015)', src:'—',
+    finding:'グリコーゲン1gあたり約3gの水分が結合して保持される。増量初期の体重増加は水分によるもので脂肪ではない。', usedIn:['分析レポート（リバースダイエット管理）'] },
+  { d:'bodycomp', topic:'グリコーゲン容量上限', ref:'Bone et al. (2016)', src:'—',
+    finding:'グリコーゲン貯蔵の容量上限と、それに伴う水分貯留が体組成測定に与える影響を報告。', usedIn:['分析レポート（移行後の体重変化判定）'] },
+  { d:'bodycomp', topic:'エネルギー代謝の個人差', ref:'Dirlewanger et al. (2000)', src:'—',
+    finding:'過剰摂取に対するエネルギー消費の反応（適応的熱産生）には大きな個人差がある。', usedIn:['分析レポート（リバースダイエット管理）'] },
+  { d:'bodycomp', topic:'+1.5kg調整閾値', ref:'（臨床経験則）', src:'—',
+    finding:'メンテナンス移行後に+1.5kgを超えた場合にカロリーを再調整する運用基準。', usedIn:['分析レポート（移行後の体重変化判定）'],
+    caveat:'一次エビデンス未確立。臨床経験則としての運用基準であり、研究で裏付けられた閾値ではない。' },
+
+  // ── 睡眠・回復 ──
+  { d:'sleep', topic:'睡眠推奨時間', ref:'NSCA / ACSM指針', src:'—',
+    finding:'アスリートの推奨睡眠時間は7〜9時間。', usedIn:['睡眠・回復','分析レポート（年齢別目標値）'] },
+  { d:'sleep', topic:'シフト勤務と心血管リスク', ref:'Barger et al. (2015)', src:'JCSM',
+    finding:'シフト勤務による睡眠障害が心血管疾患リスクを高める。消防士は特に該当。', usedIn:['睡眠・回復','分析レポート（年齢別目標値）'] },
+  { d:'sleep', topic:'消防士の睡眠推奨', ref:'NSCA TSAC (2023)', src:'—',
+    finding:'戦術的アスリート（消防士・軍人・警察官）向けの睡眠推奨指針。', usedIn:['分析レポート（年齢別目標値）'] },
+  { d:'sleep', topic:'加齢とREM睡眠', ref:'Walker (2017)', src:'—',
+    finding:'加齢とともにREM睡眠が減少し、回復に必要な時間が延びる。', usedIn:['分析レポート（年齢別目標値）'] },
+  { d:'sleep', topic:'アルコールと睡眠', ref:'Gardiner et al. (2025)', src:'Sleep Medicine Reviews',
+    finding:'27研究のメタ分析。飲酒は入眠を早める一方で睡眠後半の質を著しく損なう。', usedIn:['分析レポート（アルコールと体脂肪減少）'] },
+
+  // ── 傷害予防 ──
+  { d:'injury', topic:'ACWR（急性:慢性作業負荷比）と傷害', ref:'Gabbett (2016)', src:'BJSM',
+    finding:'ACWRが1.5を超えると傷害リスクが急増する。0.8〜1.3が推奨レンジ。', usedIn:['分析レポート（怪我リスクスコア）','シフト管理'] },
+  { d:'injury', topic:'膝関節への負荷', ref:'Escamilla (2001)', src:'—',
+    finding:'スクワット動作における膝関節剪断力・膝蓋大腿圧縮力を計測。屈曲が深いほど圧縮力が増大する。', usedIn:['分析レポート（種目自動フラグ）'] },
+  { d:'injury', topic:'肩インピンジメント', ref:'Kolber et al. (2010)', src:'—',
+    finding:'レジスタンストレーニングにおける肩のインピンジメント発生要因を整理。内旋＋外転位でリスクが高い。', usedIn:['分析レポート（種目自動フラグ）'] },
+  { d:'injury', topic:'スクワット深度と関節負荷', ref:'Hartmann et al. (2013)', src:'—',
+    finding:'スクワットの深度による脊柱・膝関節への負荷の変化を分析。', usedIn:['分析レポート（種目自動フラグ）'] },
+
+  // ── 消防士特有 ──
+  { d:'firefighter', topic:'防火装備の代謝コスト', ref:'Knapik et al. (1990)', src:'—',
+    finding:'装備重量により代謝コストが平均+35〜45%増加する。アプリでは負荷を×1.4補正。', usedIn:['トレーニング記録（防火装備ランニング）','ピーキング'] },
+  { d:'firefighter', topic:'消防士の心血管リスク', ref:'Smith (2019)', src:'AHA Guidelines',
+    finding:'消防士の職務中突然死の大半は心臓イベントによるもの。', usedIn:['分析レポート（心血管リスクモニタリング）'] },
+  { d:'firefighter', topic:'簡易CVDリスク推定', ref:'ACSM (2022)', src:'—',
+    finding:'安静時心拍・体重・BMIから心血管リスクを簡易推定する枠組み。', usedIn:['分析レポート（心血管リスク）'] },
+  { d:'firefighter', topic:'VO2max基準値', ref:'Uth et al. (2004) / NFPA 1582', src:'HRmax/HRrest法',
+    finding:'安静時心拍と最大心拍の比からVO2maxを推定。NFPA 1582は消防士に42 mL/kg/min以上を求める。', usedIn:['分析レポート（VO2max推定）'] },
+  { d:'firefighter', topic:'消防士の体力低下（年代別）', ref:'Redshaw (2023) / Parpa & Michaelides (2024)', src:'PMC',
+    finding:'消防士の動作品質は50歳で急低下する。年代別の体組成・筋力変化も報告。', usedIn:['分析レポート（怪我リスクの年齢係数・年齢別目標値）'] },
+  { d:'firefighter', topic:'火災現場のエネルギー消費', ref:'Ruby et al. (2023)', src:'—',
+    finding:'山岳消防士の1日消費量は2,946〜6,260kcal/日。建物火災消防士は約3,600〜4,900kcal/日。', usedIn:['分析レポート（当番日栄養プロトコル）','シフト管理（勤務カロリー補正）'],
+    caveat:'1時間あたりではなく1日あたりの値。' },
+  { d:'firefighter', topic:'消防士のACWR管理', ref:'Firefighter Nation (2024)', src:'—',
+    finding:'ACWR 0.8〜1.3を維持することで傷害リスクを最小化できる。', usedIn:['シフト管理','分析レポート'] },
+  { d:'firefighter', topic:'熱ストレスと水分補給', ref:'ACSM水分補給ガイドライン / NFPA熱ストレス指針', src:'—',
+    finding:'防火装備下では発汗量が1時間あたり1〜2Lに達し、低ナトリウム血症のリスクがある。', usedIn:['サプリメント（電解質）','当番日栄養プロトコル'] },
+
+  // ── サプリメント ──
+  { d:'supplement', topic:'ビタミンD欠乏（消防士）', ref:'Colorado州消防士研究 / Endocrine Society (2024)', src:'—',
+    finding:'Colorado州の消防士研究で75%が不足水準。シフトワーカー全般では約80%が不足。', usedIn:['サプリメント（Tier1）'],
+    caveat:'日本のDRI 340IUは現場推奨値の10分の1以下。' },
+  { d:'supplement', topic:'マグネシウム需要（運動・発汗）', ref:'Volpe (2013)', src:'—',
+    finding:'激しい運動・発汗によりマグネシウム需要が10〜20%増加する。', usedIn:['サプリメント'],
+    caveat:'一部で流布する「94.0%不足」という数値の一次研究は未特定。' },
+  { d:'supplement', topic:'カリウム喪失（発汗）', ref:'（発汗研究）', src:'—',
+    finding:'発汗1時間で最大200mg以上のカリウムが失われる。', usedIn:['サプリメント（電解質）'],
+    caveat:'「98.7%不足」という数値の一次研究は未特定。発汗量が多い職種で補充が重要という点は妥当。' },
+  { d:'supplement', topic:'クルクミンの吸収率', ref:'Hewlings (2017)', src:'—',
+    finding:'BCM-95形態は標準ウコン粉末の6〜7倍の吸収率を示す。', usedIn:['サプリメント（Tier3・50代以降の関節保護）'] },
+  { d:'supplement', topic:'ALDH2多型と栄養戦略', ref:'（社内資料 第3.1.3節）', src:'—',
+    finding:'日本人の約半数が持つALDH2不活性型では、オメガ3+ビタミンEの積極摂取が特に重要。', usedIn:['サプリメント'],
+    caveat:'一次文献未特定。外部の査読論文で裏付けを取ること。' },
+
+  // ── 腸内環境 ──
+  { d:'gut', topic:'腸脳相関', ref:'Cryan et al. (2019)', src:'Nature Reviews',
+    finding:'腸脳軸と腸内フローラが情動・ストレス応答に及ぼす影響を包括的にレビュー。', usedIn:['腸内環境管理'] },
+];
+
+function evidenceDomainCounts() {
+  const c = {};
+  EVIDENCE_DB.forEach(e => { c[e.d] = (c[e.d] || 0) + 1; });
+  return c;
+}
+
+let _evDomain = 'all';
+
+function setEvidenceDomain(d) {
+  _evDomain = d;
+  renderEvidenceTabs();
+  renderEvidenceList();
+}
+
+function renderEvidenceTabs() {
+  const el = document.getElementById('ev-tabs');
+  if (!el) return;
+  const counts = evidenceDomainCounts();
+  const mk = (key, label, icon, n, color) => {
+    const on = _evDomain === key;
+    return `<span onclick="setEvidenceDomain('${key}')" style="cursor:pointer;font-size:11px;font-weight:${on?700:500};padding:5px 10px;border-radius:5px;border:1px solid ${on?(color||'var(--accent)'):'var(--border)'};background:${on?(color||'var(--accent)'):'transparent'};color:${on?'#0a0a0f':'var(--text2)'}">${icon} ${label} ${n}</span>`;
+  };
+  el.innerHTML = mk('all', 'すべて', '📚', EVIDENCE_DB.length, 'var(--accent)')
+    + Object.entries(EVIDENCE_DOMAINS)
+        .map(([k, v]) => counts[k] ? mk(k, v.label, v.icon, counts[k], v.color) : '')
+        .join('');
+}
+
+function renderEvidenceList() {
+  const el = document.getElementById('ev-list');
+  if (!el) return;
+  const q = (document.getElementById('ev-search')?.value || '').trim().toLowerCase();
+
+  let items = EVIDENCE_DB.filter(e => _evDomain === 'all' || e.d === _evDomain);
+  if (q) {
+    items = items.filter(e => [e.topic, e.ref, e.src, e.finding, e.caveat, (e.usedIn || []).join(' '),
+      EVIDENCE_DOMAINS[e.d]?.label].join(' ').toLowerCase().includes(q));
+  }
+
+  const cnt = document.getElementById('ev-count');
+  if (cnt) cnt.textContent = `全${EVIDENCE_DB.length}件の一次資料 / 表示中 ${items.length}件`;
+
+  if (!items.length) {
+    el.innerHTML = '<div class="card"><div class="muted" style="font-size:12px">該当する資料がありません。キーワードを変えてお試しください。</div></div>';
+    return;
+  }
+
+  // 分野ごとにグループ化して見出しを付ける
+  const groups = {};
+  items.forEach(e => { (groups[e.d] = groups[e.d] || []).push(e); });
+
+  el.innerHTML = Object.entries(groups).map(([d, list]) => {
+    const dom = EVIDENCE_DOMAINS[d] || { label: d, icon: '•', color: 'var(--text3)' };
+    return `
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-header-bar" style="background:${dom.color}"></div>
+        <div class="h3" style="margin-bottom:12px;font-size:14px">${dom.icon} ${dom.label}<span style="font-size:11px;color:var(--text3);font-weight:400;margin-left:8px">${list.length}件</span></div>
+        ${list.map(e => `
+          <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+            <div style="font-size:13px;font-weight:600;margin-bottom:3px">${e.topic}</div>
+            <div style="font-size:11px;font-family:var(--font-mono);color:${dom.color};margin-bottom:5px">${e.ref}${e.src && e.src !== '—' ? ` — ${e.src}` : ''}</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:6px">${e.finding}</div>
+            ${e.caveat ? `<div style="font-size:11px;color:var(--accent);line-height:1.6;margin-bottom:6px">⚠️ ${e.caveat}</div>` : ''}
+            <div style="font-size:10px;color:var(--text3)">使用箇所: ${(e.usedIn || []).join(' / ')}</div>
+          </div>`).join('')}
+      </div>`;
+  }).join('') + `
+    <div style="font-size:10px;color:var(--text3);line-height:1.7;padding:0 4px 20px">
+      ※ 本アプリは医療機器ではなく、記載内容は医療診断・治療の代替ではありません。<br>
+      ※ 「⚠️」付きの項目は一次エビデンスが未確立、または限界のある推定です。運用時は注意してください。
+    </div>`;
+}
+
+function renderEvidencePage() {
+  renderEvidenceTabs();
+  renderEvidenceList();
+}
+
 init();
 
 window.addEventListener('beforeinstallprompt', function(e) {
@@ -9837,6 +10058,7 @@ function deleteSleep(id) {
   <button class="toc-drawer-item" onclick="showPage('sleep');closeTocDrawer()"><span class="toc-num">◑</span>睡眠・回復</button>
   <button class="toc-drawer-item" onclick="showPage('shift');closeTocDrawer()"><span class="toc-num">📅</span>シフト管理</button>
   <button class="toc-drawer-item" onclick="showPage('analysis');closeTocDrawer()"><span class="toc-num">📊</span>分析レポート</button>
+  <button class="toc-drawer-item" onclick="showPage('evidence');closeTocDrawer()"><span class="toc-num">📚</span>エビデンス</button>
   <button class="toc-drawer-item" onclick="showPage('settings');closeTocDrawer()"><span class="toc-num">⚙</span>設定</button>
   <div id="toc-divider-analysis" style="height:1px;background:var(--bg3);margin:8px 0"></div>
   <div id="toc-section-analysis" style="font-size:10px;color:var(--text3);margin-bottom:6px">— 分析レポート内 —</div>
