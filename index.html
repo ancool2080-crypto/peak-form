@@ -390,7 +390,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="card card-blue" style="margin-bottom:18px"><div class="row-between"><div><div class="h3" id="prog-session-name">—</div><div class="muted" id="prog-session-focus" style="margin-top:3px"></div></div><div class="row" style="gap:8px"><div id="prog-phase-advice" class="badge badge-blue"></div><button class="btn btn-primary btn-sm" onclick="loadProgramToTraining()">記録画面に読み込む ↗</button></div></div></div>
     <div class="card" style="margin-bottom:18px">
       <div class="card-header-bar amber"></div>
-      <div class="row-between" style="margin-bottom:10px"><div class="h3">フェーズ別RIR指針（種目タイプ別）</div><span class="badge badge-purple" style="font-size:10px">Refalo et al. 2022 準拠</span></div>
+      <div class="row-between" style="margin-bottom:10px"><div class="h3">フェーズ別RIR指針（種目タイプ別）</div><span class="badge badge-purple" style="font-size:10px">Refalo et al. 2022 準拠 <span onclick="openEvidence('RIR')" style="color:var(--accent2);cursor:pointer">📚</span></span></div>
       <div class="alert alert-info" style="margin-bottom:12px;font-size:12px">RPE9〜10は種目の安全性に応じて使い分けます。回復確認＋前回より良いパフォーマンスが出ている（プログレッシブオーバーロード指標あり）が前提条件です。</div>
       <table><thead><tr><th>フェーズ</th><th>コンパウンド（フリー）</th><th>マシン系</th><th>アイソレーション</th><th>レップ数目安</th></tr></thead><tbody>
         <tr><td><span class="badge badge-blue">蓄積期</span></td><td class="mono">RIR 3〜4</td><td class="mono">RIR 2〜3</td><td class="mono">RIR 1〜2</td><td class="muted">8〜15 rep</td></tr>
@@ -586,7 +586,7 @@ input[type=range]:focus{border:none;box-shadow:none}
       </div>
     </div>
     <div style="font-size:10px;color:var(--text3);margin-top:8px;text-align:center">
-      根拠: Schoenfeld (2016) + Singer (2024) — 種目タイプで自動判定
+      根拠: Schoenfeld (2016) + Singer (2024) — 種目タイプで自動判定 <span onclick="openEvidence('休憩')" style="color:var(--accent2);cursor:pointer">📚</span>
     </div>
   </div>
 
@@ -1277,6 +1277,19 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div id="supp-timing-now" style="display:flex;gap:8px;flex-wrap:wrap"></div>
     <div style="margin-top:10px;font-size:12px;color:var(--text3)">次のタイミング：<span id="supp-next-timing" style="color:var(--accent2);font-weight:600"></span></div>
   </div>
+  <!-- 未記録バナー -->
+  <div id="supp-missed-banner" style="display:none;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:var(--rs);padding:10px 12px;margin-bottom:14px"></div>
+  <!-- 摂取タイミング通知 -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-header-bar" style="background:#a78bfa"></div>
+    <div class="h3" style="margin-bottom:10px">🔔 摂取タイミング通知</div>
+    <div id="supp-notify-settings"></div>
+  </div>
+  <!-- 出動連動 抗酸化プロトコル -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-header-bar" style="background:#f97316"></div>
+    <div id="supp-antiox-panel"></div>
+  </div>
   <!-- 年齢連動サプリ推奨 -->
   <div class="card" style="margin-bottom:14px;border:1px solid var(--accent2)">
     <div class="card-header-bar"></div>
@@ -1285,7 +1298,7 @@ input[type=range]:focus{border:none;box-shadow:none}
       <span id="supp-age-badge" class="badge" style="font-size:10px"></span>
     </div>
     <div id="supp-age-recommend" style="font-size:12px;color:var(--text2);line-height:1.7"></div>
-    <div style="font-size:10px;color:var(--text3);margin-top:8px">エビデンス: ESPEN (2014) / Frontiers Nutrition (2024) / Smith (2019) 消防士CVD</div>
+    <div style="font-size:10px;color:var(--text3);margin-top:8px">エビデンス: ESPEN (2014) / Frontiers Nutrition (2024) / Smith (2019) 消防士CVD <span onclick="openEvidence('同化抵抗性')" style="color:var(--accent2);cursor:pointer">📚</span></div>
   </div>
 
   <!-- 消防士版1日プロトコル（docx第4.2節） -->
@@ -1827,7 +1840,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div id="anc-vo2max" class="card-header-bar green"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <div class="h3">VO2max 推定値</div>
-      <span style="font-size:10px;color:var(--text3)">NFPA 1582 / Uth (2004)</span>
+      <span style="font-size:10px;color:var(--text3)">NFPA 1582 / Uth (2004) <span onclick="openEvidence('VO2max')" style="color:var(--accent2);cursor:pointer">📚</span></span>
     </div>
     <div id="a-vo2max"><div class="muted">計算中...</div></div>
   </div>
@@ -1874,6 +1887,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="field" style="margin-bottom:12px"><label class="label">メモ</label>
       <input type="text" id="fe-notes" placeholder="活動内容・体調など"></div>
     <button class="btn btn-primary btn-sm" onclick="saveFireExposure()">記録する</button>
+    <div id="fe-antiox-panel" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"></div>
     <div id="fe-log" style="margin-top:14px"></div>
   </div>
 
@@ -1908,7 +1922,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div id="anc-duty" class="card-header-bar" style="background:#4a9eff"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <div class="h3">当番日 栄養プロトコル</div>
-      <span style="font-size:10px;color:var(--text3)">Ruby (2023) / Volpe (2013)</span>
+      <span style="font-size:10px;color:var(--text3)">Ruby (2023) / Volpe (2013) <span onclick="openEvidence('消防士')" style="color:var(--accent2);cursor:pointer">📚</span></span>
     </div>
     <div id="duty-day-protocol"><div class="muted">計算中...</div></div>
   </div>
@@ -1945,7 +1959,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div id="anc-reverse" class="card" style="margin-bottom:18px">
     <div class="card-header-bar"></div>
     <div class="h3" style="margin-bottom:4px">🔄 リバースダイエット管理</div>
-    <div class="muted" style="font-size:11px;margin-bottom:14px">Da Silva (2025) / Hall et al. (2012) / Dirlewanger et al. (2000)</div>
+    <div class="muted" style="font-size:11px;margin-bottom:14px">Da Silva (2025) / Hall et al. (2012) / Dirlewanger et al. (2000) <span onclick="openEvidence('リバース')" style="color:var(--accent2);cursor:pointer">📚</span></div>
 
     <!-- STEP1: メンテナンスkcal逆算 -->
     <div style="background:var(--bg3);border-radius:var(--rs);padding:14px;margin-bottom:12px">
@@ -2652,7 +2666,7 @@ const EATING_OUT_DB={
 
 // ============================================================
 // 経験レベル別ボリューム閾値（収穫逓減モデル）
-// 根拠: Pelland et al. (2025) n=2058 / Israetel et al. 2019
+// 根拠: Pelland et al. (2025) n=2058 / Israetel <span onclick="openEvidence('セット数')" style="color:var(--accent2);cursor:pointer">📚</span> et al. 2019
 // シフト補正: 24h勤務後はMRVを0.6倍（睡眠不足による回復能力低下）
 // ============================================================
 const VOLUME_LEVELS = {
@@ -3882,6 +3896,9 @@ function renderWeeklyReview(){
 function renderSupplementPage(){
   renderSuppTiming();
   renderSuppAgeRecommend();
+  renderSuppNotifySettings();
+  renderSuppMissedBanner();
+  renderAntioxidantPanel();
   const suppData=DB.get('pf_supp_checks')||{};
   const todayStr=today();
   const todayChecks=suppData[todayStr]||[];
@@ -5048,7 +5065,7 @@ function renderCVDRisk() {
     <div style="font-size:11px">
       ${r.checkItems.map(item=>`<div style="padding:4px 0;color:var(--text3)">📋 ${item}</div>`).join('')}
     </div>
-    <div style="font-size:9px;color:var(--text3);margin-top:8px">Smith (2019) / AHA Guidelines / Barger et al. (2015) JCSM / ACSM 2022<br>※医療診断ではありません。心配な症状は医師に相談してください。</div>
+    <div style="font-size:9px;color:var(--text3);margin-top:8px">Smith (2019) / AHA Guidelines / Barger et al. (2015) JCSM / ACSM 2022 <span onclick="openEvidence('心血管')" style="color:var(--accent2);cursor:pointer">📚</span><br>※医療診断ではありません。心配な症状は医師に相談してください。</div>
   `;
 }
 
@@ -5065,6 +5082,7 @@ function saveFireExposure() {
   if (!duration) { alert('活動時間を入力してください'); return; }
   DB.push('fire_exposures', { date, type, duration, smoke, ba, notes, id: Date.now() });
   renderFireExposureLog();
+  renderAntioxidantPanel(); // 抗酸化プロトコルも即時更新
   renderInjuryRisk(); // リスクスコアも更新
   alert('記録しました');
 }
@@ -5121,11 +5139,10 @@ function renderFireExposureLog() {
           <div style="font-size:18px;font-weight:600;font-family:var(--font-mono)">${last30.reduce((a,r)=>a+r.duration,0)}分</div>
         </div>
       </div>
-      ${smokeCount >= 3 ? `<div style="font-size:11px;padding:8px;background:rgba(255,69,96,0.08);border:1px solid rgba(255,69,96,0.3);border-radius:var(--rs);color:var(--accent)">
-        ⚠️ 煙暴露が${smokeCount}回あります。オメガ3・ビタミンC・クルクミンの摂取を増やし、抗酸化対策を強化してください。
-      </div>` : ''}
     `;
   }
+  // 抗酸化プロトコルは暴露量に応じて段階的に算出する（固定文言を置き換え）
+  renderAntioxidantPanel();
 }
 
 function deleteFireExposure(id) {
@@ -5405,7 +5422,7 @@ function renderJointExerciseFlags() {
           </div>`;
         }).join('')}
         <div style="font-size:9px;color:var(--text3);margin-top:4px;line-height:1.6">
-          Escamilla (2001) / Kolber et al. (2010) / Hartmann et al. (2013) / Gabbett (2016) BJSM<br>
+          Escamilla (2001) / Kolber et al. (2010) / Hartmann et al. (2013) / Gabbett (2016) BJSM <span onclick="openEvidence('傷害予防')" style="color:var(--accent2);cursor:pointer">📚</span><br>
           ※医療診断ではありません。痛みが2週間以上続く・夜間痛がある場合は整形外科を受診してください。
         </div>
       </div>`;
@@ -8308,6 +8325,7 @@ function renderAnalysis(){
   renderVO2max();
   renderMacroCycle();
   renderFireExposureLog();
+  renderAntioxidantPanel(); // renderFireExposureLogは記録0件で早期returnするため個別に呼ぶ
   renderJointLog();
   renderJointExerciseFlags();
   renderDutyDayProtocol();
@@ -9696,6 +9714,281 @@ function saveOcrAsPreset(result) {
 }
 
 // ============================================================
+// ① サプリ摂取タイミング通知（ブラウザ通知API）
+// ============================================================
+// 制約: 静的ホスティングのためプッシュサーバーを持てない。
+// アプリ（またはPWA）が起動している間のスケジュール通知のみ実現できる。
+// 完全に閉じている間の定時通知にはFCM等のプッシュ基盤が別途必要。
+// 既定はOFF。通知許可はユーザー操作を起点にしてのみ要求する。
+let _suppNotifyTimer = null;
+
+function getNotifyCfg() {
+  return {
+    enabled:   DB.get('notify_enabled') === true,
+    slots:     DB.get('notify_slots') || SUPP_TIMINGS.map((_, i) => i), // 既定は全タイミング
+    quietDuty: DB.get('notify_quiet_duty') === true,
+  };
+}
+function setNotifyCfg(patch) {
+  const c = getNotifyCfg();
+  if ('enabled'   in patch) DB.set('notify_enabled', patch.enabled);
+  if ('slots'     in patch) DB.set('notify_slots', patch.slots);
+  if ('quietDuty' in patch) DB.set('notify_quiet_duty', patch.quietDuty);
+  return { ...c, ...patch };
+}
+
+function notifySupported() { return typeof Notification !== 'undefined'; }
+function notifyPermission() { return notifySupported() ? Notification.permission : 'unsupported'; }
+
+// 当番日（24時間勤務）かどうか
+function isDutyToday() {
+  const s = getShiftData()[today()];
+  return (typeof s === 'object' ? s?.type : s) === '24h';
+}
+
+// 次に通知すべきタイミングを求める
+function nextNotifySlot(from) {
+  const cfg = getNotifyCfg();
+  if (!cfg.enabled) return null;
+  if (cfg.quietDuty && isDutyToday()) return null;
+  const now = from || new Date();
+  let best = null;
+  SUPP_TIMINGS.forEach((slot, i) => {
+    if (!cfg.slots.includes(i)) return;
+    const h = Math.min(...slot.hour);
+    const at = new Date(now); at.setHours(h, 0, 0, 0);
+    if (at <= now) at.setDate(at.getDate() + 1); // 過ぎていれば翌日
+    if (!best || at < best.at) best = { at, slot, index: i };
+  });
+  return best;
+}
+
+async function fireSuppNotification(slot) {
+  const title = 'PEAK FORM — ' + slot.label;
+  const body  = slot.items.join(' / ');
+  const opts  = { body, icon: './icon.svg', badge: './icon.svg', tag: 'pf-supp-' + slot.label };
+  try {
+    const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
+    if (reg && reg.showNotification) { await reg.showNotification(title, opts); return true; }
+  } catch (e) { /* SW経由が使えなければ下のフォールバックへ */ }
+  try { new Notification(title, opts); return true; } catch (e) { return false; }
+}
+
+// 開いている間のスケジューリング（最大30分ごとに再評価して時刻ずれを防ぐ）
+function scheduleSuppNotification() {
+  if (_suppNotifyTimer) { clearTimeout(_suppNotifyTimer); _suppNotifyTimer = null; }
+  if (!notifySupported() || notifyPermission() !== 'granted') return;
+  const next = nextNotifySlot();
+  if (!next) return;
+  const ms = next.at.getTime() - Date.now();
+  const wait = Math.max(1000, Math.min(ms, 30 * 60 * 1000));
+  _suppNotifyTimer = setTimeout(() => {
+    if (Date.now() >= next.at.getTime() - 1000) fireSuppNotification(next.slot);
+    scheduleSuppNotification();
+  }, wait);
+}
+
+async function requestNotifyPermission() {
+  if (!notifySupported()) { alert('このブラウザは通知に対応していません。'); return; }
+  const p = await Notification.requestPermission();
+  if (p === 'granted') {
+    setNotifyCfg({ enabled: true });
+    scheduleSuppNotification();
+    await fireSuppNotification({ label: '通知テスト', items: ['通知を有効にしました'] });
+  } else if (p === 'denied') {
+    alert('通知がブロックされています。ブラウザのサイト設定から許可してください。');
+  }
+  renderSuppNotifySettings();
+}
+
+function toggleNotifyMaster() {
+  const cfg = getNotifyCfg();
+  if (!cfg.enabled && notifyPermission() !== 'granted') { requestNotifyPermission(); return; }
+  setNotifyCfg({ enabled: !cfg.enabled });
+  scheduleSuppNotification();
+  renderSuppNotifySettings();
+}
+function toggleNotifySlot(i) {
+  const cfg = getNotifyCfg();
+  const s = cfg.slots.includes(i) ? cfg.slots.filter(x => x !== i) : cfg.slots.concat([i]).sort((a, b) => a - b);
+  setNotifyCfg({ slots: s });
+  scheduleSuppNotification();
+  renderSuppNotifySettings();
+}
+function toggleNotifyQuietDuty() {
+  setNotifyCfg({ quietDuty: !getNotifyCfg().quietDuty });
+  scheduleSuppNotification();
+  renderSuppNotifySettings();
+}
+
+function renderSuppNotifySettings() {
+  const el = document.getElementById('supp-notify-settings');
+  if (!el) return;
+  const cfg = getNotifyCfg();
+  const perm = notifyPermission();
+  const on = cfg.enabled && perm === 'granted';
+
+  const permRow = perm === 'unsupported'
+    ? '<div style="font-size:11px;color:var(--accent)">⚠️ このブラウザは通知に対応していません。</div>'
+    : perm === 'denied'
+      ? '<div style="font-size:11px;color:var(--accent)">⚠️ 通知がブロックされています。ブラウザのサイト設定から許可してください。</div>'
+      : perm === 'default'
+        ? '<button class="btn btn-sm btn-primary" onclick="requestNotifyPermission()">通知を許可する</button>'
+        : '';
+
+  const next = on ? nextNotifySlot() : null;
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+      <span onclick="toggleNotifyMaster()" style="cursor:pointer;font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;background:${on ? 'var(--accent4)' : 'var(--bg4)'};color:${on ? '#0a0a0f' : 'var(--text2)'}">${on ? '🔔 通知ON' : '🔕 通知OFF'}</span>
+      ${next ? `<span style="font-size:11px;color:var(--text3)">次回: ${next.slot.label} ${String(next.at.getHours()).padStart(2,'0')}:00</span>` : ''}
+    </div>
+    ${permRow}
+    ${on ? `
+      <div style="font-size:10px;color:var(--text3);margin:10px 0 6px">通知するタイミング（タップでON/OFF）</div>
+      <div class="row" style="gap:5px;flex-wrap:wrap;margin-bottom:10px">
+        ${SUPP_TIMINGS.map((s, i) => {
+          const sel = cfg.slots.includes(i);
+          return `<span onclick="toggleNotifySlot(${i})" style="cursor:pointer;font-size:11px;padding:4px 9px;border-radius:5px;border:1px solid ${sel ? 'var(--accent2)' : 'var(--border)'};background:${sel ? 'rgba(74,158,255,0.15)' : 'transparent'};color:${sel ? 'var(--accent2)' : 'var(--text3)'}">${s.label}</span>`;
+        }).join('')}
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);cursor:pointer">
+        <input type="checkbox" ${cfg.quietDuty ? 'checked' : ''} onchange="toggleNotifyQuietDuty()" style="width:16px;height:16px">
+        当番日（24時間勤務）は通知しない
+      </label>
+    ` : ''}
+    <div style="font-size:10px;color:var(--text3);margin-top:10px;line-height:1.6">
+      ※ 通知はアプリ（またはホーム画面に追加したPWA）が起動している間のみ発火します。<br>
+      ※ 完全に閉じている間の定時通知には、別途プッシュ配信サーバーの導入が必要です。
+    </div>`;
+}
+
+// 本日まだ記録していない、既に過ぎたタイミング
+function missedSuppSlots() {
+  const rec = (DB.get('pf_supp_checks') || {})[today()] || [];
+  if (rec.length) return [];
+  const h = new Date().getHours();
+  return SUPP_TIMINGS.filter(s => Math.max(...s.hour) < h);
+}
+
+function renderSuppMissedBanner() {
+  const el = document.getElementById('supp-missed-banner');
+  if (!el) return;
+  const missed = missedSuppSlots();
+  if (!missed.length) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div style="font-size:12px;color:#fbbf24;line-height:1.7">
+      ⏰ 本日はまだ摂取記録がありません。過ぎたタイミング: ${missed.map(s => s.label).join(' / ')}
+    </div>`;
+}
+
+// ============================================================
+// ② 出動・火災暴露に連動した抗酸化サプリ推奨
+// ============================================================
+// 火災ガス（アクロレイン等）暴露による酸化ストレスに対し、暴露量に応じて
+// 抗酸化系サプリの推奨量を段階的に引き上げる。
+// 根拠: ISSFAL 2019 / Smith 2011（オメガ3と炎症）/ ALDH2多型（社内資料第3.1.3節）
+// ※ 暴露量に対する具体的な増量幅は運用上の目安であり、用量反応を示した
+//    一次研究に基づくものではない（下の caveat 表示で明示している）。
+function calcAntioxidantNeed() {
+  const recs = DB.arr('fire_exposures');
+  const base = new Date(); base.setHours(0, 0, 0, 0);
+  const days = n => { const d = new Date(base); d.setDate(d.getDate() - (n - 1)); return d; };
+  const within = (r, n) => { const d = new Date(r.date); return !isNaN(d.getTime()) && d >= days(n); };
+
+  const l3  = recs.filter(r => within(r, 3));
+  const l7  = recs.filter(r => within(r, 7));
+  const l30 = recs.filter(r => within(r, 30));
+  const smoke3  = l3.filter(r => r.smoke).length;
+  const smoke7  = l7.filter(r => r.smoke).length;
+  const smoke30 = l30.filter(r => r.smoke).length;
+  const min7    = l7.reduce((a, r) => a + (parseInt(r.duration) || 0), 0);
+
+  let level = 'base';
+  if (smoke3 >= 1)                              level = 'acute';
+  else if (smoke7 >= 2 || min7 >= 120)          level = 'high';
+  else if (smoke30 >= 3)                        level = 'elevated';
+
+  const PLAN = {
+    base: { label: '通常', color: 'var(--accent4)',
+      msg: '直近に目立った煙暴露はありません。通常のTier1プロトコルを継続してください。',
+      items: [
+        { n: 'オメガ3（EPA+DHA）', d: '1,500〜2,000mg/日', w: '通常量' },
+        { n: 'ビタミンC',          d: '食事から（果物・野菜）', w: '通常量' },
+      ] },
+    elevated: { label: '継続強化', color: '#fbbf24',
+      msg: '30日間で煙暴露が複数回あります。慢性的な酸化ストレス負荷を想定し、抗酸化系を底上げしてください。',
+      items: [
+        { n: 'オメガ3（EPA+DHA）', d: '2,000mg/日', w: '増量' },
+        { n: 'ビタミンC',          d: '500mg/日',   w: '追加' },
+        { n: 'ビタミンE',          d: '200IU/日',   w: '追加' },
+      ] },
+    high: { label: '強化', color: '#f97316',
+      msg: '直近7日の暴露量が多い状態です。回復が追いつかない可能性があるため、抗酸化と抗炎症を強化してください。',
+      items: [
+        { n: 'オメガ3（EPA+DHA）', d: '2,000〜3,000mg/日', w: '増量' },
+        { n: 'ビタミンC',          d: '1,000mg/日',        w: '増量' },
+        { n: 'ビタミンE',          d: '200〜400IU/日',     w: '追加' },
+        { n: 'クルクミン（BCM-95）', d: '500mg/日',        w: '追加' },
+      ] },
+    acute: { label: '急性対応', color: 'var(--accent)',
+      msg: '72時間以内に煙暴露があります。暴露直後は脂質過酸化が進むため、48時間は抗酸化を優先してください。',
+      items: [
+        { n: 'ビタミンC',          d: '1,000mg（暴露後すぐ・以降24〜48h継続）', w: '最優先' },
+        { n: 'オメガ3（EPA+DHA）', d: '2,000〜3,000mg/日',                      w: '増量' },
+        { n: 'ビタミンE',          d: '400IU/日（48時間）',                     w: '追加' },
+        { n: 'クルクミン（BCM-95）', d: '500mg/日',                             w: '追加' },
+        { n: '水分＋電解質',        d: '通常より+500ml',                        w: '併用' },
+      ] },
+  };
+
+  return { level, ...PLAN[level], smoke3, smoke7, smoke30, min7, count7: l7.length, count30: l30.length };
+}
+
+function renderAntioxidantPanel() {
+  const a = calcAntioxidantNeed();
+  const html = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+      <span style="font-size:13px;font-weight:700">🧯 出動連動 抗酸化プロトコル</span>
+      <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:${a.color};color:#0a0a0f">${a.label}</span>
+      <span style="font-size:10px;color:var(--text3);margin-left:auto;font-family:var(--font-mono)">7日 ${a.count7}件 / 煙 ${a.smoke7}回・30日 煙 ${a.smoke30}回</span>
+    </div>
+    <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px">${a.msg}</div>
+    <div>
+      ${a.items.map(it => `
+        <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;flex-shrink:0;background:rgba(255,255,255,0.07);color:${a.color}">${it.w}</span>
+          <span style="font-size:12px;flex:1;min-width:0">${it.n}</span>
+          <span style="font-size:11px;font-family:var(--font-mono);color:var(--text2);flex-shrink:0">${it.d}</span>
+        </div>`).join('')}
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:10px;line-height:1.6">
+      ISSFAL (2019) / Smith (2011) — オメガ3と慢性炎症 ／ ALDH2多型（社内資料）
+      <span onclick="openEvidence('オメガ3')" style="color:var(--accent2);cursor:pointer">📚 詳細</span><br>
+      ⚠️ 暴露量に応じた増量幅は運用上の目安です。用量反応を示した一次研究に基づくものではありません。
+    </div>`;
+
+  const p1 = document.getElementById('supp-antiox-panel');
+  if (p1) p1.innerHTML = html;
+  const p2 = document.getElementById('fe-antiox-panel');
+  if (p2) p2.innerHTML = html;
+}
+
+// ============================================================
+// ③ 一次資料への導線 — 各ページの引用からエビデンスページへ
+// ============================================================
+function openEvidence(q) {
+  showPage('evidence');
+  const el = document.getElementById('ev-search');
+  if (el) el.value = q || '';
+  _evDomain = 'all';
+  renderEvidenceTabs();
+  renderEvidenceList();
+  document.getElementById('ev-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ============================================================
 // エビデンスDB — アプリ内で使用している一次資料の集約
 // ============================================================
 // 各機能に散在していた引用をデータベース化し、分野別に参照できるようにする。
@@ -9832,7 +10125,33 @@ const EVIDENCE_DB = [
     finding:'日本人の約半数が持つALDH2不活性型では、オメガ3+ビタミンEの積極摂取が特に重要。', usedIn:['サプリメント'],
     caveat:'一次文献未特定。外部の査読論文で裏付けを取ること。' },
 
+  { d:'supplement', topic:'クレアチンと認知機能・筋力', ref:'Lanhers (2017) / Rawson (2011)', src:'—',
+    finding:'クレアチンは筋力・無酸素パワーに加え、睡眠不足下での認知機能・短期記憶も改善する。腎機能正常者での長期摂取は安全。', usedIn:['サプリメント（Tier1）'] },
+  { d:'supplement', topic:'オメガ3と慢性炎症・筋損傷回復', ref:'ISSFAL (2019) / Smith (2011)', src:'—',
+    finding:'EPA+DHAの摂取により慢性炎症が抑制され、運動誘発性筋損傷（EIMD）からの回復が促進される。推奨は合計1,500〜2,000mg/日。', usedIn:['サプリメント（Tier1）','出動連動 抗酸化プロトコル'] },
+  { d:'supplement', topic:'出動暴露に応じた抗酸化の増量', ref:'（運用上の目安）', src:'—',
+    finding:'火災ガス暴露による酸化ストレスに対し、暴露量（直近72時間・7日・30日の煙暴露回数と活動時間）に応じて抗酸化系を4段階で増量する。', usedIn:['サプリメント','分析レポート（出動・火災暴露記録）'],
+    caveat:'増量幅そのものは運用上の目安であり、暴露量と至適用量の関係を示した一次研究には基づいていない。' },
+  { d:'supplement', topic:'ビタミンD3の目標血中濃度', ref:'Endocrine Society (2024) / Nutrients (2025)', src:'—',
+    finding:'血中25(OH)D の目標値は40〜60ng/mL。K2の同時摂取によりカルシウムを骨へ沈着させ血管石灰化を防ぐ。', usedIn:['サプリメント（Tier1）'] },
+  { d:'supplement', topic:'マグネシウムと睡眠の質', ref:'Nielsen (2010) / Abbasi (2012)', src:'—',
+    finding:'マグネシウム補充により睡眠の質と筋痙攣が改善する。形態は酸化Mgよりグリシン酸塩が吸収率3〜4倍。', usedIn:['サプリメント（Tier2）'] },
+  { d:'supplement', topic:'電解質と発汗時の水分補給', ref:'ACSM水分補給GL (2007) / Baker (2019)', src:'NFPA熱ストレス指針',
+    finding:'大量発汗時に水のみを補給すると希釈性低ナトリウム血症を招く。ナトリウム補充が熱中症・パフォーマンス低下の予防に直結する。', usedIn:['サプリメント（Tier1）','当番日栄養プロトコル'] },
+  { d:'supplement', topic:'コラーゲン+ビタミンCと腱', ref:'Shaw et al. (2017)', src:'JAP',
+    finding:'ゼラチン（コラーゲン）とビタミンCの併用摂取が腱・靭帯のコラーゲン合成を促進する。', usedIn:['サプリメント（Tier3）'] },
+  { d:'supplement', topic:'カフェインとパフォーマンス', ref:'Grgic et al. (2018)', src:'BJSM',
+    finding:'体重1kgあたり3〜6mgのカフェインが筋力・持久力の双方を向上させる。上限は400mg/日。', usedIn:['サプリメント（Tier3）'] },
+  { d:'supplement', topic:'L-シトルリンと血流', ref:'Pérez-Guisado (2010) / Suzuki (2016)', src:'—',
+    finding:'トレーニング60〜90分前の6〜8g摂取により一酸化窒素産生が増加し、パフォーマンスが向上する。', usedIn:['サプリメント（Tier2）'] },
+  { d:'supplement', topic:'クルクミンと運動後の炎症', ref:'Drobnic (2014) / Hewlings (2017)', src:'—',
+    finding:'クルクミン摂取が運動後の筋肉痛と炎症マーカーを軽減する。BCM-95形態は標準粉末の6〜7倍の吸収率。', usedIn:['サプリメント（Tier3）','出動連動 抗酸化プロトコル'] },
+  { d:'supplement', topic:'ビタミンCと免疫・コラーゲン', ref:'Hemilä (2017) / Shaw (2017)', src:'—',
+    finding:'ビタミンCは激しい運動を行う集団で上気道感染リスクを低減し、コラーゲン合成にも必要。', usedIn:['サプリメント（Tier3）','出動連動 抗酸化プロトコル'] },
+
   // ── 腸内環境 ──
+  { d:'gut', topic:'プロバイオティクスと夜勤', ref:'Griffith University (2021)', src:'夜勤者対象',
+    finding:'夜勤者を対象としたマルチストレイン・プロバイオティクスの介入研究。推奨は100億〜1,000億CFU/日。', usedIn:['サプリメント（Tier2）','腸内環境管理'] },
   { d:'gut', topic:'腸脳相関', ref:'Cryan et al. (2019)', src:'Nature Reviews',
     finding:'腸脳軸と腸内フローラが情動・ストレス応答に及ぼす影響を包括的にレビュー。', usedIn:['腸内環境管理'] },
 ];
@@ -9916,6 +10235,8 @@ function renderEvidencePage() {
 }
 
 init();
+// 通知が許可済み かつ 有効なら、起動時にスケジューリングを開始する
+scheduleSuppNotification();
 
 window.addEventListener('beforeinstallprompt', function(e) {
   e.preventDefault();

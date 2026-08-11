@@ -36,6 +36,19 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
+// 通知クリック: 既に開いているタブがあればフォーカス、無ければ新規に開く
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const c of list) {
+        if ('focus' in c) return c.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow('./');
+    })
+  );
+});
+
 // フェッチ: Network First（index.htmlは常に最新を取得）
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
