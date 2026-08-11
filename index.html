@@ -375,10 +375,11 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="card-header-bar"></div>
       <div class="h3" style="margin-bottom:14px">トレーニングプログラム選択</div>
       <div id="prog-selector-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:14px"></div>
-      <button class="btn btn-sm btn-ghost" onclick="document.getElementById('prog-selector').style.display="none"">閉じる</button>
+      <button class="btn btn-sm btn-ghost" onclick="document.getElementById('prog-selector').style.display='none'">閉じる</button>
     </div>
   </div>
   <div class="alert alert-info" style="margin-bottom:18px" id="prog-cycle-hint">セッションを選択してください</div>
+  <div id="prog-joint-alert"></div>
   <div class="card" style="margin-bottom:18px">
     <div class="card-header-bar blue"></div>
     <div class="h3" style="margin-bottom:16px">セッション選択</div>
@@ -1895,6 +1896,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     </div>
     <button class="btn btn-primary btn-sm" onclick="saveJointRecord()">記録する</button>
     <div id="jr-log" style="margin-top:14px"></div>
+    <div id="jr-flags"></div>
   </div>
 
   <!-- ⑦ 当番日専用栄養プロトコル -->
@@ -4530,6 +4532,12 @@ function calcInjuryRisk() {
   score += Math.min(15, duty24hDays * 5);
 
   // 年齢係数適用（40代+20%・50代+40%のリスク増加）
+  // 根拠: Redshaw (2023) 50歳で動作品質が急低下 / Parpa & Michaelides (2024) 年代別筋力低下
+  const ageRisk = cfg().age || 28;
+  const ageRiskMult = ageRisk >= 60 ? 1.5
+    : ageRisk >= 50 ? 1.4
+    : ageRisk >= 40 ? 1.2
+    : 1.0;
   score = Math.min(100, Math.round(score * ageRiskMult));
 
   // リスクレベル判定
@@ -5135,6 +5143,7 @@ function saveJointRecord() {
   if (!entries.length) { alert('不調な部位のスコアを入力してください（0以外）'); return; }
   DB.push('joint_records', { date, entries, id: Date.now() });
   renderJointLog();
+  renderJointExerciseFlags();
   alert('記録しました');
 }
 
@@ -5150,7 +5159,7 @@ function renderJointLog() {
   // 部位別の最近のトレンド
   const partData = {};
   BODY_PARTS.forEach(p => {
-    const vals = records.flatMap(r => r.entries.filter(e=>e.part===p.id).map(e=>e.level));
+    const vals = records.flatMap(r => (r.entries||[]).filter(e=>e.part===p.id).map(e=>e.level));
     if (vals.length) partData[p.id] = { avg: Math.round(vals.reduce((a,b)=>a+b)/vals.length*10)/10, max: Math.max(...vals), count: vals.length };
   });
 
@@ -5187,6 +5196,232 @@ function renderJointLog() {
       </div>
     ` : ''}
   `;
+}
+
+// ============================================================
+// ③-2 関節ストレス連動 種目自動フラグ
+// ============================================================
+// 関節ストレス記録（0〜10）から、現在のプログラム内で該当部位に
+// 負荷をかける種目を自動抽出し、除外／負荷軽減／経過観察を提案する。
+// 根拠: Escamilla (2001) 膝関節剪断力・膝蓋大腿圧縮力 /
+//       Kolber et al. (2010) レジスタンストレーニングと肩インピンジメント /
+//       Hartmann et al. (2013) スクワット深度と関節負荷 /
+//       Gabbett (2016) BJSM 負荷管理と傷害予防
+// ※ 医療診断ではありません。痛みが持続する場合は整形外科の受診を優先してください。
+const JOINT_EXERCISE_MAP = {
+  knee: {
+    high: ['スクワット','レッグプレス','ハック','ランジ','ブルガリアン','レッグエクステンション','シシー','ステップアップ','ジャンプ'],
+    mod:  [],
+    exclude: [],
+    alt: ['レッグカール（ハムストリング主導に置換）','ヒップスラスト / マシンヒッププレス','ルーマニアンデッドリフト（股関節主導）','レッグプレスを残す場合は膝90°までの可動域＋重量30%減にする'],
+    note: '膝は屈曲が深いほど膝蓋大腿関節の圧縮力が増大します。種目を消す前に、まず可動域制限と重量20〜30%減を試してください。'
+  },
+  shoulder: {
+    high: ['ショルダープレス','オーバーヘッドプレス','ミリタリー','アーノルド','ディップス','インクラインプレス','ハイインクライン','ビハインドネック','アップライトロウ'],
+    mod:  ['ベンチプレス','フラットプレス','チェストプレス','ペックフライ','ペックデック','フライ','サイドレイズ','プルダウン','チンニング','懸垂','プルアップ','シュラッグ'],
+    exclude: ['リバースペックフライ','Yレイズ','リアレイズ','フェイスプル'],
+    alt: ['ニュートラルグリップ（掌が向かい合う）プレスに変更','ランドマインプレス（肩甲骨が自由に動く角度）','ケーブルYレイズ・フェイスプル（腱板/下部僧帽筋の強化）','プレス系は肘を体側45°に閉じる'],
+    note: '肩は内旋＋外転位（肘を真横に張る姿勢）でインピンジメントが起きやすくなります。グリップと肘の角度を変えるだけで大半は継続可能です。'
+  },
+  lower_back: {
+    high: ['デッドリフト','ベントオーバーロウ','バーベルロウ','ペンドレイ','グッドモーニング','ハイパーエクステンション','バックエクステンション','スクワット','スティッフレッグ'],
+    mod:  ['レッグプレス','T-BARロウ','ハンギングレッグレイズ','アブクランチ','クランチ','シットアップ','ロシアンツイスト','シュラッグ'],
+    exclude: ['チェストサポーテッド'],
+    alt: ['チェストサポーテッドロウ / マシンロウ（脊柱への軸圧なし）','マシンヒッププレス・レッグカール','デッドバグ / プランク（抗伸展の体幹トレ）','45°レッグプレスは骨盤が丸まる手前で可動域を止める'],
+    note: '腰は「軸圧」と「屈曲位での負荷」の2つが問題になります。サポート付きマシンへの置換が最も確実です。'
+  },
+  elbow: {
+    high: ['ディップス','JMプレス','スカルクラッシャー','ライイングトライセップス','プリチャー','プリーチャー','クローズグリップ','オーバーヘッドエクステンション','インクラインDBカール'],
+    mod:  ['カール','プッシュダウン','トライセップス','エクステンション','チンニング','懸垂','プルアップ','プルダウン'],
+    exclude: ['レッグカール','レッグエクステンション','ハイパーエクステンション','バックエクステンション','ハムストリングカール'],
+    alt: ['ストレートバー → EZバー / ハンマーグリップに変更（前腕回外ストレスを回避）','ケーブル種目（張力が一定で急なストレッチが少ない）','ストレッチポジションでの高重量を避ける','肘を体側に固定できる種目を優先する'],
+    note: '肘は前腕回外＋伸展ストレッチ位（プリチャー・インクラインカール等）で腱の負担が跳ね上がります。グリップ変更が第一選択です。'
+  },
+  hip: {
+    high: ['スクワット','デッドリフト','ランジ','ブルガリアン','ヒップスラスト','ヒッププレス','グッドモーニング','アダクター','アブダクター'],
+    mod:  ['レッグプレス','ハイパーエクステンション'],
+    exclude: [],
+    alt: ['レッグエクステンション / レッグカール（単関節に分離）','レッグプレスを残す場合は痛みの出ない可動域までに制限する','スタンス幅・つま先角度を変えて詰まりを回避','股関節屈曲90°を超えない種目に置換'],
+    note: '股関節はインピンジメント（FAI）の可能性があります。深いしゃがみ込みと過度な内転・開脚を避けてください。'
+  },
+  ankle: {
+    high: ['カーフレイズ','ジャンプ','ランジ','ブルガリアン','ステップアップ','なわとび','ランニング'],
+    mod:  ['スクワット','デッドリフト'],
+    exclude: ['シーテッド'],
+    alt: ['レッグプレス（背屈角度が小さい）','レッグエクステンション / レッグカール','有酸素は自転車・エアロバイクに置換','立位カーフレイズ → シーテッドカーフレイズ（体重の軸負荷を除く）'],
+    note: '足首は背屈制限があるとスクワットで代償が起き、膝・腰に波及します。有酸素の接地衝撃を先に減らしてください。'
+  },
+};
+
+const JOINT_SEV = {
+  severe:  { label:'除外推奨', icon:'⛔', color:'var(--accent)', bg:'rgba(255,69,96,0.08)',  bd:'rgba(255,69,96,0.3)',
+             action:'高負荷種目は1〜2週間の除外を推奨。中負荷種目も重量を落として様子を見てください。' },
+  caution: { label:'負荷軽減', icon:'⚠️', color:'#f97316',      bg:'rgba(249,115,22,0.08)', bd:'rgba(249,115,22,0.3)',
+             action:'高負荷種目は重量20〜30%減または可動域制限で継続。悪化するようなら除外に切り替えてください。' },
+  watch:   { label:'経過観察', icon:'👁', color:'#fbbf24',      bg:'rgba(251,191,36,0.08)', bd:'rgba(251,191,36,0.3)',
+             action:'除外は不要です。フォームと可動域に注意しつつ、記録を継続して推移を見てください。' },
+};
+
+// 種目名が該当部位にかける負荷レベルを返す（'high' / 'mod' / null）
+function getExerciseJointLevel(name, partId) {
+  const m = JOINT_EXERCISE_MAP[partId];
+  if (!m || !name) return null;
+  const n = name.replace(/[（）()]/g, '');
+  if (m.exclude.some(k => n.includes(k))) return null;
+  if (m.high.some(k => n.includes(k))) return 'high';
+  if (m.mod.some(k => n.includes(k))) return 'mod';
+  return null;
+}
+
+// 直近14日の関節記録から要注意部位を抽出（直近7日は重み×2）
+function getJointStressFlags() {
+  const recs = DB.arr('joint_records');
+  if (!recs.length) return [];
+  const base = new Date(); base.setHours(0,0,0,0);
+  const d14 = new Date(base); d14.setDate(d14.getDate() - 13);
+  const d7  = new Date(base); d7.setDate(d7.getDate() - 6);
+
+  const acc = {};
+  recs.forEach(r => {
+    const d = new Date(r.date);
+    if (isNaN(d.getTime()) || d < d14) return;
+    const w = d >= d7 ? 2 : 1;
+    (r.entries || []).forEach(e => {
+      if (!e || !(e.level > 0) || !JOINT_EXERCISE_MAP[e.part]) return;
+      const a = acc[e.part] || (acc[e.part] = { sum:0, wsum:0, max:0, n:0, last:r.date });
+      a.sum += e.level * w;
+      a.wsum += w;
+      a.n++;
+      if (e.level > a.max) a.max = e.level;
+      if (r.date > a.last) a.last = r.date;
+    });
+  });
+
+  const out = [];
+  Object.entries(acc).forEach(([part, a]) => {
+    const avg = Math.round(a.sum / a.wsum * 10) / 10;
+    let sev = null;
+    if (a.max >= 8 || avg >= 6.5)      sev = 'severe';
+    else if (a.max >= 6 || avg >= 4)   sev = 'caution';
+    else if (a.max >= 3 || avg >= 2)   sev = 'watch';
+    if (sev) out.push({ part, avg, max:a.max, count:a.n, last:a.last, sev });
+  });
+  const order = { severe:0, caution:1, watch:2 };
+  return out.sort((x,y) => order[x.sev] - order[y.sev] || y.avg - x.avg);
+}
+
+// 要注意部位に該当する現行プログラム内の種目を抽出（種目名で重複排除）
+function getFlaggedExercises(partId) {
+  const prog = getCurrentProgramData();
+  const byName = {};
+  Object.entries(prog.sessions || {}).forEach(([sid, s]) => {
+    (s.exercises || []).forEach(ex => {
+      const lv = getExerciseJointLevel(ex.name, partId);
+      if (!lv) return;
+      const hit = byName[ex.name] || (byName[ex.name] = { name:ex.name, lv, sessions:[] });
+      if (lv === 'high') hit.lv = 'high';
+      if (!hit.sessions.includes(sid)) hit.sessions.push(sid);
+    });
+  });
+  return Object.values(byName).sort((a,b) => (a.lv === b.lv ? 0 : a.lv === 'high' ? -1 : 1));
+}
+
+function renderJointExerciseFlags() {
+  const full    = document.getElementById('jr-flags');
+  const compact = document.getElementById('prog-joint-alert');
+  if (!full && !compact) return;
+
+  const flags = getJointStressFlags();
+
+  if (!flags.length) {
+    if (full) full.innerHTML = `
+      <div style="margin-top:14px;padding:10px 12px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.25);border-radius:var(--rs);font-size:12px;color:var(--accent4)">
+        ✅ 直近14日で要注意の部位はありません。除外を推奨する種目もありません。
+      </div>`;
+    if (compact) compact.innerHTML = '';
+    return;
+  }
+
+  const prog = getCurrentProgramData();
+  const sessName = sid => (prog.sessions?.[sid]?.name) || sid;
+
+  if (full) {
+    full.innerHTML = `
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+        <div class="h3" style="margin-bottom:4px;font-size:14px">⚡ 種目自動フラグ</div>
+        <div class="muted" style="font-size:11px;margin-bottom:12px">
+          直近14日の記録（直近7日は重み×2）から、${prog.name} 内で該当部位に負荷をかける種目を自動抽出しています。
+        </div>
+        ${flags.map(f => {
+          const part = BODY_PARTS.find(p => p.id === f.part);
+          const sv = JOINT_SEV[f.sev];
+          const hits = getFlaggedExercises(f.part);
+          const high = hits.filter(h => h.lv === 'high');
+          const mod  = hits.filter(h => h.lv === 'mod');
+          const m = JOINT_EXERCISE_MAP[f.part];
+          return `
+          <div style="margin-bottom:14px;padding:12px;background:${sv.bg};border:1px solid ${sv.bd};border-radius:var(--rs)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+              <span style="font-size:18px">${part?.icon || '🔧'}</span>
+              <span style="font-size:13px;font-weight:700">${part?.label || f.part}</span>
+              <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:${sv.color};color:#0a0a0f">${sv.icon} ${sv.label}</span>
+              <span style="font-size:10px;font-family:var(--font-mono);color:var(--text3);margin-left:auto">平均${f.avg} / 最大${f.max} / ${f.count}件</span>
+            </div>
+            <div style="font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:10px">${sv.action}</div>
+            ${hits.length ? `
+              ${high.length ? `
+                <div style="font-size:10px;color:var(--text3);margin-bottom:5px">高負荷種目（${high.length}件）</div>
+                <div style="margin-bottom:10px">
+                  ${high.map(h => `
+                    <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border)">
+                      <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;flex-shrink:0;background:rgba(255,69,96,0.18);color:var(--accent)">高負荷</span>
+                      <span style="font-size:12px;flex:1;min-width:0">${h.name}</span>
+                      <span style="font-size:9px;color:var(--text3);font-family:var(--font-mono);flex-shrink:0">${h.sessions.map(sessName).join(' / ')}</span>
+                    </div>`).join('')}
+                </div>
+              ` : ''}
+              ${(f.sev !== 'watch' && mod.length) ? `
+                <div style="font-size:10px;color:var(--text3);margin-bottom:4px">中負荷種目（${mod.length}件・重量調整のみで継続可）</div>
+                <div style="font-size:11px;color:var(--text2);line-height:1.7;margin-bottom:10px">${mod.map(h => h.name).join(' ・ ')}</div>
+              ` : ''}
+            ` : `<div class="muted" style="font-size:11px;margin-bottom:10px">現行プログラム内に該当種目はありません。有酸素・出動業務側の負荷を確認してください。</div>`}
+            <div style="font-size:10px;color:var(--text3);margin-bottom:4px">代替・調整案</div>
+            <ul style="margin:0 0 8px 16px;padding:0;font-size:11px;color:var(--text2);line-height:1.7">
+              ${m.alt.map(a => `<li>${a}</li>`).join('')}
+            </ul>
+            <div style="font-size:11px;color:var(--text3);line-height:1.6">${m.note}</div>
+          </div>`;
+        }).join('')}
+        <div style="font-size:9px;color:var(--text3);margin-top:4px;line-height:1.6">
+          Escamilla (2001) / Kolber et al. (2010) / Hartmann et al. (2013) / Gabbett (2016) BJSM<br>
+          ※医療診断ではありません。痛みが2週間以上続く・夜間痛がある場合は整形外科を受診してください。
+        </div>
+      </div>`;
+  }
+
+  if (compact) {
+    const top = flags.filter(f => f.sev !== 'watch');
+    if (!top.length) { compact.innerHTML = ''; return; }
+    compact.innerHTML = `
+      ${top.map(f => {
+        const part = BODY_PARTS.find(p => p.id === f.part);
+        const sv = JOINT_SEV[f.sev];
+        const hits = getFlaggedExercises(f.part).filter(h => h.lv === 'high');
+        return `
+        <div style="margin-bottom:12px;padding:11px 13px;background:${sv.bg};border:1px solid ${sv.bd};border-radius:var(--rs)">
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap">
+            <span style="font-size:15px">${part?.icon || '🔧'}</span>
+            <span style="font-size:12px;font-weight:700">${part?.label || f.part}に負荷が蓄積しています</span>
+            <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:${sv.color};color:#0a0a0f">${sv.icon} ${sv.label}</span>
+          </div>
+          ${hits.length ? `
+            <div style="font-size:11px;color:var(--text2);line-height:1.7">
+              プログラム内の高負荷種目: <span style="color:${sv.color};font-weight:600">${hits.map(h => h.name).join(' / ')}</span>
+            </div>` : ''}
+          <div style="font-size:10px;color:var(--text3);margin-top:5px">分析レポート → 関節・筋腱ストレス記録 に代替種目の提案があります。</div>
+        </div>`;
+      }).join('')}`;
+  }
 }
 
 // ============================================================
@@ -6140,6 +6375,8 @@ function initProgramPage(){
   // ラベル更新
   const lbl=document.getElementById('prog-program-label');
   if(lbl)lbl.textContent=prog.name+' — '+Object.keys(prog.sessions).length+'セッション';
+  // 関節ストレス連動アラート
+  renderJointExerciseFlags();
   // セッションボタン描画
   const sgrid=document.getElementById('prog-session-grid');
   if(!sgrid)return;
@@ -8060,6 +8297,7 @@ function renderAnalysis(){
   renderMacroCycle();
   renderFireExposureLog();
   renderJointLog();
+  renderJointExerciseFlags();
   renderDutyDayProtocol();
   renderReverseDiet();
 }
