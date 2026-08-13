@@ -203,6 +203,27 @@ input[type=range]:focus{border:none;box-shadow:none}
   }
   .toc-drawer-item:hover, .toc-drawer-item:active { background:var(--accent); color:#fff; }
 
+  /* ===== 折りたたみ解説（インライン長文の圧縮用） ===== */
+  details.expl { margin-top:6px; }
+  details.expl > summary {
+    list-style:none; cursor:pointer; display:inline-flex; align-items:center; gap:5px;
+    font-size:11px; color:var(--accent2); padding:3px 8px; border-radius:5px;
+    border:1px solid var(--border); background:var(--bg3); user-select:none;
+  }
+  details.expl > summary::-webkit-details-marker { display:none; }
+  details.expl > summary::before { content:'▸'; font-size:10px; transition:transform 0.15s; }
+  details.expl[open] > summary::before { transform:rotate(90deg); }
+  details.expl > summary:hover { border-color:var(--accent2); }
+  /* ネイティブのdetails折りたたみに依存せず明示的に制御する
+     （環境によっては閉じた状態でも中身が描画されるため） */
+  details.expl > .expl-body { display:none; }
+  details.expl[open] > .expl-body { display:block; }
+  details.expl > .expl-body {
+    margin-top:8px; padding:10px 12px; background:var(--bg3);
+    border-radius:var(--rs); font-size:11.5px; color:var(--text2); line-height:1.75;
+  }
+  details.expl .expl-body > div + div { margin-top:8px; }
+
 </style>
 
   <!-- PWA manifest (inline) -->
@@ -398,14 +419,19 @@ input[type=range]:focus{border:none;box-shadow:none}
         <tr><td><span class="badge badge-red">変換期</span></td><td class="mono">RIR 1〜2</td><td class="mono">RIR 1〜2</td><td class="mono">RIR 0〜1</td><td class="muted" style="color:var(--accent);font-weight:600">6〜8 rep ✓</td></tr>
         <tr><td><span class="badge badge-green">テーパー期</span></td><td class="mono">RIR 3〜4</td><td class="mono">RIR 3〜4</td><td class="mono">RIR 2〜3</td><td class="muted">ボリューム40〜60%削減</td></tr>
       </tbody></table>
-      <div style="margin-top:12px;padding:10px 12px;background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.2);border-radius:var(--rs)">
+      
+      <details class="expl">
+        <summary>変換期の6〜8rep・プログレッシブオーバーロードの解説</summary>
+        <div class="expl-body"><div style="margin-top:12px;padding:10px 12px;background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.2);border-radius:var(--rs)">
         <div style="font-size:11px;font-weight:700;color:var(--accent5);margin-bottom:5px">変換期の6〜8repについて（Morton et al. 2016 / Schoenfeld et al. 2017）</div>
         <div style="font-size:12px;color:var(--text2);line-height:1.6">6〜8rep（80〜85%1RM）でも8〜12repと同等の筋肥大が起こることが確認されています。さらに神経系適応（最大筋力向上）では6〜8repが明確に優れるため、消防士の装備・現場対応能力向上に直結します。コンパウンド種目はRIR1〜2（Failure到達は不要・怪我リスク上昇）、アイソレーションのみRIR0〜1を許容します。</div>
       </div>
       <div style="margin-top:10px;padding:10px 12px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:var(--rs)">
         <div style="font-size:11px;font-weight:700;color:var(--accent4);margin-bottom:5px">プログレッシブオーバーロード — Double Progression法（最も根拠が強い方法）</div>
         <div style="font-size:12px;color:var(--text2);line-height:1.6"><strong style="color:var(--text)">①</strong> 設定レップ範囲の上限を全セット達成する → <strong style="color:var(--text)">②</strong> 次回セッションから重量を+2.5〜5kg引き上げ、レップ目標を下限にリセット → <strong style="color:var(--text)">③</strong> 再び上限に到達するまで継続。この「回数達成→重量UP」サイクルが、プログレッシブオーバーロードを最も安全かつ継続的に実現する実用的な方法として研究で支持されています（Ralston et al. 2017/2020）。</div>
-      </div>
+      </div></div>
+      </details>
+
     </div>
     <div class="card">
       <div class="card-header-bar blue"></div>
@@ -951,6 +977,9 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="step-task"><div class="step-task-check" onclick="toggleTask(0,3)"></div><div class="step-task-text"><strong>アルコールを完全排除（2週間）</strong>：過度の飲酒は腸粘膜を傷つけ、腸内細菌のバランスを崩します。特に高濃度アルコールは腸壁を直接損傷します。</div></div>
       <div class="step-task"><div class="step-task-check" onclick="toggleTask(0,4)"></div><div class="step-task-text"><strong>高FODMAP食品を一時的に制限</strong>：腸が弱っている間は以下の食品を制限（健康な人には問題なし）。</div></div>
     </div>
+    <details class="expl">
+      <summary>詳しい解説を読む</summary>
+      <div class="expl-body">
     <div style="margin-top:14px">
       <div class="label">腸が敏感な人が制限すべき食品（高FODMAP）</div>
       <div class="grid3" style="gap:8px;margin-top:8px">
@@ -978,6 +1007,8 @@ input[type=range]:focus{border:none;box-shadow:none}
       </div>
     </div>
   </div>
+    </details>
+  </div>
 
   <!-- STEP 2 -->
   <div class="step-card" id="gut-step-1">
@@ -991,6 +1022,9 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="step-task"><div class="step-task-check" onclick="toggleTask(1,3)"></div><div class="step-task-text">冷やした白米・芋類を活用（レジスタントスターチが増加。善玉菌のエサとなり、腸内細菌の多様性を高める）</div></div>
       <div class="step-task"><div class="step-task-check" onclick="toggleTask(1,4)"></div><div class="step-task-text">水分2.5〜3L/日を徹底（腸の蠕動運動サポート。便秘予防の最も優先度が高い対策）</div></div>
     </div>
+    <details class="expl">
+      <summary>詳しい解説を読む</summary>
+      <div class="expl-body">
     <div style="margin-top:14px"><div class="label">推奨プレバイオティクス食材</div>
     <div class="food-grid">
       <div class="food-chip food-good"><span>🥣</span>オートミール（β-グルカン）</div>
@@ -999,6 +1033,8 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="food-chip food-good"><span>🍚</span>冷やした白米（RS）</div>
       <div class="food-chip food-good"><span>🍠</span>冷やした芋類（RS）</div>
     </div></div>
+  </div>
+    </details>
   </div>
 
   <!-- STEP 3 -->
@@ -1013,6 +1049,9 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="step-task"><div class="step-task-check" onclick="toggleTask(2,3)"></div><div class="step-task-text">週30種類以上の植物性食品を目標に（腸内細菌の多様性を高めるための理想的な摂取量）</div></div>
       <div class="step-task"><div class="step-task-check" onclick="toggleTask(2,4)"></div><div class="step-task-text">環境が整ったらプロバイオティクス（100億CFU以上）を追加（STEP 2完了後に導入）</div></div>
     </div>
+    <details class="expl">
+      <summary>詳しい解説を読む</summary>
+      <div class="expl-body">
     <div style="margin-top:14px"><div class="label">おすすめ発酵食品</div>
     <div class="food-grid">
       <div class="food-chip food-good"><span>🥬</span>ぬか漬け</div>
@@ -1020,6 +1059,8 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="food-chip food-good"><span>🥒</span>キムチ（無添加）</div>
       <div class="food-chip food-good"><span>🍵</span>コンブチャ（砂糖少なめ）</div>
     </div></div>
+  </div>
+    </details>
   </div>
 
   <!-- STEP 4 -->
@@ -1033,6 +1074,9 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="step-task"><div class="step-task-check" onclick="toggleTask(3,2)"></div><div class="step-task-text">食事は急がず最低20分以上かけて咀嚼（交感神経優位の状態では消化が停止または機能低下します）</div></div>
       <div class="step-task"><div class="step-task-check" onclick="toggleTask(3,3)"></div><div class="step-task-text">適度な有酸素運動を週150分（腸の運動異常＝ガス・便秘・下痢を防ぐ。腸粘膜の透過性亢進リスクも下がります）</div></div>
     </div>
+    <details class="expl">
+      <summary>詳しい解説を読む</summary>
+      <div class="expl-body">
     <div class="grid2" style="margin-top:14px;gap:8px">
       <div class="card-sm" style="border-color:rgba(255,69,96,0.25)">
         <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">交感神経優位の影響（消防士に多い）</div>
@@ -1043,6 +1087,8 @@ input[type=range]:focus{border:none;box-shadow:none}
         <div style="font-size:12px;color:var(--text2);line-height:1.7">緊急出動・精神的ストレスはコルチゾールを急上昇させ腸粘膜を傷つけます。クルクミン500mg/日・オメガ3 2g/日で炎症を抑制してください。</div>
       </div>
     </div>
+  </div>
+    </details>
   </div>
 
   <!-- STEP 5 -->
@@ -1998,6 +2044,11 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="card-header-bar"></div>
     <div class="h3" style="margin-bottom:16px">基本プロフィール</div>
     <div class="grid2"><div class="field"><label class="label">名前</label><input type="text" id="cfg-name" placeholder="山田 太郎"></div><div class="field"><label class="label">所属</label><input type="text" id="cfg-dept" placeholder="〇〇消防署 第3中隊"></div></div>
+    <div class="grid3">
+      <div class="field"><label class="label">年齢<span class="muted" style="font-size:10px"> 年齢別目標値・怪我リスク・サプリ推奨に反映</span></label><input type="number" id="cfg-age" placeholder="28" min="16" max="80"></div>
+      <div class="field"><label class="label">性別</label><select id="cfg-sex"><option value="male">男性</option><option value="female">女性</option></select></div>
+      <div class="field"><label class="label">身長 (cm)</label><input type="number" id="cfg-height" placeholder="175" step="0.1" min="120" max="220"></div>
+    </div>
     <div class="grid3"><div class="field"><label class="label">目標体重 (kg)</label><input type="number" id="cfg-goalweight" step="0.1"></div><div class="field"><label class="label">TDEE (kcal)</label><input type="number" id="cfg-tdee" placeholder="2800"></div><div class="field"><label class="label">水分目標 (mL/日)</label><input type="number" id="cfg-water" placeholder="2500"></div></div>
     <div class="field"><label class="label">栄養目標モード</label><select id="cfg-goalmode" style="max-width:200px"><option value="maintain">維持</option><option value="cut">減量</option><option value="bulk">増量</option></select></div>
     <button class="btn btn-primary" onclick="saveSettings()">保存する</button>
@@ -2250,7 +2301,8 @@ function showPage(id){
   if(id==='supplement')renderSupplementPage();
   if(id==='training')renderTrainingLog();
   if(id==='evidence')renderEvidencePage();
-  if(id==='settings')renderSettingsPage();
+  if(id==='settings'){loadSettings();renderSettingsPage();}
+  if(id==='tdee')initTdeePage();
 }
 // ドロワー外クリックで閉じる
 document.addEventListener('click', function(e) {
@@ -3954,12 +4006,19 @@ function renderSupplementPage(){
           <div style="flex:1">
             <div style="font-size:13px;font-weight:600;margin-bottom:3px">${s.name}</div>
             <div style="font-size:11px;color:var(--accent2);margin-bottom:4px">📍 ${s.dose} / ${s.timing}</div>
-            <div style="font-size:12px;color:var(--text2);margin-bottom:4px">${s.effect}</div>
-            <div style="font-size:11px;color:var(--accent3);margin-bottom:3px">🔥 消防士特記：${s.firefighter}</div>
-            <div style="font-size:11px;color:var(--accent4)">🥗 食事での代替：${s.foodAlt}</div>
+            <div style="font-size:12px;color:var(--text2)">${s.effect}</div>
+            <details class="expl">
+              <summary>消防士特記・食事での代替・根拠</summary>
+              <div class="expl-body">
+                <div style="color:var(--accent3)">🔥 消防士特記：${s.firefighter}</div>
+                <div style="color:var(--accent4)">🥗 食事での代替：${s.foodAlt}</div>
+                <div style="color:var(--text3);font-size:10px">根拠：${s.evidence}
+                  <span onclick="openEvidence('${(s.name||'').replace(/'/g,'')}')" style="color:var(--accent2);cursor:pointer">📚</span>
+                </div>
+              </div>
+            </details>
           </div>
         </div>
-        <div style="font-size:10px;color:var(--text3);margin-top:4px">根拠：${s.evidence}</div>
       </div>`).join('');
   });
 
@@ -8890,14 +8949,45 @@ function renderCondSuggestions(history,avgs){
 }
 
 // ===== tdee.js =====
-function calcTDEE(){const sex=document.getElementById('td-sex').value;const age=parseInt(document.getElementById('td-age').value)||30;const h=parseFloat(document.getElementById('td-height').value)||175;const w=parseFloat(document.getElementById('td-weight').value)||70;const act=parseFloat(document.getElementById('td-act').value)||1.55;const shift=parseInt(document.getElementById('td-shift').value)||300;let bmr=sex==='male'?10*w+6.25*h-5*age+5:10*w+6.25*h-5*age-161;const tdee=Math.round(bmr*act)+Math.round(shift*3/7)+Math.round(parseInt(document.getElementById('td-tdays').value||4)*30/7);const neat=Math.round(tdee-bmr);document.getElementById('td-bmr').textContent=Math.round(bmr);document.getElementById('td-tdee').textContent=tdee;document.getElementById('td-neat').textContent=neat;const goals=[{l:'減量（-15%）',c:Math.round(tdee*0.85)},{l:'維持',c:tdee},{l:'増量（+10%）',c:Math.round(tdee*1.10)}];document.getElementById('tdee-goal-table').innerHTML='<table><thead><tr><th>モード</th><th>目標kcal</th></tr></thead><tbody>'+goals.map(g=>`<tr><td>${g.l}</td><td class="mono" style="color:var(--accent)">${g.c}</td></tr>`).join('')+'</tbody></table>';const macros=getMacros(tdee,w);document.getElementById('tdee-macro-table').innerHTML='<table><thead><tr><th>栄養素</th><th>量</th><th>根拠</th></tr></thead><tbody>'+`<tr><td>タンパク質</td><td class="mono">${macros.protein}g</td><td class="muted">2.0g/kg (Morton 2018)</td></tr><tr><td>脂質</td><td class="mono">${macros.fat}g</td><td class="muted">総kcalの25%</td></tr><tr><td>炭水化物</td><td class="mono">${macros.carb}g</td><td class="muted">残余から算出</td></tr>`+'</tbody></table>';document.getElementById('tdee-result').style.display='block';const c=cfg();c.tdeeCalc=tdee;c.tdeeweight=w;DB.set('cfg',c);}
+function calcTDEE(){const sex=document.getElementById('td-sex').value;const age=parseInt(document.getElementById('td-age').value)||30;const h=parseFloat(document.getElementById('td-height').value)||175;const w=parseFloat(document.getElementById('td-weight').value)||70;const act=parseFloat(document.getElementById('td-act').value)||1.55;const shift=parseInt(document.getElementById('td-shift').value)||300;let bmr=sex==='male'?10*w+6.25*h-5*age+5:10*w+6.25*h-5*age-161;const tdee=Math.round(bmr*act)+Math.round(shift*3/7)+Math.round(parseInt(document.getElementById('td-tdays').value||4)*30/7);const neat=Math.round(tdee-bmr);document.getElementById('td-bmr').textContent=Math.round(bmr);document.getElementById('td-tdee').textContent=tdee;document.getElementById('td-neat').textContent=neat;const goals=[{l:'減量（-15%）',c:Math.round(tdee*0.85)},{l:'維持',c:tdee},{l:'増量（+10%）',c:Math.round(tdee*1.10)}];document.getElementById('tdee-goal-table').innerHTML='<table><thead><tr><th>モード</th><th>目標kcal</th></tr></thead><tbody>'+goals.map(g=>`<tr><td>${g.l}</td><td class="mono" style="color:var(--accent)">${g.c}</td></tr>`).join('')+'</tbody></table>';const macros=getMacros(tdee,w);document.getElementById('tdee-macro-table').innerHTML='<table><thead><tr><th>栄養素</th><th>量</th><th>根拠</th></tr></thead><tbody>'+`<tr><td>タンパク質</td><td class="mono">${macros.protein}g</td><td class="muted">2.0g/kg (Morton 2018)</td></tr><tr><td>脂質</td><td class="mono">${macros.fat}g</td><td class="muted">総kcalの25%</td></tr><tr><td>炭水化物</td><td class="mono">${macros.carb}g</td><td class="muted">残余から算出</td></tr>`+'</tbody></table>';document.getElementById('tdee-result').style.display='block';const c=cfg();c.tdeeCalc=tdee;c.tdeeweight=w;c.age=age;c.sex=sex;c.height=h;DB.set('cfg',c);
+// 設定ページのプロフィール欄と同期させる（年齢はここでも確定させる）
+const sync=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val;};
+sync('cfg-age',age);sync('cfg-sex',sex);sync('cfg-height',h);}
+
+// TDEEページを開いたときに設定値を引き継ぐ
+function initTdeePage(){
+  const c=cfg();
+  const set=(id,val)=>{const el=document.getElementById(id);if(el&&val)el.value=val;};
+  set('td-age',c.age);set('td-height',c.height);set('td-weight',c.tdeeweight);
+  const sx=document.getElementById('td-sex');if(sx&&c.sex)sx.value=c.sex;
+}
 
 function applyTDEE(){const tdee=parseInt(document.getElementById('td-tdee').textContent);if(!tdee){alert('先に算出してください');return}const c=cfg();c.tdee=tdee;DB.set('cfg',c);document.getElementById('cfg-tdee').value=tdee;alert('TDEEを'+tdee+'kcalに設定しました。');}
 
 // ===== settings.js =====
-function saveSettings(){const c={name:document.getElementById('cfg-name').value,dept:document.getElementById('cfg-dept').value,goalweight:parseFloat(document.getElementById('cfg-goalweight').value)||0,goalmode:document.getElementById('cfg-goalmode').value,tdee:parseInt(document.getElementById('cfg-tdee').value)||2800,water:parseInt(document.getElementById('cfg-water').value)||2500};DB.set('cfg',c);alert('設定を保存しました');}
+function saveSettings(){
+  // 既存のcfgを引き継いでからフォームの値を上書きする。
+  // 以前は新しいオブジェクトで丸ごと置換していたため、experienceLevel・
+  // tdeeweight・tdeeCalc・trainingKcalRatio・age などが保存のたびに消えていた。
+  const v = id => document.getElementById(id);
+  const c = { ...cfg() };
+  c.name       = v('cfg-name')?.value ?? c.name ?? '';
+  c.dept       = v('cfg-dept')?.value ?? c.dept ?? '';
+  c.age        = parseInt(v('cfg-age')?.value) || c.age || 28;
+  c.sex        = v('cfg-sex')?.value || c.sex || 'male';
+  c.height     = parseFloat(v('cfg-height')?.value) || c.height || 0;
+  c.goalweight = parseFloat(v('cfg-goalweight')?.value) || 0;
+  c.goalmode   = v('cfg-goalmode')?.value || 'maintain';
+  c.tdee       = parseInt(v('cfg-tdee')?.value) || 2800;
+  c.water      = parseInt(v('cfg-water')?.value) || 2500;
+  DB.set('cfg', c);
+  // 年齢・性別が変わると年齢連動の表示が変わるため再描画する
+  if (typeof renderSupplementPage === 'function' && document.getElementById('supp-age-recommend')) renderSupplementPage();
+  alert('設定を保存しました');
+}
 
-function loadSettings(){const c=cfg();['cfg-name','cfg-dept','cfg-tdee','cfg-water'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=c[id.replace('cfg-','')]||''});if(document.getElementById('cfg-goalmode'))document.getElementById('cfg-goalmode').value=c.goalmode||'maintain';
+function loadSettings(){const c=cfg();['cfg-name','cfg-dept','cfg-tdee','cfg-water','cfg-goalweight','cfg-age','cfg-height'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=c[id.replace('cfg-','')]||''});if(document.getElementById('cfg-goalmode'))document.getElementById('cfg-goalmode').value=c.goalmode||'maintain';
+  if(document.getElementById('cfg-sex'))document.getElementById('cfg-sex').value=c.sex||'male';
   // 経験レベル読み込み
   const expLevelEl = document.getElementById('cfg-experience-level');
   const savedLevel = (DB.get('cfg')||{}).experienceLevel || 'beginner';
