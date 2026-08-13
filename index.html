@@ -916,23 +916,6 @@ input[type=range]:focus{border:none;box-shadow:none}
   </div>
   <div style="display:none"><!-- modal placeholder --></div>
   </div>
-</div>
-  <!-- トレーニング自動配置プラン -->
-  <div class="card card-blue" style="margin-top:18px">
-    <div class="card-header-bar blue"></div>
-    <div class="row-between" style="margin-bottom:10px">
-      <div>
-        <div class="h3">シフト連動トレーニング配置</div>
-        <div class="muted" style="font-size:12px;margin-top:3px">シフトデータから最適なジム日を自動提案。ジム候補日をタップで確定</div>
-      </div>
-    </div>
-    <div class="alert alert-info" style="margin-bottom:10px;font-size:12px">
-      💡 <strong>使い方：</strong>シフトカレンダーに24h/非番/週休/ジムを登録すると、下のカレンダーにトレーニング推奨日が自動表示されます。緑のセル（ジム候補）をタップするとジム確定になります。
-    </div>
-    <div id="shift-training-plan"><div class="muted">シフトを登録するとトレーニング配置が自動生成されます</div></div>
-  </div>
-
-</div>
 
 <!-- GUT HEALTH -->
 <div class="page" id="page-gut">
@@ -2152,6 +2135,22 @@ input[type=range]:focus{border:none;box-shadow:none}
     </div>
     <button class="btn btn-primary" onclick="applyShiftPattern()">パターンを一括登録</button>
     <button class="btn btn-danger btn-sm" onclick="clearShiftMonth()" style="margin-left:10px">今月をクリア</button>
+  </div>
+
+
+  <!-- シフト連動トレーニング配置（シフト管理から集約） -->
+  <div class="card card-blue" style="margin-top:18px">
+    <div class="card-header-bar blue"></div>
+    <div class="row-between" style="margin-bottom:10px">
+      <div>
+        <div class="h3">シフト連動トレーニング配置</div>
+        <div class="muted" style="font-size:12px;margin-top:3px">シフトデータから最適なジム日を自動提案。ジム候補日をタップで確定</div>
+      </div>
+    </div>
+    <div class="alert alert-info" style="margin-bottom:10px;font-size:12px">
+      💡 <strong>使い方：</strong>シフトカレンダーに24h/非番/週休/ジムを登録すると、下のカレンダーにトレーニング推奨日が自動表示されます。緑のセル（ジム候補）をタップするとジム確定になります。
+    </div>
+    <div id="shift-training-plan"><div class="muted">シフトを登録するとトレーニング配置が自動生成されます</div></div>
   </div>
 
   <!-- 安静時心拍トレンド & VO2max -->
