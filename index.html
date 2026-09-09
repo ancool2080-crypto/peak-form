@@ -2229,6 +2229,30 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div id="sleep-record-list"><div class="muted">記録がありません</div></div>
   </div>
 
+  <!-- 自己診断 -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar green"></div>
+    <div class="row-between" style="margin-bottom:8px">
+      <div class="h3">🩺 自己診断</div>
+      <button class="btn btn-sm btn-primary" onclick="executeDiagnostics()">診断を実行</button>
+    </div>
+    <div class="muted" style="font-size:11px;line-height:1.7;margin-bottom:10px">
+      「エラーは出ないのに機能が動いていない」種類の不具合を検査します。全ページの描画・DOM構造・ID重複・
+      参照関数・保存キーの整合・プロフィール未設定・目次リンク・食品DBのPFC整合の8項目。
+    </div>
+    <div id="diag-result"></div>
+  </div>
+
+  <!-- エラーログ -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header-bar" style="background:#f97316"></div>
+    <div class="h3" style="margin-bottom:8px">⚠️ エラーログ</div>
+    <div class="muted" style="font-size:11px;line-height:1.7;margin-bottom:10px">
+      画面上は空白になるだけで気づけない例外を自動記録します。不具合報告の際はここの内容が手がかりになります。
+    </div>
+    <div id="err-log"></div>
+  </div>
+
   <div style="margin-bottom:18px"><div class="card-header-bar"></div><div class="h3" style="margin-bottom:12px">データ管理</div><div class="row" style="gap:10px;flex-wrap:wrap"><button class="btn" onclick="exportData()">JSONエクスポート</button><button class="btn btn-danger" onclick="clearAll()">全データリセット</button></div><div class="muted" style="margin-top:10px;font-size:12px">エクスポートしたJSONはExcel・Google Sheetsにインポート可能。ブラウザのlocalStorageに永続保存されます。</div></div>
   <div class="card"><div class="card-header-bar blue"></div><div class="h3" style="margin-bottom:8px">科学的根拠</div>
     <div class="muted" style="font-size:12px;line-height:1.7;margin-bottom:12px">
@@ -2249,6 +2273,38 @@ input[type=range]:focus{border:none;box-shadow:none}
 
 // ===== db.js =====
 const DB={get(k){try{return JSON.parse(localStorage.getItem('pf_'+k)||'null')}catch{return null}},set(k,v){localStorage.setItem('pf_'+k,JSON.stringify(v))},arr(k){return this.get(k)||[]},push(k,v){const a=this.arr(k);a.push(v);this.set(k,a)}};
+
+// ============================================================
+// エラー記録とセクション隔離
+// ============================================================
+// 過去に「例外が出ても画面上は空白になるだけ」で機能停止に気づけない不具合が
+// 複数発生した（renderAnalysis が途中で落ちて以降の全セクションが消える等）。
+// 例外を握り潰さずに記録し、被害を1セクションに封じ込めるための共通基盤。
+const APP_ERR_MAX = 30;
+function logAppError(where, err) {
+  try {
+    const list = DB.arr('errors');
+    list.push({
+      t: new Date().toISOString(),
+      where: String(where || '?'),
+      msg: String((err && err.message) || err || '').slice(0, 300),
+      stack: String((err && err.stack) || '').split(String.fromCharCode(10)).slice(1, 3).join(' / ').slice(0, 300),
+    });
+    DB.set('errors', list.slice(-APP_ERR_MAX));
+  } catch (_) { /* 記録自体が失敗しても本処理は止めない */ }
+}
+
+// 1セクションの描画失敗で後続を巻き添えにしないためのラッパ
+function safeRender(label, fn) {
+  try { fn(); }
+  catch (e) {
+    logAppError('render:' + label, e);
+    console.error('[PEAK FORM] ' + label + ' の描画に失敗しました', e);
+  }
+}
+
+window.addEventListener('error', e => logAppError('window', e.error || e.message));
+window.addEventListener('unhandledrejection', e => logAppError('promise', e.reason));
 const cfg=()=>DB.get('cfg')||{tdee:2800,goalmode:'maintain',water:2500,name:''};
 const today=()=>new Date().toISOString().slice(0,10);
 const fmtInt=n=>isFinite(n)?Math.round(n):'—';
@@ -6199,6 +6255,17 @@ function computeLoad(){
     if(shiftLoad>0&&!days[date])days[date]=shiftLoad; // トレーニング記録がない日のみ追加
     else if(shiftLoad>0)days[date]=Math.max(days[date],shiftLoad); // 高い方を採用
   });
+  // 出動・火災暴露を負荷に算入（従来は記録しても ATL/CTL に一切反映されなかった）
+  // 建物火災で60分活動しても負荷ゼロでは、ACWR も怪我リスクも実態を表さないため。
+  // 強度係数は既存の duration×RPE と同じスケールに合わせている。
+  // ※ 係数自体は運用上の目安であり、出動強度を実測した一次研究に基づくものではない。
+  DB.arr('fire_exposures').forEach(r=>{
+    const min=parseInt(r.duration)||0; if(!min)return;
+    const base={fire:9,rescue:7,training:6,drill:6}[r.type]||6; // RPE相当
+    const mult=(r.smoke?1.2:1)*(r.ba?1.2:1);                    // 煙暴露・空気呼吸器の追加負荷
+    const load=Math.round(min*base*mult);
+    days[r.date]=(days[r.date]||0)+load;                        // 勤務負荷に上乗せする
+  });
   if(!Object.keys(days).length)return{atl:0,ctl:0,tsb:0,history:[]};
   let atl=0,ctl=0;const all=[];
   const start=new Date(Object.keys(days).sort()[0]);const end=new Date(today());
@@ -8424,20 +8491,20 @@ function renderAnalysis(){
   );}
   const meals=DB.arr('meals');const mbd={};meals.forEach(m=>{if(!mbd[m.date])mbd[m.date]={cal:0};mbd[m.date].cal+=m.cal||0});const mDates=Object.keys(mbd).sort().slice(-14);const calT=getCalTarget(cfg().goalmode||'maintain');if(aNutr)aNutr.destroy();if(mDates.length){aNutr=new Chart(document.getElementById('a-nutrition-chart'),{type:'bar',data:{labels:mDates.map(d=>d.slice(5)),datasets:[{data:mDates.map(d=>mbd[d].cal),backgroundColor:'rgba(245,166,35,0.45)',borderColor:'#f5a623',borderWidth:1,borderRadius:4},{data:mDates.map(()=>calT),type:'line',borderColor:'rgba(255,69,96,0.6)',borderDash:[5,3],borderWidth:1.5,pointRadius:0}]},options:co});}
   const sl14=DB.arr('sleeps').slice(-14);if(aWell)aWell.destroy();if(sl14.length){aWell=new Chart(document.getElementById('a-wellness-chart'),{type:'line',data:{labels:sl14.map(s=>s.date.slice(5)),datasets:[{data:sl14.map(s=>s.wellness||0),borderColor:'#f5a623',tension:0.4,borderWidth:2,fill:false,pointRadius:3},{data:sl14.map(s=>s.duration||0),borderColor:'#4a9eff',tension:0.4,borderWidth:1.5,fill:false,pointRadius:0,borderDash:[3,3]}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:0,max:10}}}});}
-  renderWeeklySummary();
-  renderInjuryRisk();
-  renderAgeAdjustedTargets();
-  renderLongTermTrend();
-  renderCVDRisk();
-  renderFFMI();
-  renderVO2max();
-  renderMacroCycle();
-  renderFireExposureLog();
-  renderAntioxidantPanel(); // renderFireExposureLogは記録0件で早期returnするため個別に呼ぶ
-  renderJointLog();
-  renderJointExerciseFlags();
-  renderDutyDayProtocol();
-  renderReverseDiet();
+  safeRender('週次サマリー', renderWeeklySummary);
+  safeRender('怪我リスク', renderInjuryRisk);
+  safeRender('年齢別目標値', renderAgeAdjustedTargets);
+  safeRender('長期トレンド', renderLongTermTrend);
+  safeRender('心血管リスク', renderCVDRisk);
+  safeRender('FFMI', renderFFMI);
+  safeRender('VO2max', renderVO2max);
+  safeRender('年間マクロサイクル', renderMacroCycle);
+  safeRender('出動記録', renderFireExposureLog);
+  safeRender('抗酸化プロトコル', renderAntioxidantPanel); // renderFireExposureLogは記録0件で早期returnするため個別に呼ぶ
+  safeRender('関節記録', renderJointLog);
+  safeRender('種目自動フラグ', renderJointExerciseFlags);
+  safeRender('当番日栄養', renderDutyDayProtocol);
+  safeRender('リバースダイエット', renderReverseDiet);
 }
 
 
@@ -9852,6 +9919,149 @@ function saveOcrAsPreset(result) {
   alert(`「${name}」をマイプリセットに登録しました！\n次回から「⭐ マイプリセット」カテゴリから選べます。`);
 }
 
+
+// ============================================================
+// エラーログ表示（設定ページ）
+// ============================================================
+function renderErrorLog() {
+  const el = document.getElementById('err-log');
+  if (!el) return;
+  const list = DB.arr('errors').slice().reverse();
+  if (!list.length) {
+    el.innerHTML = '<div class="muted" style="font-size:12px">記録されたエラーはありません。</div>';
+    return;
+  }
+  el.innerHTML = `
+    <div style="font-size:11px;color:var(--accent);margin-bottom:8px">${list.length}件のエラーが記録されています</div>
+    ${list.map(e => `
+      <div style="padding:8px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:11px;font-family:var(--font-mono);color:var(--text3)">${(e.t||'').replace('T',' ').slice(0,19)}　<span style="color:var(--accent2)">${e.where}</span></div>
+        <div style="font-size:12px;color:var(--text2);margin-top:3px;word-break:break-word">${e.msg}</div>
+        ${e.stack ? `<div style="font-size:10px;color:var(--text3);margin-top:2px;word-break:break-all">${e.stack}</div>` : ''}
+      </div>`).join('')}
+    <button class="btn btn-sm btn-danger" style="margin-top:10px" onclick="clearErrorLog()">エラーログを消去</button>`;
+}
+function clearErrorLog() {
+  DB.set('errors', []);
+  renderErrorLog();
+}
+
+// ============================================================
+// 自己診断 — サイレント障害の検出
+// ============================================================
+// 「例外が出ないまま機能が死んでいる」種類の不具合を実機・実データで検出する。
+// 過去に踏んだ失敗（孤児DOM・保存キー不一致・未定義関数参照）を型として登録している。
+function runDiagnostics() {
+  const R = [];
+  const add = (ok, name, detail) => R.push({ ok, name, detail: detail || '' });
+
+  // ① 全ページの描画が例外なく通るか
+  const before = DB.arr('errors').length;
+  const cur = [...document.querySelectorAll('.page.active')][0]?.id.replace('page-','') || 'dashboard';
+  const broken = [];
+  document.querySelectorAll('.page').forEach(p => {
+    const id = p.id.replace('page-','');
+    try { showPage(id); } catch (e) { broken.push(id + ': ' + e.message); }
+  });
+  showPage(cur);
+  const newErrs = DB.arr('errors').length - before;
+  add(!broken.length && !newErrs, '全ページの描画',
+      broken.length ? broken.join(' / ') : (newErrs ? newErrs + '件のセクションが描画に失敗（下のエラーログ参照）' : '13ページすべて正常'));
+
+  // ② どのページにも属さない孤児要素（過去に全ページ表示の原因になった）
+  const orphans = [...document.querySelectorAll('.card, .step-card')].filter(e => !e.closest('.page'));
+  add(!orphans.length, 'DOM構造（孤児要素）',
+      orphans.length ? orphans.length + '件がページ外に存在' : 'ページ外の要素なし');
+
+  // ③ 重複ID（片方しか描画されず原因が見えにくい）
+  const seen = {}, dup = [];
+  document.querySelectorAll('[id]').forEach(e => { if (seen[e.id]) dup.push(e.id); else seen[e.id] = 1; });
+  add(!dup.length, 'ID重複', dup.length ? [...new Set(dup)].join(', ') : '重複なし');
+
+  // ④ onclick から参照される関数が実在するか
+  const missing = new Set();
+  document.querySelectorAll('[onclick]').forEach(e => {
+    const m = e.getAttribute('onclick').match(/^\s*(\w+)\s*\(/);
+    if (m && typeof window[m[1]] !== 'function') missing.add(m[1]);
+  });
+  add(!missing.size, 'onclick参照関数', missing.size ? [...missing].join(', ') : '未定義なし');
+
+  // ⑤ 保存キーと読み出しキーの整合（安静時心拍の不整合を踏んだ型）
+  const sleeps = DB.arr('sleeps');
+  const hrBad = sleeps.filter(s => (s.rhr > 0) !== (s.restingHR > 0)).length;
+  add(!hrBad, '睡眠データのキー整合', hrBad ? hrBad + '件で rhr と restingHR が不一致' : (sleeps.length ? sleeps.length + '件すべて整合' : '睡眠記録なし'));
+
+  // ⑥ プロフィール必須項目（未設定だと年齢連動が既定値で動き続ける）
+  const c = cfg();
+  const miss = ['age','sex','tdeeweight'].filter(k => !c[k]);
+  add(!miss.length, 'プロフィール設定',
+      miss.length ? '未設定: ' + miss.join(', ') + '（既定値で計算されます）' : '年齢・性別・体重すべて設定済み');
+
+  // ⑦ 目次のジャンプ先が実在するか
+  const anchors = new Set([...document.querySelectorAll('[id^="anc-"]')].map(e => e.id));
+  const deadLinks = new Set();
+  document.querySelectorAll('[onclick*="tocJump"]').forEach(e => {
+    const m = e.getAttribute('onclick').match(/tocJump\('([\w-]+)'\)/);
+    if (m && !anchors.has(m[1])) deadLinks.add(m[1]);
+  });
+  add(!deadLinks.size, '目次のリンク先', deadLinks.size ? [...deadLinks].join(', ') : '全て有効');
+
+  // ⑧ 食品DBのPFC整合
+  // 野菜・きのこ・海藻・発酵食品は日本食品標準成分表のエネルギー換算方法により
+  // 構造的に乖離するためカテゴリごと除外。下記は食物繊維が多く同じ理由で乖離する
+  // 個別品目で、成分表準拠であることを確認済み（新規登録時の入力ミスは検出したいので
+  // 閾値は緩めず、確認済み品目だけを明示的に除外している）。
+  const PFC_KNOWN_OK = ['山芋（とろろ）', '枝豆（冷凍）', 'ゆで枝豆（袋）'];
+  let pfcBad = 0, pfcTotal = 0;
+  const pfcOffenders = [];
+  [FOOD_DB, EATING_OUT_DB, DISH_DB].forEach(db => Object.entries(db).forEach(([cat, items]) => {
+    if (cat === 'veggie' || cat === 'fermented') return;
+    items.forEach(it => {
+      if (!it.cal || PFC_KNOWN_OK.includes(it.name)) return;
+      pfcTotal++;
+      const est = it.p * 4 + it.c * 4 + it.f * 9;
+      if (Math.abs(it.cal - est) / it.cal > 0.15) { pfcBad++; pfcOffenders.push(it.name); }
+    });
+  }));
+  add(!pfcBad, '食品DBのPFC整合', pfcBad ? pfcBad + '/' + pfcTotal + '品で15%超の乖離: ' + pfcOffenders.slice(0,5).join(', ') : pfcTotal + '品すべて許容範囲');
+
+  return R;
+}
+
+function renderDiagnosticsPanel(results) {
+  const el = document.getElementById('diag-result');
+  if (!el) return;
+  if (!results) {
+    el.innerHTML = '<div class="muted" style="font-size:12px">「診断を実行」で、機能が静かに壊れていないかを検査します。</div>';
+    return;
+  }
+  const ng = results.filter(r => !r.ok).length;
+  el.innerHTML = `
+    <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:${ng ? 'var(--accent)' : 'var(--accent4)'}">
+      ${ng ? '⚠️ ' + ng + '件の問題を検出しました' : '✅ 全' + results.length + '項目に問題はありません'}
+    </div>
+    ${results.map(r => `
+      <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+        <span style="flex-shrink:0">${r.ok ? '✅' : '⚠️'}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:600">${r.name}</div>
+          <div style="font-size:11px;color:${r.ok ? 'var(--text3)' : 'var(--accent)'};word-break:break-word">${r.detail}</div>
+        </div>
+      </div>`).join('')}`;
+}
+
+function executeDiagnostics() {
+  const el = document.getElementById('diag-result');
+  if (el) el.innerHTML = '<div class="muted" style="font-size:12px">診断中…</div>';
+  setTimeout(() => {
+    try { renderDiagnosticsPanel(runDiagnostics()); renderErrorLog(); }
+    catch (e) {
+      logAppError('diagnostics', e);
+      if (el) el.innerHTML = '<div style="font-size:12px;color:var(--accent)">診断の実行中にエラーが発生しました: ' + e.message + '</div>';
+    }
+  }, 30);
+}
+
 // ============================================================
 // 設定ページ — 各メニューから集約した運用設定の描画
 // ============================================================
@@ -9908,10 +10118,12 @@ function renderRestingHRTrend() {
 }
 
 function renderSettingsPage() {
-  updateRestDisplays();      // インターバルタイマー設定
-  renderShiftPage();         // シフト集計・ACWR（カレンダー要素は無いので内部でガードされる）
-  renderSleepRecordList();   // 睡眠記録一覧
-  renderRestingHRTrend();    // 安静時心拍トレンド
+  safeRender('タイマー設定',   updateRestDisplays);
+  safeRender('シフト集計',     renderShiftPage);
+  safeRender('睡眠記録一覧',   renderSleepRecordList);
+  safeRender('安静時心拍',     renderRestingHRTrend);
+  safeRender('エラーログ',     renderErrorLog);
+  safeRender('自己診断',       renderDiagnosticsPanel);
 }
 
 // ============================================================
@@ -10305,6 +10517,9 @@ const EVIDENCE_DB = [
   { d:'firefighter', topic:'火災現場のエネルギー消費', ref:'Ruby et al. (2023)', src:'—',
     finding:'山岳消防士の1日消費量は2,946〜6,260kcal/日。建物火災消防士は約3,600〜4,900kcal/日。', usedIn:['分析レポート（当番日栄養プロトコル）','シフト管理（勤務カロリー補正）'],
     caveat:'1時間あたりではなく1日あたりの値。' },
+  { d:'firefighter', topic:'出動負荷のトレーニング負荷への算入', ref:'（運用上の目安）', src:'Knapik (1990) の装備補正を参考',
+    finding:'出動を活動時間×強度係数（火災9／救助7／訓練6、煙暴露・空気呼吸器で各×1.2）としてATL/CTLに加算する。出動が多い週は自動的にACWRが上昇し、怪我リスクにも反映される。', usedIn:['ダッシュボード','分析レポート（怪我リスク・週次負荷）'],
+    caveat:'強度係数は運用上の目安であり、消防活動の実測強度を報告した一次研究に基づくものではない。' },
   { d:'firefighter', topic:'消防士のACWR管理', ref:'Firefighter Nation (2024)', src:'—',
     finding:'ACWR 0.8〜1.3を維持することで傷害リスクを最小化できる。', usedIn:['シフト管理','分析レポート'] },
   { d:'firefighter', topic:'熱ストレスと水分補給', ref:'ACSM水分補給ガイドライン / NFPA熱ストレス指針', src:'—',
