@@ -1,12 +1,12 @@
 // PEAK FORM Service Worker
 // キャッシュ名にタイムスタンプを埋め込み → デプロイのたびに自動更新
-const CACHE = 'peak-form-20260924';
+const CACHE = 'peak-form-20260925';
 
 const ASSETS = [
   './',
   './index.html',
   'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js',
-  'https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=BIZ+UDGothic:wght@400;700&display=swap'
+  'https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Bebas+Neue&display=swap'
 ];
 
 // インストール時: 新しいキャッシュを作成

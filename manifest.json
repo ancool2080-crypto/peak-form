@@ -1,11 +1,11 @@
 {
   "name": "PEAK FORM",
   "short_name": "PEAK FORM",
-  "description": "消防士の体調記録。勤務区分・トレーニング・食事・睡眠をまとめて管理します。",
+  "description": "消防士コンディショニングシステム — 科学的根拠に基づく総合管理",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#131B26",
-  "theme_color": "#131B26",
+  "background_color": "#0a0a0f",
+  "theme_color": "#ff4560",
   "orientation": "portrait-primary",
   "categories": [
     "health",
