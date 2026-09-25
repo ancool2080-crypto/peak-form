@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PEAK FORM — 消防士コンディショニングシステム</title>
+<title>PEAK FORM</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -26,10 +26,10 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 .content{padding:28px;max-width:1200px}
 .logo{padding:22px 20px 16px;border-bottom:1px solid var(--border)}
 .logo-text{font-family:var(--font-display);font-size:30px;letter-spacing:3px;line-height:1}
-.logo-sub{font-size:9px;color:var(--text3);letter-spacing:4px;font-family:var(--font-mono);margin-top:4px}
+.logo-sub{font-size:11px;color:var(--text3);margin-top:4px}
 .logo-accent{display:block;width:28px;height:2px;background:var(--accent);margin-bottom:6px;border-radius:1px}
 .nav-section{padding:8px 0}
-.nav-label{font-size:9px;letter-spacing:3px;color:var(--text3);padding:10px 20px 4px;font-family:var(--font-mono)}
+.nav-label{font-size:11px;color:var(--text3);padding:12px 20px 4px;font-weight:500}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;color:var(--text2);font-size:13.5px;font-weight:500;transition:all 0.15s;border-left:2px solid transparent}
 .nav-item:hover{color:var(--text);background:rgba(255,255,255,0.04)}
 .nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(255,69,96,0.07);font-weight:700}
@@ -40,17 +40,17 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 /* ===== IMPROVED CARDS ===== */
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:22px 26px;margin-bottom:18px;box-shadow:0 2px 14px rgba(0,0,0,0.4)}
 .card-sm{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:16px 18px}
-.card-accent{border-color:rgba(255,69,96,0.3);background:linear-gradient(135deg,rgba(255,69,96,0.06) 0%,var(--bg2) 55%)}
-.card-blue{border-color:rgba(74,158,255,0.3);background:linear-gradient(135deg,rgba(74,158,255,0.06) 0%,var(--bg2) 55%)}
-.card-green{border-color:rgba(34,197,94,0.3);background:linear-gradient(135deg,rgba(34,197,94,0.06) 0%,var(--bg2) 55%)}
-.card-amber{border-color:rgba(245,166,35,0.3);background:linear-gradient(135deg,rgba(245,166,35,0.06) 0%,var(--bg2) 55%)}
-.card-purple{border-color:rgba(167,139,250,0.3);background:linear-gradient(135deg,rgba(167,139,250,0.06) 0%,var(--bg2) 55%)}
+.card-accent{border-color:rgba(255,69,96,0.3);background:var(--bg2)}
+.card-blue{border-color:rgba(74,158,255,0.3);background:var(--bg2)}
+.card-green{border-color:rgba(34,197,94,0.3);background:var(--bg2)}
+.card-amber{border-color:rgba(245,166,35,0.3);background:var(--bg2)}
+.card-purple{border-color:rgba(167,139,250,0.3);background:var(--bg2)}
 .card-header-bar{height:3px;border-radius:2px;margin-bottom:18px;width:40px;background:var(--accent)}
 .card-header-bar.blue{background:var(--accent2)}.card-header-bar.green{background:var(--accent4)}.card-header-bar.amber{background:var(--accent3)}.card-header-bar.purple{background:var(--accent5)}
 .h1{font-family:var(--font-display);font-size:38px;letter-spacing:2px;line-height:1}
 .h2{font-size:19px;font-weight:700;margin-bottom:18px}
 .h3{font-size:14.5px;font-weight:700}
-.label{font-size:10px;color:var(--text3);letter-spacing:2px;font-family:var(--font-mono);margin-bottom:7px;display:block;text-transform:uppercase}
+.label{font-size:12px;color:var(--text3);font-weight:500;margin-bottom:7px;display:block}
 .muted{color:var(--text2);font-size:13px}.mono{font-family:var(--font-mono)}
 .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
@@ -68,7 +68,7 @@ canvas{max-width:100%}
 .metric::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--border2)}
 .metric:hover{border-color:var(--border2)}
 .metric-val{font-family:var(--font-mono);font-size:26px;font-weight:500;line-height:1.1;margin:6px 0 4px}
-.metric-label{font-size:9px;color:var(--text3);letter-spacing:2px;font-family:var(--font-mono);text-transform:uppercase}
+.metric-label{font-size:12px;color:var(--text3);font-weight:500}
 .metric-sub{font-size:11px;color:var(--text2);margin-top:3px}
 .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:500;letter-spacing:0.5px;font-family:var(--font-mono)}
 .badge-red{background:rgba(255,69,96,0.15);color:#ff7088;border:1px solid rgba(255,69,96,0.3)}
@@ -105,7 +105,7 @@ select option{background:var(--bg3)}
 .chart-wrap{position:relative;width:100%}
 table{width:100%;border-collapse:collapse;font-size:13px}
 td,th{padding:10px 14px;border-bottom:1px solid var(--border);text-align:left;vertical-align:middle}
-th{font-size:10px;color:var(--text3);font-family:var(--font-mono);letter-spacing:1.5px;font-weight:500;background:rgba(255,255,255,0.02);text-transform:uppercase}
+th{font-size:12px;color:var(--text3);font-weight:500;background:rgba(255,255,255,0.02)}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(255,255,255,0.025)}
 .row{display:flex;align-items:center;gap:12px}
@@ -232,6 +232,10 @@ input[type=range]:focus{border:none;box-shadow:none}
   }
   details.expl .expl-body > div + div { margin-top:8px; }
 
+
+/* ---- 装飾を減らす：カード上部の色線は出さない（目次のジャンプ先としては残す） ---- */
+.card-header-bar{height:0!important;margin:0!important;background:none!important;scroll-margin-top:72px}
+.step-number{display:none}
 </style>
 
   <!-- PWA manifest (inline) -->
@@ -245,9 +249,8 @@ input[type=range]:focus{border:none;box-shadow:none}
 <body>
 
 <!-- PWA インストールバナー -->
-<div id="pwa-install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1a1a28,#0a0a0f);border-top:1px solid rgba(255,69,96,0.3);padding:12px 20px;z-index:999;align-items:center;justify-content:space-between;gap:12px;backdrop-filter:blur(12px)">
+<div id="pwa-install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid rgba(255,69,96,0.3);padding:12px 20px;z-index:999;align-items:center;justify-content:space-between;gap:12px;backdrop-filter:blur(12px)">
   <div style="display:flex;align-items:center;gap:10px">
-    <span style="font-size:24px">🔥</span>
     <div>
       <div style="font-size:13px;font-weight:600;color:var(--text)">PEAK FORMをホーム画面に追加</div>
       <div style="font-size:11px;color:var(--text3)">オフラインでも使用可能。24h勤務現場でもデータを記録できます。</div>
@@ -262,30 +265,30 @@ input[type=range]:focus{border:none;box-shadow:none}
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 <div class="app-shell">
 <aside class="sidebar" id="sidebar">
-  <div class="logo"><span class="logo-accent"></span><div class="logo-text">PEAK FORM</div><div class="logo-sub">FIREFIGHTER CONDITIONING</div></div>
+  <div class="logo"><span class="logo-accent"></span><div class="logo-text">PEAK FORM</div><div class="logo-sub">消防士のコンディション記録</div></div>
   <nav class="nav-section">
-    <div class="nav-label">OVERVIEW</div>
+    <div class="nav-label">概要</div>
     <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">◈</span>ダッシュボード</div>
     <div class="nav-item" onclick="showPage('peaking')"><span class="nav-icon">◎</span>ピーキングプランナー</div>
   </nav>
   <nav class="nav-section">
-    <div class="nav-label">DAILY LOG</div>
+    <div class="nav-label">毎日の記録</div>
     <div class="nav-item" onclick="showPage('training')"><span class="nav-icon">▲</span>トレーニング記録</div>
     <div class="nav-item" onclick="showPage('program')"><span class="nav-icon">◀</span>今日のメニュー</div>
     <div class="nav-item" onclick="showPage('nutrition')"><span class="nav-icon">◆</span>栄養管理</div>
     <div class="nav-item" onclick="showPage('sleep')"><span class="nav-icon">◑</span>睡眠・回復</div>
   </nav>
   <nav class="nav-section">
-    <div class="nav-label">HEALTH</div>
-    <div class="nav-item" onclick="showPage('shift')"><span class="nav-icon">📅</span>シフト管理</div>
-    <div class="nav-item" onclick="showPage('gut')"><span class="nav-icon">🌿</span>腸内環境管理</div>
-    <div class="nav-item" onclick="showPage('supplement')"><span class="nav-icon">💊</span>サプリメント</div>
+    <div class="nav-label">体調管理</div>
+    <div class="nav-item" onclick="showPage('shift')"><span class="nav-icon"></span>シフト管理</div>
+    <div class="nav-item" onclick="showPage('gut')"><span class="nav-icon"></span>腸内環境管理</div>
+    <div class="nav-item" onclick="showPage('supplement')"><span class="nav-icon"></span>サプリメント</div>
   </nav>
   <nav class="nav-section">
-    <div class="nav-label">TOOLS</div>
+    <div class="nav-label">ツール</div>
     <div class="nav-item" onclick="showPage('tdee')"><span class="nav-icon">≡</span>TDEEカリキュレーター</div>
     <div class="nav-item" onclick="showPage('analysis')"><span class="nav-icon">∿</span>分析レポート</div>
-    <div class="nav-item" onclick="showPage('evidence')"><span class="nav-icon">📚</span>エビデンス</div>
+    <div class="nav-item" onclick="showPage('evidence')"><span class="nav-icon"></span>エビデンス</div>
     <div class="nav-item" onclick="showPage('settings')"><span class="nav-icon">⊙</span>設定</div>
   </nav>
   <div class="sidebar-footer"><div class="version">PEAK FORM v3.2</div><div class="version" style="margin-top:2px;opacity:0.5">based on sports science</div></div>
@@ -303,10 +306,10 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div id="dash-alerts"></div>
   <div id="dash-quick-actions" style="margin-bottom:18px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px"></div>
   <div class="grid4" style="margin-bottom:18px">
-    <div class="metric"><div class="metric-label">CONDITION</div><div class="metric-val" id="d-condition" style="color:var(--accent)">—</div><div class="metric-sub">/100</div></div>
-    <div class="metric"><div class="metric-label">FITNESS (CTL)</div><div class="metric-val" id="d-ctl">—</div><div class="metric-sub">42日指数</div></div>
-    <div class="metric"><div class="metric-label">FATIGUE (ATL)</div><div class="metric-val" id="d-atl">—</div><div class="metric-sub">7日指数</div></div>
-    <div class="metric"><div class="metric-label">FORM (TSB)</div><div class="metric-val" id="d-tsb">—</div><div class="metric-sub">CTL - ATL</div></div>
+    <div class="metric"><div class="metric-label">コンディション</div><div class="metric-val" id="d-condition" style="color:var(--accent)">—</div><div class="metric-sub">/100</div></div>
+    <div class="metric"><div class="metric-label">体力（CTL）</div><div class="metric-val" id="d-ctl">—</div><div class="metric-sub">42日指数</div></div>
+    <div class="metric"><div class="metric-label">疲労（ATL）</div><div class="metric-val" id="d-atl">—</div><div class="metric-sub">7日指数</div></div>
+    <div class="metric"><div class="metric-label">余力（TSB）</div><div class="metric-val" id="d-tsb">—</div><div class="metric-sub">CTL - ATL</div></div>
   </div>
   <div class="grid2" style="margin-bottom:18px">
     <div class="card card-blue">
@@ -340,7 +343,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   </div>
 <div class="card" style="margin-bottom:18px">
     <div class="card-header-bar blue"></div>
-    <div class="h3" style="margin-bottom:16px">ATL / CTL / TSB — 直近21日</div>
+    <div class="h3" style="margin-bottom:16px">ATL / CTL / TSB（直近21日）</div>
     <div class="chart-wrap" style="height:200px"><canvas id="dash-load-chart"></canvas></div>
     <div style="display:flex;gap:18px;margin-top:12px;flex-wrap:wrap">
       <span style="font-size:12px;color:#6baaff;display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:18px;height:2px;background:#4a9eff;border-radius:1px"></span>CTL</span>
@@ -357,7 +360,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     </div>
     <div id="d-weekly-volume"><div class="muted">今週のトレーニング記録がありません</div></div>
     <div style="margin-top:10px;font-size:11px;color:var(--text3);line-height:1.6">
-      ★ CF種目1セット = 主働筋1.0 + 補助筋0.5セット換算（Henselmans分数カウント）<br>
+      CF種目1セット = 主働筋1.0 + 補助筋0.5セット換算（Henselmans分数カウント）<br>
       <span id="volume-level-note">目安：初心者MEV = 部位別週4〜6セット / スイートスポット = 週8セット / MRV = 週16セット</span>
     </div>
   </div>
@@ -397,7 +400,7 @@ input[type=range]:focus{border:none;box-shadow:none}
 <div class="page" id="page-program">
   <div class="row-between" style="margin-bottom:18px">
     <div><div class="h1">TODAY</div><div class="muted" style="margin-top:4px" id="prog-program-label">—</div></div>
-    <button class="btn btn-sm" onclick="showProgramSelector()" style="gap:6px">⚙ プログラム変更</button>
+    <button class="btn btn-sm" onclick="showProgramSelector()" style="gap:6px">プログラム変更</button>
   </div>
   <!-- プログラム選択オーバーレイ -->
   <div id="prog-selector" style="display:none;margin-bottom:18px">
@@ -419,7 +422,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="card card-blue" style="margin-bottom:18px"><div class="row-between"><div><div class="h3" id="prog-session-name">—</div><div class="muted" id="prog-session-focus" style="margin-top:3px"></div></div><div class="row" style="gap:8px"><div id="prog-phase-advice" class="badge badge-blue"></div><button class="btn btn-primary btn-sm" onclick="loadProgramToTraining()">記録画面に読み込む ↗</button></div></div></div>
     <div class="card" style="margin-bottom:18px">
       <div class="card-header-bar amber"></div>
-      <div class="row-between" style="margin-bottom:10px"><div class="h3">フェーズ別RIR指針（種目タイプ別）</div><span class="badge badge-purple" style="font-size:10px">Refalo et al. 2022 準拠 <span onclick="openEvidence('RIR')" style="color:var(--accent2);cursor:pointer">📚</span></span></div>
+      <div class="row-between" style="margin-bottom:10px"><div class="h3">フェーズ別RIR指針（種目タイプ別）</div><span class="badge badge-purple" style="font-size:10px">Refalo et al. 2022 準拠 <span onclick="openEvidence('RIR')" style="color:var(--accent2);cursor:pointer"></span></span></div>
       <div class="alert alert-info" style="margin-bottom:12px;font-size:12px">RPE9〜10は種目の安全性に応じて使い分けます。回復確認＋前回より良いパフォーマンスが出ている（プログレッシブオーバーロード指標あり）が前提条件です。</div>
       <table><thead><tr><th>フェーズ</th><th>コンパウンド（フリー）</th><th>マシン系</th><th>アイソレーション</th><th>レップ数目安</th></tr></thead><tbody>
         <tr><td><span class="badge badge-blue">蓄積期</span></td><td class="mono">RIR 3〜4</td><td class="mono">RIR 2〜3</td><td class="mono">RIR 1〜2</td><td class="muted">8〜15 rep</td></tr>
@@ -435,7 +438,7 @@ input[type=range]:focus{border:none;box-shadow:none}
         <div style="font-size:12px;color:var(--text2);line-height:1.6">6〜8rep（80〜85%1RM）でも8〜12repと同等の筋肥大が起こることが確認されています。さらに神経系適応（最大筋力向上）では6〜8repが明確に優れるため、消防士の装備・現場対応能力向上に直結します。コンパウンド種目はRIR1〜2（Failure到達は不要・怪我リスク上昇）、アイソレーションのみRIR0〜1を許容します。</div>
       </div>
       <div style="margin-top:10px;padding:10px 12px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:var(--rs)">
-        <div style="font-size:11px;font-weight:700;color:var(--accent4);margin-bottom:5px">プログレッシブオーバーロード — Double Progression法（最も根拠が強い方法）</div>
+        <div style="font-size:11px;font-weight:700;color:var(--accent4);margin-bottom:5px">プログレッシブオーバーロード：Double Progression法（最も根拠が強い方法）</div>
         <div style="font-size:12px;color:var(--text2);line-height:1.6"><strong style="color:var(--text)">①</strong> 設定レップ範囲の上限を全セット達成する → <strong style="color:var(--text)">②</strong> 次回セッションから重量を+2.5〜5kg引き上げ、レップ目標を下限にリセット → <strong style="color:var(--text)">③</strong> 再び上限に到達するまで継続。この「回数達成→重量UP」サイクルが、プログレッシブオーバーロードを最も安全かつ継続的に実現する実用的な方法として研究で支持されています（Ralston et al. 2017/2020）。</div>
       </div></div>
       </details>
@@ -445,7 +448,7 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="card-header-bar blue"></div>
       <div class="row-between" style="margin-bottom:14px">
         <div class="h3">種目リスト</div>
-        <button class="btn btn-sm" onclick="openExerciseCustomizer()" style="font-size:11px">✏ 種目をカスタマイズ</button>
+        <button class="btn btn-sm" onclick="openExerciseCustomizer()" style="font-size:11px">種目をカスタマイズ</button>
       </div>
       <div id="prog-exercise-list"></div>
     </div>
@@ -512,7 +515,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="card" style="margin-bottom:18px">
     <div class="card-header-bar blue"></div>
     <div class="h3" style="margin-bottom:16px">本日のセッション</div>
-    <div class="grid2"><div class="field"><label class="label">日付</label><input type="date" id="t-date"></div><div class="field"><label class="label">種別</label><select id="t-type" onchange="onTrainingTypeChange()"><option value="strength">筋力トレーニング</option><option value="hiit">HIIT</option><option value="cardio">有酸素</option><option value="functional">機能的トレーニング</option><option value="mobility">モビリティ・回復</option><option value="firefighting">消防訓練</option><option value="firefighter_run">🔥 防火装備ランニング</option></select></div></div>
+    <div class="grid2"><div class="field"><label class="label">日付</label><input type="date" id="t-date"></div><div class="field"><label class="label">種別</label><select id="t-type" onchange="onTrainingTypeChange()"><option value="strength">筋力トレーニング</option><option value="hiit">HIIT</option><option value="cardio">有酸素</option><option value="functional">機能的トレーニング</option><option value="mobility">モビリティ・回復</option><option value="firefighting">消防訓練</option><option value="firefighter_run">防火装備ランニング</option></select></div></div>
     <div class="grid3"><div class="field"><label class="label">時間（分）<span class="muted" style="font-size:10px;font-weight:400;margin-left:4px">インターバル含む合計</span></label><input type="number" id="t-duration" placeholder="60" oninput="autoEstimateKcal()"></div><div class="field"><label class="label">RPE（1〜10）</label><input type="number" id="t-rpe" placeholder="7" min="1" max="10" oninput="autoEstimateKcal()"></div><div class="field"><label class="label">水分（mL）</label><input type="number" id="t-water" placeholder="2000"></div></div>
     <!-- 消費カロリー自動推定表示 -->
     <div id="t-strength-kcal-display" style="display:none;padding:8px 12px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:var(--rs);margin-top:8px;font-size:12px"></div>
@@ -521,7 +524,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div id="cardio-fields" style="display:none">
     <!-- 防火装備ランニング専用注記 -->
     <div id="firefighter-run-hint" style="display:none;background:rgba(255,69,96,0.08);border:1px solid rgba(255,69,96,0.3);border-radius:var(--rs);padding:10px 12px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">🔥 防火装備ランニング</div>
+      <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">防火装備ランニング</div>
       <div style="font-size:11px;color:var(--text2);line-height:1.7">
         <div>• <strong>装備重量:</strong> 空気呼吸器(13kg) + 防火衣(8kg) + ヘルメット等 ≈ 25kg</div>
         <div>• <strong>負荷補正:</strong> 通常有酸素の<strong style="color:var(--accent)">×1.4倍</strong>でATL/CTLに計上</div>
@@ -580,7 +583,7 @@ input[type=range]:focus{border:none;box-shadow:none}
       <button class="btn btn-sm" onclick="addExRow()">＋ 種目を追加</button>
       <button class="btn btn-sm" id="sort-ex-btn"
         style="background:rgba(74,158,255,0.1);border-color:rgba(74,158,255,0.4);color:var(--accent2)"
-        onclick="sortExercisesByType()">⚡ 最適順に並び替え</button>
+        onclick="sortExercisesByType()">最適順に並び替え</button>
     </div>
     <div style="font-size:10px;color:var(--text3);margin-bottom:10px">
       <span style="color:var(--accent)">■ COMP</span> コンパウンド（多関節）→
@@ -610,12 +613,12 @@ input[type=range]:focus{border:none;box-shadow:none}
         <div style="display:flex;gap:0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;max-width:280px">
           <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;cursor:pointer;font-size:13px;font-weight:500;transition:background 0.15s" id="label-training">
             <input type="radio" name="today-session" id="today-training" value="training" onchange="updateSmartNutrition();updateSessionLabel()" checked style="display:none">
-            💪 トレ日
+            トレ日
           </label>
           <div style="width:1px;background:var(--border)"></div>
           <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;cursor:pointer;font-size:13px;font-weight:500;transition:background 0.15s" id="label-off">
             <input type="radio" name="today-session" id="today-off" value="off" onchange="updateSmartNutrition();updateSessionLabel()" style="display:none">
-            🛌 オフ日
+            オフ日
           </label>
         </div>
       </div>
@@ -632,7 +635,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="card card-blue" style="margin-bottom:18px">
     <div class="card-header-bar blue"></div>
     <div class="row-between" style="margin-bottom:16px"><div class="h3">本日の目標</div><div class="row" style="gap:8px"><span class="muted" style="font-size:12px">モード</span><select id="n-goal-mode" style="width:auto;padding:6px 12px" onchange="updateNutritionGoals()"><option value="maintain">維持</option><option value="cut">減量</option><option value="bulk">増量</option></select></div></div>
-    <div class="grid4"><div class="metric"><div class="metric-label">TARGET</div><div class="metric-val" id="n-cal-target">—</div><div class="metric-sub">kcal</div></div><div class="metric"><div class="metric-label">PROTEIN</div><div class="metric-val" id="n-protein-t">—</div><div class="metric-sub">g</div></div><div class="metric"><div class="metric-label">CARBS</div><div class="metric-val" id="n-carb-t">—</div><div class="metric-sub">g</div></div><div class="metric"><div class="metric-label">FAT</div><div class="metric-val" id="n-fat-t">—</div><div class="metric-sub">g</div></div></div>
+    <div class="grid4"><div class="metric"><div class="metric-label">目標</div><div class="metric-val" id="n-cal-target">—</div><div class="metric-sub">kcal</div></div><div class="metric"><div class="metric-label">たんぱく質</div><div class="metric-val" id="n-protein-t">—</div><div class="metric-sub">g</div></div><div class="metric"><div class="metric-label">炭水化物</div><div class="metric-val" id="n-carb-t">—</div><div class="metric-sub">g</div></div><div class="metric"><div class="metric-label">脂質</div><div class="metric-val" id="n-fat-t">—</div><div class="metric-sub">g</div></div></div>
     <div class="alert alert-info" style="margin-top:14px" id="n-mode-hint"></div>
   </div>
   <div class="card" style="margin-bottom:18px">
@@ -649,7 +652,7 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div style="margin-bottom:10px">
         <button class="btn btn-primary" style="width:100%;font-size:13px;padding:10px;display:flex;align-items:center;justify-content:center;gap:8px"
           onclick="triggerOCR()">
-          📷 成分表を撮影して自動入力
+          成分表を撮影して自動入力
         </button>
         <input type="file" id="ocr-image-input" accept="image/*" capture="environment"
           style="display:none" onchange="onOcrImageSelected(event)">
@@ -660,44 +663,44 @@ input[type=range]:focus{border:none;box-shadow:none}
       <img id="ocr-preview" style="display:none;max-width:100%;max-height:160px;border-radius:var(--rs);margin-bottom:8px;object-fit:contain">
       <!-- 食品検索バー -->
       <div style="display:flex;gap:6px;margin-bottom:8px">
-        <input type="text" id="food-search-input" placeholder="🔍 食品名で検索（例: 鶏むね、バナナ）"
+        <input type="text" id="food-search-input" placeholder="食品名で検索（例: 鶏むね、バナナ）"
           style="flex:1;font-size:13px;padding:8px 10px" oninput="showFoodSearch(this.value)">
         <button class="btn btn-sm" id="web-search-btn" style="flex-shrink:0;font-size:12px;white-space:nowrap"
-          onclick="searchFoodOnline()">🌐 ネット検索</button>
+          onclick="searchFoodOnline()">ネット検索</button>
       </div>
       <div id="web-food-panel" style="display:none;background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.25);border-radius:var(--rs);padding:12px;margin-bottom:10px"></div>
       <!-- カテゴリタブ -->
       <div class="row" style="gap:5px;flex-wrap:wrap;margin-bottom:6px">
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('protein')">🥩 タンパク質</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('carb')">🍚 炭水化物</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('veggie')">🥦 野菜・海藻</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('fat')">🥑 脂質・ナッツ</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('fermented')">🫙 発酵食品</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('seasoning')">🧂 調味料</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('drink')">🥤 飲料・補食</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('convenience')">🏪 コンビニ</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('custom')">⭐ マイプリセット</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('protein')">タンパク質</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('carb')">炭水化物</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('veggie')">野菜・海藻</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('fat')">脂質・ナッツ</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('fermented')">発酵食品</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('seasoning')">調味料</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('drink')">飲料・補食</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('convenience')">コンビニ</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('custom')">マイプリセット</span>
       </div>
       <!-- 外食タブ -->
       <div class="row" style="gap:5px;flex-wrap:wrap;margin-bottom:6px">
         <span style="font-size:10px;color:var(--text3);align-self:center">外食：</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_gyudon')">🍚 牛丼</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_fastfood')">🍔 ファストフード</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_family_restaurant')">🍽 ファミレス</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_sushi')">🍣 回転寿司</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_yakiniku')">🥩 焼肉</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_gyudon')">牛丼</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_fastfood')">ファストフード</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_family_restaurant')">ファミレス</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_sushi')">回転寿司</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('eating_yakiniku')">焼肉</span>
       </div>
       <!-- 料理タブ -->
       <div class="row" style="gap:5px;flex-wrap:wrap;margin-bottom:6px">
         <span style="font-size:10px;color:var(--text3);align-self:center">料理：</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_japanese')">🍱 和食・丼</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_noodles')">🍜 麺類</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_western')">🍝 洋食</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_chinese')">🥟 中華</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_homemade')">🥘 自炊</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_soup')">🍲 鍋・スープ</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_breakfast')">🌅 朝食</span>
-        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_izakaya')">🍺 居酒屋</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_japanese')">和食・丼</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_noodles')">麺類</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_western')">洋食</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_chinese')">中華</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_homemade')">自炊</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_soup')">鍋・スープ</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_breakfast')">朝食</span>
+        <span class="badge badge-gray" style="cursor:pointer;font-size:11px" onclick="showPresetCategory('dish_izakaya')">居酒屋</span>
       </div>
       <div id="preset-list" style="max-height:260px;overflow-y:auto;margin-top:4px"></div>
     </div>
@@ -705,7 +708,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <!-- 量の調整スライダー -->
     <div id="preset-amount-row" style="display:none;padding:10px 12px;background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.2);border-radius:var(--rs);margin-bottom:12px">
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
-        <span style="font-size:11px;color:var(--text3);white-space:nowrap">🍳 調理法：</span>
+        <span style="font-size:11px;color:var(--text3);white-space:nowrap">調理法：</span>
         <select id="n-cooking-method" style="font-size:12px;padding:5px 8px;flex:1;min-width:110px;max-width:150px" onchange="onCookingChange('n')">
           <option value="raw">生（そのまま）</option>
           <option value="boil">茹でる</option>
@@ -759,7 +762,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="grid4"><div class="field"><label class="label">カロリー</label><input type="number" id="n-cal" placeholder="500"></div><div class="field"><label class="label">タンパク質 g</label><input type="number" id="n-protein" placeholder="30"></div><div class="field"><label class="label">炭水化物 g</label><input type="number" id="n-carb" placeholder="60"></div><div class="field"><label class="label">脂質 g</label><input type="number" id="n-fat" placeholder="10"></div></div>
     <div class="row" style="gap:8px;margin-top:4px">
       <button class="btn btn-primary" style="flex:1" onclick="saveMeal()">記録する</button>
-      <button class="btn btn-sm" onclick="saveCustomPreset()" title="現在の入力内容をマイプリセットに保存">⭐ マイプリセットに保存</button>
+      <button class="btn btn-sm" onclick="saveCustomPreset()" title="現在の入力内容をマイプリセットに保存">マイプリセットに保存</button>
     </div>
   </div>
   <!-- 推奨食材リスト（消防士向け） -->
@@ -771,36 +774,36 @@ input[type=range]:focus{border:none;box-shadow:none}
     </div>
     <div class="muted" style="font-size:12px;margin-bottom:14px">食事優先の原則（バルクアップガイド第6章）に基づき、食品から最大限の栄養を確保する。毎日食べるべき食材と週3〜4回の食材を分類。</div>
     <!-- docx第4.1節 + 第2章ベース -->
-    <div class="label" style="margin-bottom:8px">🥇 毎日食べるべき食材 Top10（A級）</div>
+    <div class="label" style="margin-bottom:8px">毎日食べるべき食材 Top10（A級）</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:6px;margin-bottom:14px">
-      <div class="card-sm" style="padding:8px;border-color:rgba(74,158,255,0.3)"><div style="font-size:12px;font-weight:600">🐟 サーモン/青魚</div><div style="font-size:10px;color:var(--text2)">EPA+DHA・EIMD抑制</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(255,69,96,0.3)"><div style="font-size:12px;font-weight:600">🥚 全卵（3〜6個）</div><div style="font-size:10px;color:var(--text2)">ロイシン・コリン・MPS最大化</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">🥩 鶏むね肉</div><div style="font-size:10px;color:var(--text2)">アンセリン・抗疲労</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">🫘 納豆</div><div style="font-size:10px;color:var(--text2)">K2・腸活・ナットウキナーゼ</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(167,139,250,0.3)"><div style="font-size:12px;font-weight:600">🫐 ブルーベリー</div><div style="font-size:10px;color:var(--text2)">ROS早期正常化・最強回復食</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">🥦 ブロッコリー</div><div style="font-size:10px;color:var(--text2)">スルフォラファン・解毒酵素誘導</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">🍠 さつまいも</div><div style="font-size:10px;color:var(--text2)">電解質補充（カリウム）・持続燃料</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">🥬 ほうれん草</div><div style="font-size:10px;color:var(--text2)">Mg欠乏率94%対策・鉄・葉酸</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(245,166,35,0.3)"><div style="font-size:12px;font-weight:600">🌰 アーモンド</div><div style="font-size:10px;color:var(--text2)">ビタミンE・Mg・抗酸化</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(74,158,255,0.3)"><div style="font-size:12px;font-weight:600">🥛 ギリシャヨーグルト</div><div style="font-size:10px;color:var(--text2)">就寝中MPS維持・腸活</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(74,158,255,0.3)"><div style="font-size:12px;font-weight:600">サーモン/青魚</div><div style="font-size:10px;color:var(--text2)">EPA+DHA・EIMD抑制</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(255,69,96,0.3)"><div style="font-size:12px;font-weight:600">全卵（3〜6個）</div><div style="font-size:10px;color:var(--text2)">ロイシン・コリン・MPS最大化</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">鶏むね肉</div><div style="font-size:10px;color:var(--text2)">アンセリン・抗疲労</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">納豆</div><div style="font-size:10px;color:var(--text2)">K2・腸活・ナットウキナーゼ</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(167,139,250,0.3)"><div style="font-size:12px;font-weight:600">ブルーベリー</div><div style="font-size:10px;color:var(--text2)">ROS早期正常化・回復食</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">ブロッコリー</div><div style="font-size:10px;color:var(--text2)">スルフォラファン・解毒酵素誘導</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">さつまいも</div><div style="font-size:10px;color:var(--text2)">電解質補充（カリウム）・持続燃料</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">ほうれん草</div><div style="font-size:10px;color:var(--text2)">Mg欠乏率94%対策・鉄・葉酸</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(245,166,35,0.3)"><div style="font-size:12px;font-weight:600">アーモンド</div><div style="font-size:10px;color:var(--text2)">ビタミンE・Mg・抗酸化</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(74,158,255,0.3)"><div style="font-size:12px;font-weight:600">ギリシャヨーグルト</div><div style="font-size:10px;color:var(--text2)">就寝中MPS維持・腸活</div></div>
     </div>
-    <div class="label" style="margin-bottom:8px">🥈 週3〜4回推奨食材 Top10（B級）</div>
+    <div class="label" style="margin-bottom:8px">週3〜4回推奨食材 Top10（B級）</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:6px;margin-bottom:12px">
-      <div class="card-sm" style="padding:8px;border-color:rgba(255,69,96,0.3)"><div style="font-size:12px;font-weight:600">🥩 牛赤身</div><div style="font-size:10px;color:var(--text2)">鉄・亜鉛・B12・天然クレアチン</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(74,158,255,0.3)"><div style="font-size:12px;font-weight:600">🦪 牡蠣・あさり</div><div style="font-size:10px;color:var(--text2)">亜鉛・タウリン・疲労回復</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(167,139,250,0.3)"><div style="font-size:12px;font-weight:600">🍷 ザクロジュース</div><div style="font-size:10px;color:var(--text2)">血管保護・回復促進（RCT）</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">🥣 オートミール</div><div style="font-size:10px;color:var(--text2)">β-グルカン・腸内炎症抑制</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">🥝 キウイ</div><div style="font-size:10px;color:var(--text2)">VC・睡眠改善（RCT確認）</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(245,166,35,0.3)"><div style="font-size:12px;font-weight:600">🍖 骨スープ</div><div style="font-size:10px;color:var(--text2)">コラーゲン・グリシン・関節保護</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">🫘 豆腐・味噌</div><div style="font-size:10px;color:var(--text2)">植物性タンパク・腸活・多様性</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">🥑 アボカド</div><div style="font-size:10px;color:var(--text2)">高カリウム（電解質補充）・発汗対策</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">🍵 緑茶・抹茶</div><div style="font-size:10px;color:var(--text2)">EGCG・神経保護・酸化ストレス防御</div></div>
-      <div class="card-sm" style="padding:8px;border-color:rgba(245,166,35,0.3)"><div style="font-size:12px;font-weight:600">🎃 かぼちゃ</div><div style="font-size:10px;color:var(--text2)">βカロテン・高熱環境の粘膜保護</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(255,69,96,0.3)"><div style="font-size:12px;font-weight:600">牛赤身</div><div style="font-size:10px;color:var(--text2)">鉄・亜鉛・B12・天然クレアチン</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(74,158,255,0.3)"><div style="font-size:12px;font-weight:600">牡蠣・あさり</div><div style="font-size:10px;color:var(--text2)">亜鉛・タウリン・疲労回復</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(167,139,250,0.3)"><div style="font-size:12px;font-weight:600">ザクロジュース</div><div style="font-size:10px;color:var(--text2)">血管保護・回復促進（RCT）</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">オートミール</div><div style="font-size:10px;color:var(--text2)">β-グルカン・腸内炎症抑制</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">キウイ</div><div style="font-size:10px;color:var(--text2)">VC・睡眠改善（RCT確認）</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(245,166,35,0.3)"><div style="font-size:12px;font-weight:600">骨スープ</div><div style="font-size:10px;color:var(--text2)">コラーゲン・グリシン・関節保護</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">豆腐・味噌</div><div style="font-size:10px;color:var(--text2)">植物性タンパク・腸活・多様性</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">アボカド</div><div style="font-size:10px;color:var(--text2)">高カリウム（電解質補充）・発汗対策</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(34,197,94,0.3)"><div style="font-size:12px;font-weight:600">緑茶・抹茶</div><div style="font-size:10px;color:var(--text2)">EGCG・神経保護・酸化ストレス防御</div></div>
+      <div class="card-sm" style="padding:8px;border-color:rgba(245,166,35,0.3)"><div style="font-size:12px;font-weight:600">かぼちゃ</div><div style="font-size:10px;color:var(--text2)">βカロテン・高熱環境の粘膜保護</div></div>
     </div>
     <!-- 消防士特有の欠乏リスク表 -->
-    <div class="label" style="margin-bottom:8px">⚠ 消防士の微量栄養素 欠乏リスクランキング（docx第2章）</div>
+    <div class="label" style="margin-bottom:8px">消防士の微量栄養素 欠乏リスクランキング（docx第2章）</div>
     <table style="font-size:11px;margin-bottom:10px">
-      <thead><tr><th>栄養素</th><th>欠乏率</th><th>欠乏リスク</th><th>最強食品源</th></tr></thead>
+      <thead><tr><th>栄養素</th><th>欠乏率</th><th>欠乏リスク</th><th>主な食品源</th></tr></thead>
       <tbody>
         <tr><td><strong>カリウム</strong></td><td class="mono" style="color:var(--accent)">高リスク</td><td class="muted">筋痙攣・心機能低下・血圧上昇（発汗による急速消耗）</td><td>アボカド・バナナ・ほうれん草</td></tr>
         <tr><td><strong>ビタミンD</strong></td><td class="mono" style="color:var(--accent)">〜75%</td><td class="muted">疲労骨折・筋力低下・免疫低下（屋内・夜勤で特にリスク高）</td><td>サーモン・サバ・卵</td></tr>
@@ -814,7 +817,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="card">
     <div class="card-header-bar green"></div>
     <div class="h3" style="margin-bottom:14px">本日の合計</div>
-    <div class="grid4" style="margin-bottom:16px"><div class="metric"><div class="metric-label">摂取</div><div class="metric-val" id="n-today-cal">0</div><div class="metric-sub">kcal</div></div><div class="metric"><div class="metric-label">PROTEIN</div><div class="metric-val" id="n-today-p">0</div><div class="metric-sub">g</div></div><div class="metric"><div class="metric-label">CARBS</div><div class="metric-val" id="n-today-c">0</div><div class="metric-sub">g</div></div><div class="metric"><div class="metric-label">FAT</div><div class="metric-val" id="n-today-f">0</div><div class="metric-sub">g</div></div></div>
+    <div class="grid4" style="margin-bottom:16px"><div class="metric"><div class="metric-label">摂取</div><div class="metric-val" id="n-today-cal">0</div><div class="metric-sub">kcal</div></div><div class="metric"><div class="metric-label">たんぱく質</div><div class="metric-val" id="n-today-p">0</div><div class="metric-sub">g</div></div><div class="metric"><div class="metric-label">炭水化物</div><div class="metric-val" id="n-today-c">0</div><div class="metric-sub">g</div></div><div class="metric"><div class="metric-label">脂質</div><div class="metric-val" id="n-today-f">0</div><div class="metric-sub">g</div></div></div>
     <div id="n-remaining-alert"></div>
     <div class="divider"></div>
     <div id="n-meal-list"><div class="muted">今日の食事記録がありません</div></div>
@@ -836,7 +839,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="grid3"><div class="field"><label class="label">日付</label><input type="date" id="s-date"></div><div class="field"><label class="label">就寝</label><input type="time" id="s-bed"></div><div class="field"><label class="label">起床</label><input type="time" id="s-wake"></div></div>
     <!-- 分割睡眠・仮眠入力 -->
     <div style="background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.15);border-radius:var(--rs);padding:10px 12px;margin:8px 0">
-      <div style="font-size:11px;color:var(--accent2);font-weight:600;margin-bottom:8px;letter-spacing:1px">🌙 睡眠の詳細（任意）</div>
+      <div style="font-size:11px;color:var(--accent2);font-weight:600;margin-bottom:8px;letter-spacing:1px">睡眠の詳細（任意）</div>
       <div class="grid2">
         <div class="field">
           <label class="label">中断時間（分）
@@ -886,14 +889,14 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="row-between" style="margin-bottom:10px;flex-wrap:wrap;gap:8px">
       <div class="row" style="gap:6px;flex-wrap:wrap">
         <span style="font-size:11px;font-weight:500;color:var(--text2)">タップして登録：</span>
-        <span class="badge badge-red" style="cursor:pointer" id="shift-mode-24h" onclick="setShiftMode('24h')">🔥 当番</span>
-        <span class="badge badge-gray" style="cursor:pointer" id="shift-mode-off" onclick="setShiftMode('off')">💤 非番</span>
-        <span class="badge badge-amber" style="cursor:pointer" id="shift-mode-off-work" onclick="setShiftMode('off-work')">⚡ 非番出勤</span>
-        <span class="badge badge-blue" style="cursor:pointer" id="shift-mode-rest" onclick="setShiftMode('rest')">🏠 週休</span>
-        <span class="badge badge-purple" style="cursor:pointer" id="shift-mode-rest-work" onclick="setShiftMode('rest-work')">🚨 週休出勤</span>
-        <span class="badge" style="background:rgba(251,191,36,0.18);border:1px solid rgba(251,191,36,0.45);color:#fbbf24;cursor:pointer" id="shift-mode-dayshift" onclick="setShiftMode('dayshift')">☀️ 日勤</span>
-        <span class="badge badge-green" style="cursor:pointer" id="shift-mode-gym" onclick="setShiftMode('gym')">💪 ジム</span>
-        <span class="badge" style="cursor:pointer;background:rgba(29,158,117,0.15);color:#34d399;border:1px solid rgba(29,158,117,0.3)" id="shift-mode-cardio" onclick="setShiftMode('cardio')">🏃 有酸素</span>
+        <span class="badge badge-red" style="cursor:pointer" id="shift-mode-24h" onclick="setShiftMode('24h')">当番</span>
+        <span class="badge badge-gray" style="cursor:pointer" id="shift-mode-off" onclick="setShiftMode('off')">非番</span>
+        <span class="badge badge-amber" style="cursor:pointer" id="shift-mode-off-work" onclick="setShiftMode('off-work')">非番出勤</span>
+        <span class="badge badge-blue" style="cursor:pointer" id="shift-mode-rest" onclick="setShiftMode('rest')">週休</span>
+        <span class="badge badge-purple" style="cursor:pointer" id="shift-mode-rest-work" onclick="setShiftMode('rest-work')">週休出勤</span>
+        <span class="badge" style="background:rgba(251,191,36,0.18);border:1px solid rgba(251,191,36,0.45);color:#fbbf24;cursor:pointer" id="shift-mode-dayshift" onclick="setShiftMode('dayshift')">日勤</span>
+        <span class="badge badge-green" style="cursor:pointer" id="shift-mode-gym" onclick="setShiftMode('gym')">ジム</span>
+        <span class="badge" style="cursor:pointer;background:rgba(29,158,117,0.15);color:#34d399;border:1px solid rgba(29,158,117,0.3)" id="shift-mode-cardio" onclick="setShiftMode('cardio')">有酸素</span>
         <span class="badge badge-gray" style="cursor:pointer" id="shift-mode-clear" onclick="setShiftMode('clear')">✕ クリア</span>
       </div>
       <div class="badge badge-blue" id="shift-cur-mode-label">モード: 24h勤務</div>
@@ -954,13 +957,13 @@ input[type=range]:focus{border:none;box-shadow:none}
 <!-- GUT HEALTH -->
 <div class="page" id="page-gut">
   <div class="row-between" style="margin-bottom:18px">
-    <div><div class="h1">GUT HEALTH</div><div class="muted" style="margin-top:5px">SGIR HQ PREMIUM — 腸内環境修復完全ガイド</div></div>
+    <div><div class="h1">GUT HEALTH</div><div class="muted" style="margin-top:5px">5つの手順で腸内環境を整える</div></div>
     <div id="gut-overall-badge"></div>
   </div>
 
   <!-- 重要前提 -->
   <div class="alert alert-warn" style="margin-bottom:18px;font-size:13px;line-height:1.7">
-    <div><strong>⚠ 重要な前提：サプリで治そうとしない</strong><br>
+    <div><strong>重要な前提：サプリで治そうとしない</strong><br>
     プロバイオティクスやエビオスを大量に摂取する前に、まず腸内環境の基盤を整えることが最優先です。腸内環境は菌の数よりも<strong>環境が大事</strong>であり、環境が整っていないといくら善玉菌を増やしても意味がありません。まず腸を壊す要因を取り除き、善玉菌が育ちやすい環境を作ることから始めましょう。</div>
   </div>
 
@@ -976,7 +979,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <!-- STEP 1 -->
   <div class="step-card" id="gut-step-0">
     <div class="step-number">1</div>
-    <div class="step-title"><div class="step-check" id="sc-0" onclick="toggleStepComplete(0)"></div>STEP 1 — 腸を壊すものを徹底排除</div>
+    <div class="step-title"><div class="step-check" id="sc-0" onclick="toggleStepComplete(0)"></div>STEP 1　腸に負担をかけるものを減らす</div>
     <div class="muted" style="margin-bottom:14px">これをやらずにサプリを飲んでも意味がありません。最優先で排除すべき食材・習慣です。リーキーガット症候群、慢性炎症、悪玉菌の増殖を引き起こす可能性があります。</div>
     <div id="gut-tasks-0">
       <div class="step-task"><div class="step-task-check" onclick="toggleTask(0,0)"></div><div class="step-task-text"><strong>超加工食品を排除</strong>：菓子パン・スナック菓子・インスタント食品。腸内細菌叢のバランスを崩し、炎症性サイトカインの産生を促進。</div></div>
@@ -1021,7 +1024,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <!-- STEP 2 -->
   <div class="step-card" id="gut-step-1">
     <div class="step-number">2</div>
-    <div class="step-title"><div class="step-check" id="sc-1" onclick="toggleStepComplete(1)"></div>STEP 2 — 環境を整えてから善玉菌を育てる</div>
+    <div class="step-title"><div class="step-check" id="sc-1" onclick="toggleStepComplete(1)"></div>STEP 2　環境を整えてから善玉菌を育てる</div>
     <div class="muted" style="margin-bottom:14px">いきなりプロバイオティクスを大量摂取することは非推奨です。善玉菌を大量投入すると下痢・ガス・腹部膨満につながるリスクがあります。まずは<strong>プレバイオティクス（腸内細菌のエサ）</strong>を先に増やし、善玉菌が育ちやすい環境を整えることが重要です。</div>
     <div id="gut-tasks-1">
       <div class="step-task"><div class="step-task-check" onclick="toggleTask(1,0)"></div><div class="step-task-text">オートミールを毎朝摂取（β-グルカンという水溶性食物繊維が豊富。善玉菌のエサとなり、短鎖脂肪酸の産生を促進）</div></div>
@@ -1035,11 +1038,11 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="expl-body">
     <div style="margin-top:14px"><div class="label">推奨プレバイオティクス食材</div>
     <div class="food-grid">
-      <div class="food-chip food-good"><span>🥣</span>オートミール（β-グルカン）</div>
-      <div class="food-chip food-good"><span>🌊</span>海藻類（フコイダン）</div>
-      <div class="food-chip food-good"><span>🥕</span>ごぼう（イヌリン）</div>
-      <div class="food-chip food-good"><span>🍚</span>冷やした白米（RS）</div>
-      <div class="food-chip food-good"><span>🍠</span>冷やした芋類（RS）</div>
+      <div class="food-chip food-good"><span></span>オートミール（β-グルカン）</div>
+      <div class="food-chip food-good"><span></span>海藻類（フコイダン）</div>
+      <div class="food-chip food-good"><span></span>ごぼう（イヌリン）</div>
+      <div class="food-chip food-good"><span></span>冷やした白米（RS）</div>
+      <div class="food-chip food-good"><span></span>冷やした芋類（RS）</div>
     </div></div>
   </div>
     </details>
@@ -1048,7 +1051,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <!-- STEP 3 -->
   <div class="step-card" id="gut-step-2">
     <div class="step-number">3</div>
-    <div class="step-title"><div class="step-check" id="sc-2" onclick="toggleStepComplete(2)"></div>STEP 3 — 発酵食品と食材の多様性</div>
+    <div class="step-title"><div class="step-check" id="sc-2" onclick="toggleStepComplete(2)"></div>STEP 3　発酵食品と食材の多様性</div>
     <div class="muted" style="margin-bottom:14px">腸内細菌の多様性が高いほど、良い状態になる傾向があります。研究では、腸内細菌の多様性が高い人ほど肥満・糖尿病・炎症性腸疾患などのリスクが低いことが示されています。毎日同じ食材を食べるのではなく、タンパク質源・脂質源・炭水化物源をそれぞれバリエーションを持たせることが重要です。</div>
     <div id="gut-tasks-2">
       <div class="step-task"><div class="step-task-check" onclick="toggleTask(2,0)"></div><div class="step-task-text">ぬか漬け・キムチ・味噌汁を毎日1品摂取（生きた乳酸菌。腸内細菌の多様性を高める）</div></div>
@@ -1062,10 +1065,10 @@ input[type=range]:focus{border:none;box-shadow:none}
       <div class="expl-body">
     <div style="margin-top:14px"><div class="label">おすすめ発酵食品</div>
     <div class="food-grid">
-      <div class="food-chip food-good"><span>🥬</span>ぬか漬け</div>
-      <div class="food-chip food-good"><span>🍶</span>味噌（天然醸造）</div>
-      <div class="food-chip food-good"><span>🥒</span>キムチ（無添加）</div>
-      <div class="food-chip food-good"><span>🍵</span>コンブチャ（砂糖少なめ）</div>
+      <div class="food-chip food-good"><span></span>ぬか漬け</div>
+      <div class="food-chip food-good"><span></span>味噌（天然醸造）</div>
+      <div class="food-chip food-good"><span></span>キムチ（無添加）</div>
+      <div class="food-chip food-good"><span></span>コンブチャ（砂糖少なめ）</div>
     </div></div>
   </div>
     </details>
@@ -1074,7 +1077,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <!-- STEP 4 -->
   <div class="step-card" id="gut-step-3">
     <div class="step-number">4</div>
-    <div class="step-title"><div class="step-check" id="sc-3" onclick="toggleStepComplete(3)"></div>STEP 4 — 自律神経とストレスマネジメント</div>
+    <div class="step-title"><div class="step-check" id="sc-3" onclick="toggleStepComplete(3)"></div>STEP 4　自律神経とストレスへの対処</div>
     <div class="muted" style="margin-bottom:14px">腸は「第二の脳」と呼ばれ、脳腸相関という密接な関係があります。腸と脳は迷走神経を通じて双方向に情報をやり取りしており、ストレスや自律神経の乱れは直接腸内環境に影響を与えます。<strong>睡眠とストレス管理は食事と同レベルで重要です。</strong></div>
     <div id="gut-tasks-3">
       <div class="step-task"><div class="step-task-check" onclick="toggleTask(3,0)"></div><div class="step-task-text">毎日7〜8時間の睡眠を確保（研究では睡眠6時間未満の人は腸内細菌の多様性が低下することが示されています）</div></div>
@@ -1102,17 +1105,17 @@ input[type=range]:focus{border:none;box-shadow:none}
   <!-- STEP 5 -->
   <div class="step-card" id="gut-step-4">
     <div class="step-number">5</div>
-    <div class="step-title"><div class="step-check" id="sc-4" onclick="toggleStepComplete(4)"></div>STEP 5 — 便で腸内環境をチェック</div>
+    <div class="step-title"><div class="step-check" id="sc-4" onclick="toggleStepComplete(4)"></div>STEP 5　便で腸内環境を確かめる</div>
     <div class="muted" style="margin-bottom:14px">朝の便は最も顕著に現れる腸内環境のバロメーターです。便の状態を観察することで、腸内環境の改善度を客観的に評価できます。</div>
 
     <!-- 理想の便チェックリスト -->
     <div class="grid2" style="gap:10px;margin-bottom:14px">
       <div class="card-sm" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.04)">
-        <div style="font-size:12px;font-weight:700;color:var(--accent4);margin-bottom:8px">✅ 理想的な便のサイン</div>
+        <div style="font-size:12px;font-weight:700;color:var(--accent4);margin-bottom:8px">✓ 理想的な便のサイン</div>
         <div style="font-size:12px;color:var(--text2);line-height:1.9">バナナ型で適度な硬さ<br>臭いが強くない（発酵臭程度）<br>1日1〜2回の排便<br>出し切った感覚がある<br>色が茶色〜黄褐色<br>水に浮かずゆっくり沈む</div>
       </div>
       <div class="card-sm" style="border-color:rgba(255,69,96,0.3);background:rgba(255,69,96,0.04)">
-        <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px">❌ 要注意なサイン</div>
+        <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px">✕ 要注意なサイン</div>
         <div style="font-size:12px;color:var(--text2);line-height:1.9">ガスが非常に臭い<br>便がベタついてトイレに張り付く<br>便秘と下痢を繰り返す<br>ウサギのフンのような硬コロコロ<br>色が黒すぎる or 極端に薄い<br>未消化の食べ物が多く混じる</div>
       </div>
     </div>
@@ -1121,13 +1124,13 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="card-sm" style="margin-bottom:14px">
       <div class="label" style="margin-bottom:10px">今日の便の状態（ブリストルスケール）</div>
       <div class="bristol-grid">
-        <div class="bristol-btn" onclick="selectBristol(1)" id="brs-1"><div class="bristol-type">💩</div><div class="bristol-label">Type 1<br>硬い塊</div></div>
-        <div class="bristol-btn" onclick="selectBristol(2)" id="brs-2"><div class="bristol-type">💩</div><div class="bristol-label">Type 2<br>塊状</div></div>
-        <div class="bristol-btn" onclick="selectBristol(3)" id="brs-3"><div class="bristol-type">💩</div><div class="bristol-label">Type 3<br>ひび割れ</div></div>
-        <div class="bristol-btn" onclick="selectBristol(4)" id="brs-4" style="border-color:rgba(34,197,94,0.5)"><div class="bristol-type">✅</div><div class="bristol-label">Type 4<br>理想的</div></div>
-        <div class="bristol-btn" onclick="selectBristol(5)" id="brs-5"><div class="bristol-type">💩</div><div class="bristol-label">Type 5<br>柔らかい</div></div>
-        <div class="bristol-btn" onclick="selectBristol(6)" id="brs-6"><div class="bristol-type">💩</div><div class="bristol-label">Type 6<br>泥状</div></div>
-        <div class="bristol-btn" onclick="selectBristol(7)" id="brs-7"><div class="bristol-type">⚠️</div><div class="bristol-label">Type 7<br>水様</div></div>
+        <div class="bristol-btn" onclick="selectBristol(1)" id="brs-1"><div class="bristol-type">1</div><div class="bristol-label">硬い塊</div></div>
+        <div class="bristol-btn" onclick="selectBristol(2)" id="brs-2"><div class="bristol-type">2</div><div class="bristol-label">塊状</div></div>
+        <div class="bristol-btn" onclick="selectBristol(3)" id="brs-3"><div class="bristol-type">3</div><div class="bristol-label">ひび割れ</div></div>
+        <div class="bristol-btn" onclick="selectBristol(4)" id="brs-4" style="border-color:rgba(34,197,94,0.5)"><div class="bristol-type">4</div><div class="bristol-label">理想的</div></div>
+        <div class="bristol-btn" onclick="selectBristol(5)" id="brs-5"><div class="bristol-type">5</div><div class="bristol-label">柔らかい</div></div>
+        <div class="bristol-btn" onclick="selectBristol(6)" id="brs-6"><div class="bristol-type">6</div><div class="bristol-label">泥状</div></div>
+        <div class="bristol-btn" onclick="selectBristol(7)" id="brs-7"><div class="bristol-type">7</div><div class="bristol-label">水様</div></div>
       </div>
       <div id="bristol-advice" class="alert alert-info" style="display:none;margin-top:10px"></div>
       <button class="btn btn-sm btn-primary" onclick="saveBristolLog()" style="margin-top:10px">今日の状態を記録</button>
@@ -1138,7 +1141,7 @@ input[type=range]:focus{border:none;box-shadow:none}
 
     <!-- タイプ別原因 -->
     <div style="margin-top:16px">
-      <div class="label" style="margin-bottom:10px">便のタイプ別 — 考えられる要因と対策</div>
+      <div class="label" style="margin-bottom:10px">便のタイプ別の要因と対策</div>
       <div class="grid2" style="gap:8px">
         <div class="card-sm" style="padding:12px">
           <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:5px">ガスが臭い</div>
@@ -1176,7 +1179,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <!-- エレミネーションダイエット -->
   <div class="card card-purple" style="margin-top:18px">
     <div class="card-header-bar purple"></div>
-    <div class="h3" style="margin-bottom:5px">PART 2 — エレミネーションダイエット（除去食事法）</div>
+    <div class="h3" style="margin-bottom:5px">除去食事法（エリミネーションダイエット）</div>
     <div class="muted" style="margin-bottom:14px">腸内環境を完全リセットし、自分に合わない食材を特定するための科学的アプローチ。IBS・食物不耐性・原因不明の消化器症状に悩む人に特に効果的です。</div>
     <div class="grid3" style="margin-bottom:14px;gap:8px">
       <div class="card-sm" style="text-align:center;padding:14px">
@@ -1195,7 +1198,7 @@ input[type=range]:focus{border:none;box-shadow:none}
         <div style="font-size:11px;color:var(--text2)">1つずつ3日間かけて食材を戻す。栄養価の高い優先順位の高い食材から開始。</div>
       </div>
     </div>
-    <div class="alert alert-warn" style="font-size:12px">⚠ 重要：再導入フェーズでは「卵→魚→鶏肉→発酵食品→ナッツ→豆類→乳製品→グルテン」の順に1つずつ3日かけて戻す。症状が出た食品はさらに2〜4週間除外を継続。いきなり複数の食材を戻さないこと。</div>
+    <div class="alert alert-warn" style="font-size:12px">重要：再導入フェーズでは「卵→魚→鶏肉→発酵食品→ナッツ→豆類→乳製品→グルテン」の順に1つずつ3日かけて戻す。症状が出た食品はさらに2〜4週間除外を継続。いきなり複数の食材を戻さないこと。</div>
   </div>
 
   <!-- まとめ4つの柱 -->
@@ -1227,8 +1230,8 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="card-header-bar amber"></div>
     <div class="h3" style="margin-bottom:14px">24時間シフト勤務と腸内環境</div>
     <div class="grid2">
-      <div class="card-sm"><div style="font-size:12px;font-weight:700;color:var(--accent3);margin-bottom:8px">⚡ 不規則シフト勤務の影響</div><div class="muted">24時間勤務は概日リズムを乱し、腸内フローラのバランスを崩します。睡眠が6時間未満の状態が続くと腸内細菌の多様性が低下することが研究で示されています。</div></div>
-      <div class="card-sm"><div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px">🔥 勤務明けの腸回復プロトコル</div><div class="muted">①水500mL（起床直後）→ ②白湯 or 味噌汁（低FODMAP）→ ③消化しやすい食事（白米・卵・豆腐）→ ④プロバイオティクスサプリ。48時間以内に睡眠7時間確保で腸内フローラが回復します。</div></div>
+      <div class="card-sm"><div style="font-size:12px;font-weight:700;color:var(--accent3);margin-bottom:8px">不規則シフト勤務の影響</div><div class="muted">24時間勤務は概日リズムを乱し、腸内フローラのバランスを崩します。睡眠が6時間未満の状態が続くと腸内細菌の多様性が低下することが研究で示されています。</div></div>
+      <div class="card-sm"><div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px">勤務明けの腸回復プロトコル</div><div class="muted">①水500mL（起床直後）→ ②白湯 or 味噌汁（低FODMAP）→ ③消化しやすい食事（白米・卵・豆腐）→ ④プロバイオティクスサプリ。48時間以内に睡眠7時間確保で腸内フローラが回復します。</div></div>
     </div>
   </div>
 </div>
@@ -1236,11 +1239,11 @@ input[type=range]:focus{border:none;box-shadow:none}
 <!-- SUPPLEMENT -->
 <div class="page" id="page-supplement">
   <div class="row-between" style="margin-bottom:20px">
-    <div><div class="h1">SUPPS</div><div class="muted" style="margin-top:5px">サプリメント管理 — 消防士特化プロトコル</div></div>
+    <div><div class="h1">SUPPS</div><div class="muted" style="margin-top:5px">消防士向けの摂取計画</div></div>
     <div id="supp-overall-badge"></div>
   </div>
   <div class="alert alert-info" style="margin-bottom:14px;font-size:13px">
-    <strong>前提：</strong>バルクアップガイド準拠 — サプリは優先順位6番目（食事→水分→トレーニング→睡眠→回復の後）。食事で解決できる栄養素はサプリに頼らない。
+    <strong>前提：</strong>バルクアップガイド準拠。サプリは優先順位6番目（食事→水分→トレーニング→睡眠→回復の後）。食事で解決できる栄養素はサプリに頼らない。
   </div>
   <!-- サプリタイミングバナー -->
   <div class="card card-accent" style="margin-bottom:14px">
@@ -1257,7 +1260,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <!-- 摂取タイミング通知 -->
   <div class="card" style="margin-bottom:14px">
     <div class="card-header-bar" style="background:#a78bfa"></div>
-    <div class="h3" style="margin-bottom:10px">🔔 摂取タイミング通知</div>
+    <div class="h3" style="margin-bottom:10px">摂取タイミング通知</div>
     <div id="supp-notify-settings"></div>
   </div>
   <!-- 出動連動 抗酸化プロトコル -->
@@ -1269,11 +1272,11 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="card" style="margin-bottom:14px;border:1px solid var(--accent2)">
     <div class="card-header-bar"></div>
     <div class="row-between" style="margin-bottom:10px">
-      <div class="h3">🎂 年代別サプリ最適化</div>
+      <div class="h3">年代別サプリ最適化</div>
       <span id="supp-age-badge" class="badge" style="font-size:10px"></span>
     </div>
     <div id="supp-age-recommend" style="font-size:12px;color:var(--text2);line-height:1.7"></div>
-    <div style="font-size:10px;color:var(--text3);margin-top:8px">エビデンス: ESPEN (2014) / Frontiers Nutrition (2024) / Smith (2019) 消防士CVD <span onclick="openEvidence('同化抵抗性')" style="color:var(--accent2);cursor:pointer">📚</span></div>
+    <div style="font-size:10px;color:var(--text3);margin-top:8px">エビデンス: ESPEN (2014) / Frontiers Nutrition (2024) / Smith (2019) 消防士CVD <span onclick="openEvidence('同化抵抗性')" style="color:var(--accent2);cursor:pointer"></span></div>
   </div>
 
   <!-- 消防士版1日プロトコル（docx第4.2節） -->
@@ -1283,12 +1286,12 @@ input[type=range]:focus{border:none;box-shadow:none}
     <table style="font-size:12px">
       <thead><tr><th>タイミング</th><th>サプリメント</th><th>目的</th></tr></thead>
       <tbody>
-        <tr><td>🌅 起床時</td><td>水 500ml + Mg 100mg</td><td>脱水リカバリー・神経系安定</td></tr>
-        <tr><td>🍳 朝食時</td><td>ビタミンD3（2,000〜4,000IU）+ K2 + オメガ3（1,000mg）</td><td>脂溶性栄養素の吸収最大化</td></tr>
-        <tr><td>💪 トレ前</td><td>L-シトルリン（6〜8g）+ （必要に応じて）カフェイン</td><td>血流改善・集中力向上</td></tr>
-        <tr><td>🏋️ トレ後</td><td>ホエイアイソレート（25〜40g）+ クレアチン（5g）</td><td>MPS最大化・認知機能補充</td></tr>
-        <tr><td>🍽️ 夕食時</td><td>オメガ3（1,000mg）+ マルチビタミン</td><td>抗炎症・微量栄養素網羅</td></tr>
-        <tr><td>🌙 就寝前</td><td>Mg（200mg）+ カゼインプロテイン（30g）</td><td>深い睡眠誘導・一晩中の筋肉保護</td></tr>
+        <tr><td>起床時</td><td>水 500ml + Mg 100mg</td><td>脱水リカバリー・神経系安定</td></tr>
+        <tr><td>朝食時</td><td>ビタミンD3（2,000〜4,000IU）+ K2 + オメガ3（1,000mg）</td><td>脂溶性栄養素の吸収最大化</td></tr>
+        <tr><td>トレ前</td><td>L-シトルリン（6〜8g）+ （必要に応じて）カフェイン</td><td>血流改善・集中力向上</td></tr>
+        <tr><td>トレ後</td><td>ホエイアイソレート（25〜40g）+ クレアチン（5g）</td><td>MPS最大化・認知機能補充</td></tr>
+        <tr><td>夕食時</td><td>オメガ3（1,000mg）+ マルチビタミン</td><td>抗炎症・微量栄養素網羅</td></tr>
+        <tr><td>就寝前</td><td>Mg（200mg）+ カゼインプロテイン（30g）</td><td>深い睡眠誘導・一晩中の筋肉保護</td></tr>
       </tbody>
     </table>
   </div>
@@ -1297,7 +1300,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="card card-accent" style="margin-bottom:14px">
     <div class="card-header-bar"></div>
     <div class="row-between" style="margin-bottom:12px">
-      <div class="h3">Tier 1 — 最優先（エビデンス最強）</div>
+      <div class="h3">Tier 1　最優先（根拠が最も強い）</div>
       <span class="badge badge-red" style="font-size:10px">消防士必須</span>
     </div>
     <div id="supp-tier1"></div>
@@ -1307,7 +1310,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="card card-amber" style="margin-bottom:14px">
     <div class="card-header-bar amber"></div>
     <div class="row-between" style="margin-bottom:12px">
-      <div class="h3">Tier 2 — 推奨（根拠中程度）</div>
+      <div class="h3">Tier 2　推奨（根拠は中程度）</div>
       <span class="badge badge-amber" style="font-size:10px">状況次第</span>
     </div>
     <div id="supp-tier2"></div>
@@ -1317,7 +1320,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="card" style="margin-bottom:14px">
     <div class="card-header-bar blue"></div>
     <div class="row-between" style="margin-bottom:12px">
-      <div class="h3">Tier 3 — 補助的（状況依存）</div>
+      <div class="h3">Tier 3　補助（状況による）</div>
       <span class="badge badge-blue" style="font-size:10px">オプション</span>
     </div>
     <div id="supp-tier3"></div>
@@ -1378,7 +1381,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="card toc-card" id="analysis-toc">
     <div class="card-header-bar"></div>
     <div class="row-between" style="margin-bottom:10px">
-      <div class="h3" style="font-size:14px">📋 目次 — 分析レポート</div>
+      <div class="h3" style="font-size:14px">目次</div>
       <button class="btn btn-sm" onclick="document.getElementById('toc-body').style.display=document.getElementById('toc-body').style.display==='none'?'block':'none'" style="font-size:11px;padding:4px 10px">開閉</button>
     </div>
     <div id="toc-body">
@@ -1404,7 +1407,7 @@ input[type=range]:focus{border:none;box-shadow:none}
         <button class="toc-btn" onclick="tocJump('anc-joint')"><span class="toc-num">19</span>関節ストレス記録</button>
         <button class="toc-btn" onclick="tocJump('anc-duty')"><span class="toc-num">20</span>当番日栄養プロトコル</button>
         <button class="toc-btn" onclick="tocJump('anc-review')"><span class="toc-num">21</span>週次レビュー</button>
-        <button class="toc-btn" onclick="tocJump('anc-reverse')"><span class="toc-num">22</span>🔄 リバースダイエット</button>
+        <button class="toc-btn" onclick="tocJump('anc-reverse')"><span class="toc-num">22</span>リバースダイエット</button>
       </div>
     </div>
   </div>
@@ -1631,7 +1634,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div id="anc-vo2max" class="card-header-bar green"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <div class="h3">VO2max 推定値</div>
-      <span style="font-size:10px;color:var(--text3)">NFPA 1582 / Uth (2004) <span onclick="openEvidence('VO2max')" style="color:var(--accent2);cursor:pointer">📚</span></span>
+      <span style="font-size:10px;color:var(--text3)">NFPA 1582 / Uth (2004) <span onclick="openEvidence('VO2max')" style="color:var(--accent2);cursor:pointer"></span></span>
     </div>
     <div id="a-vo2max"><div class="muted">計算中...</div></div>
   </div>
@@ -1668,11 +1671,11 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:8px 10px;background:var(--bg3);border-radius:var(--rs)">
         <input type="checkbox" id="fe-smoke" style="width:18px;height:18px;flex-shrink:0">
-        <span>🔥 煙・燃焼生成物暴露あり</span>
+        <span>煙・燃焼生成物暴露あり</span>
       </label>
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:8px 10px;background:var(--bg3);border-radius:var(--rs)">
         <input type="checkbox" id="fe-ba" style="width:18px;height:18px;flex-shrink:0">
-        <span>🫁 空気呼吸器（BA）使用</span>
+        <span>空気呼吸器（BA）使用</span>
       </label>
     </div>
     <div class="field" style="margin-bottom:12px"><label class="label">メモ</label>
@@ -1690,17 +1693,17 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="field" style="margin-bottom:10px"><label class="label">日付</label>
       <input type="date" id="jr-date"></div>
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px">
-      <div class="field"><label class="label">🦵 膝</label>
+      <div class="field"><label class="label">膝</label>
         <input type="number" id="jr-knee" min="0" max="10" value="0" placeholder="0〜10"></div>
-      <div class="field"><label class="label">💪 肩</label>
+      <div class="field"><label class="label">肩</label>
         <input type="number" id="jr-shoulder" min="0" max="10" value="0" placeholder="0〜10"></div>
-      <div class="field"><label class="label">🔧 腰</label>
+      <div class="field"><label class="label">腰</label>
         <input type="number" id="jr-lower_back" min="0" max="10" value="0" placeholder="0〜10"></div>
-      <div class="field"><label class="label">💪 肘</label>
+      <div class="field"><label class="label">肘</label>
         <input type="number" id="jr-elbow" min="0" max="10" value="0" placeholder="0〜10"></div>
-      <div class="field"><label class="label">🦴 股関節</label>
+      <div class="field"><label class="label">股関節</label>
         <input type="number" id="jr-hip" min="0" max="10" value="0" placeholder="0〜10"></div>
-      <div class="field"><label class="label">🦶 足首</label>
+      <div class="field"><label class="label">足首</label>
         <input type="number" id="jr-ankle" min="0" max="10" value="0" placeholder="0〜10"></div>
     </div>
     <button class="btn btn-primary btn-sm" onclick="saveJointRecord()">記録する</button>
@@ -1713,7 +1716,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div id="anc-duty" class="card-header-bar" style="background:#4a9eff"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <div class="h3">当番日 栄養プロトコル</div>
-      <span style="font-size:10px;color:var(--text3)">Ruby (2023) / Volpe (2013) <span onclick="openEvidence('消防士')" style="color:var(--accent2);cursor:pointer">📚</span></span>
+      <span style="font-size:10px;color:var(--text3)">Ruby (2023) / Volpe (2013) <span onclick="openEvidence('消防士')" style="color:var(--accent2);cursor:pointer"></span></span>
     </div>
     <div id="duty-day-protocol"><div class="muted">計算中...</div></div>
   </div>
@@ -1723,7 +1726,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="card-header-bar green"></div>
     <div class="row-between" style="margin-bottom:14px">
       <div>
-        <div class="h3">📊 週次レビュー</div>
+        <div class="h3">週次レビュー</div>
         <div class="muted" style="font-size:12px;margin-top:3px">今週のパフォーマンスサマリー</div>
       </div>
       <div class="row" style="gap:6px">
@@ -1749,8 +1752,8 @@ input[type=range]:focus{border:none;box-shadow:none}
   <!-- ===== リバースダイエット管理 ===== -->
   <div id="anc-reverse" class="card" style="margin-bottom:18px">
     <div class="card-header-bar"></div>
-    <div class="h3" style="margin-bottom:4px">🔄 リバースダイエット管理</div>
-    <div class="muted" style="font-size:11px;margin-bottom:14px">Da Silva (2025) / Hall et al. (2012) / Dirlewanger et al. (2000) <span onclick="openEvidence('リバース')" style="color:var(--accent2);cursor:pointer">📚</span></div>
+    <div class="h3" style="margin-bottom:4px">リバースダイエット管理</div>
+    <div class="muted" style="font-size:11px;margin-bottom:14px">Da Silva (2025) / Hall et al. (2012) / Dirlewanger et al. (2000) <span onclick="openEvidence('リバース')" style="color:var(--accent2);cursor:pointer"></span></div>
 
     <!-- STEP1: メンテナンスkcal逆算 -->
     <div style="background:var(--bg3);border-radius:var(--rs);padding:14px;margin-bottom:12px">
@@ -1847,7 +1850,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   </div>
 
   <!-- ▼ 分析レポートから移設した解説・規律セクション ▼ -->
-  <div class="h3" style="margin:4px 0 12px;font-size:14px">📖 解説・規律</div>
+  <div class="h3" style="margin:4px 0 12px;font-size:14px">解説・規律</div>
   <!-- 減量カロリー設定 -->
   <div class="card card-accent" style="margin-bottom:18px">
     <div id="anc-calorie" class="card-header-bar"></div>
@@ -1855,7 +1858,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="muted" style="font-size:12px;margin-bottom:16px">体重ベースの簡易計算。体脂肪が多い人ほど係数が低くなる（体内に貯蔵エネルギーが多いため少ない摂取カロリーでも身体機能を維持できる）。</div>
     <div class="grid2" style="margin-bottom:16px;gap:10px">
       <div>
-        <div class="label" style="margin-bottom:8px">男性 — 目標カロリー係数</div>
+        <div class="label" style="margin-bottom:8px">男性の目標カロリー係数</div>
         <table style="font-size:12px">
           <thead><tr><th>体重</th><th>係数</th><th>目安カロリー例</th></tr></thead>
           <tbody>
@@ -1882,7 +1885,7 @@ input[type=range]:focus{border:none;box-shadow:none}
       </div>
     </div>
     <div class="alert alert-info" style="font-size:12px">
-      💡 週7日間の<strong>平均摂取カロリー</strong>が目標値に合っていれば十分です。平日は少なめ・週末は少し多めという戦略も有効。毎日完全に同じカロリーでなくてもOK。
+      週7日間の<strong>平均摂取カロリー</strong>が目標値に合っていれば十分です。平日は少なめ・週末は少し多めという戦略も有効。毎日完全に同じカロリーでなくてもOK。
     </div>
   </div>
 
@@ -1935,7 +1938,7 @@ input[type=range]:focus{border:none;box-shadow:none}
         <div style="font-size:12px;color:var(--text2);line-height:1.7">食事量を高い状態にキープしながらアンダーカロリーを作れる<br>心肺機能・健康維持<br>精神的なストレス発散</div>
       </div>
       <div class="card-sm" style="border-color:rgba(255,69,96,0.3)">
-        <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">✗ 有酸素の注意点</div>
+        <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">有酸素の注意点</div>
         <div style="font-size:12px;color:var(--text2);line-height:1.7">量と強度によっては筋トレパフォーマンスを低下させる<br>筋肉も落ちる可能性がある<br>いくらやっても食べすぎればゼロ</div>
       </div>
     </div>
@@ -1974,7 +1977,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <!-- モチベーション vs 規律 -->
   <div class="card card-purple" style="margin-bottom:18px">
     <div id="anc-mindset" class="card-header-bar purple"></div>
-    <div class="h3" style="margin-bottom:5px">モチベーションは捨てる — 規律で動く</div>
+    <div class="h3" style="margin-bottom:5px">モチベーションより規律で動く</div>
     <div class="muted" style="font-size:12px;margin-bottom:14px">ダイエット成功と失敗の最大の差は「モチベーションを失った時に継続できるかどうか」です。モチベーションは感情の一つであり、感情に大きく左右されます。</div>
     <div class="grid2" style="gap:10px;margin-bottom:12px">
       <div class="card-sm" style="border-color:rgba(255,69,96,0.2)">
@@ -2001,7 +2004,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="card card-purple" style="margin-bottom:18px">
     <div id="anc-sets" class="card-header-bar purple"></div>
     <div class="row-between" style="margin-bottom:5px">
-      <div class="h3">週間セット数と筋肥大 — 収穫逓減モデル</div>
+      <div class="h3">週間セット数と筋肥大（収穫逓減モデル）</div>
       <span class="badge badge-purple" style="font-size:10px">Pelland et al. 2025</span>
     </div>
     <div class="muted" style="font-size:12px;margin-bottom:14px">「週10〜12セットで打ち止め」説の根拠だったBarbalho et al. (2019) は2020年にデータ不正が指摘され、関連論文は著者自ら撤回。現在の正確なモデルは「収穫逓減（Diminishing Returns）」です。</div>
@@ -2035,10 +2038,10 @@ input[type=range]:focus{border:none;box-shadow:none}
     </div>
   </div>
 
-  <div class="h3" style="margin:24px 0 12px;font-size:14px">📚 一次資料データベース</div>
+  <div class="h3" style="margin:24px 0 12px;font-size:14px">一次資料データベース</div>
   <div class="card" style="margin-bottom:18px">
     <div class="card-header-bar blue"></div>
-    <input type="text" id="ev-search" placeholder="🔍 著者・トピック・キーワードで検索（例: 睡眠、Gabbett、ACWR）"
+    <input type="text" id="ev-search" placeholder="著者・トピック・キーワードで検索（例: 睡眠、Gabbett、ACWR）"
       style="width:100%;font-size:13px;padding:9px 11px;margin-bottom:10px" oninput="renderEvidenceList()">
     <div id="ev-tabs" class="row" style="gap:5px;flex-wrap:wrap"></div>
   </div>
@@ -2065,7 +2068,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="card-header-bar blue"></div>
     <div class="h3" style="margin-bottom:8px">Claude API設定</div>
     <div class="muted" style="font-size:12px;margin-bottom:12px;line-height:1.7">
-      APIキーを設定すると📷<strong>食品成分表の写真から栄養素を自動読み取り</strong>できます。<br>
+      APIキーを設定すると<strong>食品成分表の写真から栄養素を自動読み取り</strong>できます。<br>
       キーはこのデバイスのみに保存。取得: <span style="color:var(--accent2)">console.anthropic.com</span>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:8px">
@@ -2126,7 +2129,7 @@ input[type=range]:focus{border:none;box-shadow:none}
 
 
   <!-- ▼ 各ページから集約した運用設定 ▼ -->
-  <div class="h3" style="margin:4px 0 12px;font-size:14px">⚙ 運用設定</div>
+  <div class="h3" style="margin:4px 0 12px;font-size:14px">運用設定</div>
   <!-- インターバルタイマー設定 -->
   <div class="card" style="margin-bottom:18px">
     <div class="card-header-bar blue"></div>
@@ -2153,7 +2156,7 @@ input[type=range]:focus{border:none;box-shadow:none}
       </div>
     </div>
     <div style="font-size:10px;color:var(--text3);margin-top:8px;text-align:center">
-      根拠: Schoenfeld (2016) + Singer (2024) — 種目タイプで自動判定 <span onclick="openEvidence('休憩')" style="color:var(--accent2);cursor:pointer">📚</span>
+      根拠: Schoenfeld (2016) + Singer (2024)。種目タイプで自動判定 <span onclick="openEvidence('休憩')" style="color:var(--accent2);cursor:pointer"></span>
     </div>
   </div>
 
@@ -2207,7 +2210,7 @@ input[type=range]:focus{border:none;box-shadow:none}
       </div>
     </div>
     <div class="alert alert-info" style="margin-bottom:10px;font-size:12px">
-      💡 <strong>使い方：</strong>シフトカレンダーに24h/非番/週休/ジムを登録すると、下のカレンダーにトレーニング推奨日が自動表示されます。緑のセル（ジム候補）をタップするとジム確定になります。
+      <strong>使い方：</strong>シフトカレンダーに24h/非番/週休/ジムを登録すると、下のカレンダーにトレーニング推奨日が自動表示されます。緑のセル（ジム候補）をタップするとジム確定になります。
     </div>
     <div id="shift-training-plan"><div class="muted">シフトを登録するとトレーニング配置が自動生成されます</div></div>
   </div>
@@ -2224,9 +2227,9 @@ input[type=range]:focus{border:none;box-shadow:none}
     </div>
     <div class="chart-wrap" style="height:180px"><canvas id="rhr-trend-chart"></canvas></div>
     <div style="font-size:10px;color:var(--text3);margin-top:8px;line-height:1.7">
-      <div>📉 持久力向上 → 安静時心拍は下がる</div>
-      <div>⚠️ 通常より5〜10bpm以上高い状態が続く → オーバートレーニングの前兆</div>
-      <div style="margin-top:2px">Uth et al. (2004) / NFPA 1582 推奨 VO2max 42以上 <span onclick="openEvidence('VO2max')" style="color:var(--accent2);cursor:pointer">📚</span></div>
+      <div>持久力向上 → 安静時心拍は下がる</div>
+      <div>通常より5〜10bpm以上高い状態が続く → オーバートレーニングの前兆</div>
+      <div style="margin-top:2px">Uth et al. (2004) / NFPA 1582 推奨 VO2max 42以上 <span onclick="openEvidence('VO2max')" style="color:var(--accent2);cursor:pointer"></span></div>
     </div>
   </div>
 
@@ -2241,7 +2244,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <div class="card" style="margin-bottom:18px">
     <div class="card-header-bar green"></div>
     <div class="row-between" style="margin-bottom:8px">
-      <div class="h3">🩺 自己診断</div>
+      <div class="h3">自己診断</div>
       <button class="btn btn-sm btn-primary" onclick="executeDiagnostics()">診断を実行</button>
     </div>
     <div class="muted" style="font-size:11px;line-height:1.7;margin-bottom:10px">
@@ -2254,7 +2257,7 @@ input[type=range]:focus{border:none;box-shadow:none}
   <!-- エラーログ -->
   <div class="card" style="margin-bottom:18px">
     <div class="card-header-bar" style="background:#f97316"></div>
-    <div class="h3" style="margin-bottom:8px">⚠️ エラーログ</div>
+    <div class="h3" style="margin-bottom:8px">エラーログ</div>
     <div class="muted" style="font-size:11px;line-height:1.7;margin-bottom:10px">
       画面上は空白になるだけで気づけない例外を自動記録します。不具合報告の際はここの内容が手がかりになります。
     </div>
@@ -2266,7 +2269,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="muted" style="font-size:12px;line-height:1.7;margin-bottom:12px">
       アプリ内の各機能が依拠する一次資料は「エビデンス」ページに集約しました。分野別タブとキーワード検索で参照できます。
     </div>
-    <button class="btn btn-primary btn-sm" onclick="showPage('evidence')">📚 エビデンス一覧を開く</button>
+    <button class="btn btn-primary btn-sm" onclick="showPage('evidence')">エビデンス一覧を開く</button>
   </div>
 </div>
 
@@ -2317,7 +2320,7 @@ const cfg=()=>DB.get('cfg')||{tdee:2800,goalmode:'maintain',water:2500,name:''};
 const today=()=>new Date().toISOString().slice(0,10);
 const fmtInt=n=>isFinite(n)?Math.round(n):'—';
 const fmt1=n=>isFinite(n)?Number(n).toFixed(1):'—';
-const typeLabel={strength:'筋力',hiit:'HIIT',cardio:'有酸素',functional:'機能',mobility:'回復',firefighting:'消防訓練',firefighter_run:'🔥防火装備RUN'};
+const typeLabel={strength:'筋力',hiit:'HIIT',cardio:'有酸素',functional:'機能',mobility:'回復',firefighting:'消防訓練',firefighter_run:'防火装備RUN'};
 const mealLabel={breakfast:'朝食',preworkout:'トレ前',postworkout:'トレ後',lunch:'昼食',dinner:'夕食',snack:'間食'};
 const pageNames={dashboard:'ダッシュボード',peaking:'ピーキングプランナー',program:'今日のメニュー',training:'トレーニング記録',nutrition:'栄養管理',sleep:'睡眠・回復',shift:'シフト管理',gut:'腸内環境管理',supplement:'サプリメント',tdee:'TDEEカリキュレーター',analysis:'分析レポート',evidence:'エビデンス',settings:'設定'};
 
@@ -2398,7 +2401,7 @@ let aWeekly=null,aWeight=null,aNutr=null,aWell=null;
 
 // ===== data-programs.js =====
 const PROGRAMS={
-  FBS:{id:'FBS',name:'FULL BODY SPLIT',abbr:'FBS',desc:'SGIR HQ PREMIUM準拠・全身3分割',color:'#4a9eff',freq:'週3〜4回',
+  FBS:{id:'FBS',name:'FULL BODY SPLIT',abbr:'FBS',desc:'全身3分割',color:'#4a9eff',freq:'週3〜4回',
     sessions:{FBA:{name:'FULL BODY A',focus:'プレスフォーカス',color:'#4a9eff',letter:'A'},FBB:{name:'FULL BODY B',focus:'プルフォーカス',color:'#f5a623',letter:'B'},FBC:{name:'FULL BODY C',focus:'スクワットフォーカス',color:'#22c55e',letter:'C'}},
     cycle:['FBA','FBB','FBC'],scheduleHint:'A→B→C→休養のサイクル'},
   PPL:{id:'PPL',name:'PPL SPLIT',abbr:'PPL',desc:'Push・Pull・Legs 3分割',color:'#f5a623',freq:'週3〜6回',
@@ -2500,9 +2503,9 @@ function applyCookingToForm(weightG, method) {
   const hint = document.getElementById('cooking-hint');
   if (hint) {
     hint.innerHTML = f.oilAbs > 0
-      ? `<span style="color:var(--accent3)">🍳 ${result.note} (脂質+${Math.round(rawG*f.oilAbs*10)/10}g)</span>`
+      ? `<span style="color:var(--accent3)">${result.note} (脂質+${Math.round(rawG*f.oilAbs*10)/10}g)</span>`
       : result.cookedWeightG !== Math.round(rawG)
-        ? `<span style="color:var(--text3)">⚖ ${result.note}</span>`
+        ? `<span style="color:var(--text3)">${result.note}</span>`
         : '';
   }
 }
@@ -2824,7 +2827,7 @@ const EATING_OUT_DB={
 
 // ============================================================
 // 経験レベル別ボリューム閾値（収穫逓減モデル）
-// 根拠: Pelland et al. (2025) n=2058 / Israetel <span onclick="openEvidence('セット数')" style="color:var(--accent2);cursor:pointer">📚</span> et al. 2019
+// 根拠: Pelland et al. (2025) n=2058 / Israetel <span onclick="openEvidence('セット数')" style="color:var(--accent2);cursor:pointer"></span> et al. 2019
 // シフト補正: 24h勤務後はMRVを0.6倍（睡眠不足による回復能力低下）
 // ============================================================
 const VOLUME_LEVELS = {
@@ -3113,7 +3116,7 @@ const FOOD_PRESETS={
      highlight:'鉄分・ビタミンB6・B3豊富',
      note:'むね肉より風味があり継続しやすい。発汗による鉄喪失の補充に有効。'},
     {name:'鶏ささみ',unit:'g',cal:98,p:23.0,c:0,f:0.8,
-     highlight:'最低脂質・減量期最強のタンパク源',
+     highlight:'脂質が最も少なく、減量期に向くタンパク源',
      note:'むね肉より低脂質。レンチン調理で手軽に高タンパク摂取。'},
     {name:'全卵（Lサイズ）',unit:'個(60g)',per:60,cal:91,p:7.4,c:0.2,f:6.2,
      highlight:'卵黄の脂質がMPSシグナルを強化・コリン・ロイシン豊富',
@@ -3125,7 +3128,7 @@ const FOOD_PRESETS={
      highlight:'EPA+DHA約1,000mg・ビタミンD・EIMD抑制',
      note:'火災現場活動後の筋損傷（EIMD）を抑制。週2回以上が理想。'},
     {name:'サバ（生）',unit:'g',cal:202,p:18.0,c:0.3,f:14.0,
-     highlight:'EPA+DHA約1,800mg（最強クラス）・ビタミンD同時補給',
+     highlight:'EPA+DHA約1,800mg（トップクラス）・ビタミンD同時補給',
      note:'コスパ最高の青魚。缶詰も可（水煮缶推奨）。'},
     {name:'イワシ（生）',unit:'g',cal:156,p:19.8,c:0.2,f:8.8,
      highlight:'EPA+DHA約2,000mg・カルシウム・セレン',
@@ -3175,7 +3178,7 @@ const FOOD_PRESETS={
   veggie:[
     {name:'ブロッコリー（茹で）',unit:'g',cal:33,p:3.9,c:4.3,f:0.4,
      highlight:'スルフォラファン（解毒酵素誘導）・ビタミンC・K・葉酸',
-     note:'火災ガス暴露による解毒をサポート。最強の抗酸化野菜。毎日推奨。'},
+     note:'火災ガス暴露による解毒をサポート。抗酸化成分が多い野菜。毎日推奨。'},
     {name:'ほうれん草（茹で）',unit:'g',cal:25,p:2.6,c:3.6,f:0.5,
      highlight:'鉄・葉酸・マグネシウム・K1',
      note:'消防士のMg不足リスク（発汗消耗）の食事対策。鉄はビタミンCと同時摂取で吸収率2〜3倍。'},
@@ -3190,7 +3193,7 @@ const FOOD_PRESETS={
      note:'加熱するとリコピン吸収率UP。缶詰も可。火災現場の酸化ストレスに対抗。'},
     {name:'ブルーベリー（冷凍）',unit:'g',cal:49,p:0.5,c:12.9,f:0.1,
      highlight:'アントシアニン・活性酸素（ROS）早期正常化',
-     note:'最強のリカバリーフード。毎日欠かさず摂取すべき（docx第1.3節RCT）。'},
+     note:'回復に役立つ食品。毎日欠かさず摂取すべき（docx第1.3節RCT）。'},
     {name:'アボカド',unit:'半個(80g)',per:80,cal:149,p:2.1,c:3.2,f:14.8,
      highlight:'オレイン酸・カリウム（最高含有）・葉酸',
      note:'消防士の電解質補充（カリウム豊富）に有効。良質な一価不飽和脂肪酸。'},
@@ -3331,15 +3334,15 @@ function getMealTemplateButtonsHTML(){
   }
   return `
     <div style="background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.2);border-radius:var(--rs);padding:12px;margin-bottom:12px">
-      <div style="font-size:11px;color:var(--accent2);font-weight:600;margin-bottom:8px;letter-spacing:1px">⚡ 食事テンプレート ${phaseLabel} — ワンタップで入力</div>
+      <div style="font-size:11px;color:var(--accent2);font-weight:600;margin-bottom:8px">${phaseLabel}の食事テンプレート（押すと入力されます）</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-sm" onclick="loadMealTemplate('preworkout')"
           style="background:rgba(245,166,35,0.12);border-color:rgba(245,166,35,0.4);color:#fbbf24">
-          🍌 トレ前食テンプレート
+          トレ前食テンプレート
         </button>
         <button class="btn btn-sm" onclick="loadMealTemplate('postworkout')"
           style="background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.4);color:#4ade80">
-          🍚 トレ後食テンプレート
+          トレ後食テンプレート
         </button>
       </div>
       <div style="font-size:10px;color:var(--text3);margin-top:6px">体重・ピーキングフェーズ・目標モードに基づいて自動算出</div>
@@ -3389,7 +3392,7 @@ function showFoodSearch(query) {
     el.innerHTML = `
       <div class="muted" style="padding:12px;font-size:12px">
         「${query.trim()}」はプリセットにありません。<br>
-        <button class="btn btn-sm btn-primary" style="margin-top:8px" onclick="searchFoodOnline()">🌐 ネットで栄養情報を検索</button>
+        <button class="btn btn-sm btn-primary" style="margin-top:8px" onclick="searchFoodOnline()">ネットで栄養情報を検索</button>
       </div>`;
   }
 }
@@ -3727,28 +3730,28 @@ function renderQuickActions(){
   const pct=tdee?Math.round(todayKcal/tdee*100):0;
   const actions=[
     {
-      label: hasTrain?'✅ トレ記録済み':'🏋️ トレーニングを記録',
+      label: hasTrain?'✓ トレ記録済み':'トレーニングを記録',
       sub: hasTrain?'本日の記録あり':'記録画面を開く',
       color: hasTrain?'var(--accent4)':'var(--accent)',
       bg: hasTrain?'rgba(34,197,94,0.08)':'rgba(255,69,96,0.08)',
       onclick: "showPage('training')"
     },
     {
-      label: hasMeal?'🍽️ 食事 '+pct+'%':'🍽️ 食事を記録',
+      label: hasMeal?'食事 '+pct+'%':'食事を記録',
       sub: hasMeal?todayKcal+'kcal / '+tdee+'kcal':'栄養管理を開く',
       color: hasMeal?(pct>=80?'var(--accent4)':'var(--accent3)'):'var(--accent2)',
       bg: hasMeal?'rgba(245,166,35,0.08)':'rgba(74,158,255,0.08)',
       onclick: "showPage('nutrition')"
     },
     {
-      label: hasSleep?'😴 睡眠記録済み':'😴 睡眠を記録',
+      label: hasSleep?'睡眠記録済み':'睡眠を記録',
       sub: hasSleep?(()=>{const s=sleeps.filter(x=>x.date===todayStr).pop();return s?(parseFloat(s.duration??s.sleep)||0).toFixed(1)+'h':'記録あり'})():'睡眠・回復を開く',
       color: hasSleep?'var(--accent4)':'var(--text2)',
       bg: hasSleep?'rgba(34,197,94,0.08)':'rgba(128,128,128,0.06)',
       onclick: "showPage('sleep')"
     },
     {
-      label: '📋 今日のメニュー',
+      label: '今日のメニュー',
       sub: 'プログラムを確認',
       color: 'var(--accent2)',
       bg: 'rgba(74,158,255,0.06)',
@@ -3766,12 +3769,12 @@ function renderQuickActions(){
 // ② サプリ摂取タイミング（現在時刻連動）
 // ============================================================
 const SUPP_TIMINGS=[
-  {hour:[5,6,7],label:'🌅 起床時',items:['マグネシウム 100mg + 水 500ml'],color:'var(--accent3)'},
-  {hour:[6,7,8,9],label:'🍳 朝食時',items:['ビタミンD3（2,000〜4,000IU）','K2（100〜200µg）','オメガ3（1,000mg）'],color:'var(--accent3)'},
-  {hour:[10,11,12],label:'💪 トレ前（60〜90分前）',items:['L-シトルリン（6〜8g）','カフェイン（任意）'],color:'var(--accent)'},
-  {hour:[13,14,15,16],label:'🏋️ トレ後',items:['ホエイアイソレート（25〜40g）','クレアチン（5g）'],color:'var(--accent)'},
-  {hour:[17,18,19],label:'🍽️ 夕食時',items:['オメガ3（1,000mg）','マルチビタミン'],color:'var(--accent2)'},
-  {hour:[20,21,22,23],label:'🌙 就寝前',items:['マグネシウム（200mg）','カゼインプロテイン（30g）'],color:'#a78bfa'},
+  {hour:[5,6,7],label:'起床時',items:['マグネシウム 100mg + 水 500ml'],color:'var(--accent3)'},
+  {hour:[6,7,8,9],label:'朝食時',items:['ビタミンD3（2,000〜4,000IU）','K2（100〜200µg）','オメガ3（1,000mg）'],color:'var(--accent3)'},
+  {hour:[10,11,12],label:'トレ前（60〜90分前）',items:['L-シトルリン（6〜8g）','カフェイン（任意）'],color:'var(--accent)'},
+  {hour:[13,14,15,16],label:'トレ後',items:['ホエイアイソレート（25〜40g）','クレアチン（5g）'],color:'var(--accent)'},
+  {hour:[17,18,19],label:'夕食時',items:['オメガ3（1,000mg）','マルチビタミン'],color:'var(--accent2)'},
+  {hour:[20,21,22,23],label:'就寝前',items:['マグネシウム（200mg）','カゼインプロテイン（30g）'],color:'#a78bfa'},
 ];
 
 
@@ -3836,7 +3839,7 @@ function renderSuppAgeRecommend() {
         ['オメガ3', '2,000mg（慢性炎症・CVD予防に増量）'],
         ['マグネシウム', '200mg（睡眠・筋機能・心血管保護）'],
       ],
-      note: '⚠️ 同化抵抗性が明確化（Volpi 2010）。CVDリスク管理としてオメガ3を積極摂取。'
+      note: '同化抵抗性が明確化（Volpi 2010）。CVDリスク管理としてオメガ3を積極摂取。'
     },
     fifties: {
       priority: 'CVD予防・筋量維持・関節保護を総合的に。',
@@ -3847,7 +3850,7 @@ function renderSuppAgeRecommend() {
         ['クルクミン', '関節・慢性炎症対策として追加推奨'],
         ['コラーゲン+VC', '腱・靱帯保護（動作品質低下期）'],
       ],
-      note: '⚠️ 動作品質急低下期（Redshaw 2023）。関節保護サプリの優先度上昇。'
+      note: '動作品質急低下期（Redshaw 2023）。関節保護サプリの優先度上昇。'
     },
     senior: {
       priority: '筋量・骨密度・心肺機能の積極的維持。医師連携推奨。',
@@ -3858,7 +3861,7 @@ function renderSuppAgeRecommend() {
         ['クルクミン', '慢性炎症・関節対策を継続'],
         ['マグネシウム', '200mg（心機能・睡眠・筋機能）'],
       ],
-      note: '⚠️ 各サプリは医師・薬剤師と相談の上で。薬剤との相互作用に注意。'
+      note: '各サプリは医師・薬剤師と相談の上で。薬剤との相互作用に注意。'
     }
   };
 
@@ -3895,7 +3898,7 @@ function renderSuppTiming(){
         ${t.items.map(i=>`<div style="font-size:11px;color:var(--text2)">・${i}</div>`).join('')}
       </div>`).join('');
   } else {
-    nowEl.innerHTML='<div style="font-size:13px;color:var(--text3)">現在の摂取タイミングなし — 次のタイミングまで待機</div>';
+    nowEl.innerHTML='<div style="font-size:13px;color:var(--text3)">今は摂取するタイミングではありません</div>';
   }
   if(next){
     const nextH=next.hour[0];
@@ -4040,12 +4043,12 @@ function renderWeeklyReview(){
 
   // アドバイス
   const advices=[];
-  if(sessionCount<3)advices.push('🏋️ 今週のトレーニングが'+sessionCount+'回と少なめです。週3回を目安に追加できないか確認しましょう。');
-  if(avgSleep>0&&avgSleep<7.5)advices.push('😴 平均睡眠が'+avgSleep+'hと目標(7.5h)を下回っています。就寝時刻を30分早める試みを。');
-  if(totalSets>0&&totalSets<60)advices.push('📊 週間セット数が'+totalSets+'と低め。種目あたりのセット数を1〜2増やすことを検討してください。');
-  if(avgKcal>0&&Math.abs(avgKcal-tdee)/tdee>0.2)advices.push('🍽️ 平均摂取('+avgKcal+'kcal)と目標('+tdee+'kcal)の乖離が大きいです。食事記録を毎食続けましょう。');
+  if(sessionCount<3)advices.push('今週のトレーニングが'+sessionCount+'回と少なめです。週3回を目安に追加できないか確認してください。');
+  if(avgSleep>0&&avgSleep<7.5)advices.push('平均睡眠が'+avgSleep+'hと目標(7.5h)を下回っています。就寝時刻を30分早める試みを。');
+  if(totalSets>0&&totalSets<60)advices.push('週間セット数が'+totalSets+'と低め。種目あたりのセット数を1〜2増やすことを検討してください。');
+  if(avgKcal>0&&Math.abs(avgKcal-tdee)/tdee>0.2)advices.push('平均摂取('+avgKcal+'kcal)と目標('+tdee+'kcal)の乖離が大きいです。食事記録を毎食続けましょう。');
   if(advices.length===0){
-    advices.push('🌟 今週は全項目で良好なパフォーマンスです。この調子を来週も維持しましょう！');
+    advices.push('今週は全項目で良好です。来週も同じ配分で続けてください。');
   }
   advEl.innerHTML=advices.join('<br>');
 }
@@ -4069,15 +4072,15 @@ function renderSupplementPage(){
         <div style="display:flex;align-items:flex-start;gap:10px">
           <div style="flex:1">
             <div style="font-size:13px;font-weight:600;margin-bottom:3px">${s.name}</div>
-            <div style="font-size:11px;color:var(--accent2);margin-bottom:4px">📍 ${s.dose} / ${s.timing}</div>
+            <div style="font-size:11px;color:var(--accent2);margin-bottom:4px">${s.dose} / ${s.timing}</div>
             <div style="font-size:12px;color:var(--text2)">${s.effect}</div>
             <details class="expl">
               <summary>消防士特記・食事での代替・根拠</summary>
               <div class="expl-body">
-                <div style="color:var(--accent3)">🔥 消防士特記：${s.firefighter}</div>
-                <div style="color:var(--accent4)">🥗 食事での代替：${s.foodAlt}</div>
+                <div style="color:var(--accent3)">消防士特記：${s.firefighter}</div>
+                <div style="color:var(--accent4)">食事での代替：${s.foodAlt}</div>
                 <div style="color:var(--text3);font-size:10px">根拠：${s.evidence}
-                  <span onclick="openEvidence('${(s.name||'').replace(/'/g,'')}')" style="color:var(--accent2);cursor:pointer">📚</span>
+                  <span onclick="openEvidence('${(s.name||'').replace(/'/g,'')}')" style="color:var(--accent2);cursor:pointer"></span>
                 </div>
               </div>
             </details>
@@ -4339,7 +4342,7 @@ function renderRestSettings() {
 
   el.innerHTML = `
     <div style="font-size:11px;color:var(--text3);margin-bottom:12px;line-height:1.7;background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.2);border-radius:var(--rs);padding:10px">
-      <div style="font-weight:600;color:var(--accent2);margin-bottom:4px">📚 エビデンス根拠</div>
+      <div style="font-weight:600;color:var(--accent2);margin-bottom:4px">エビデンス根拠</div>
       <div>• Schoenfeld et al. (2016) JSCR: 3分 > 1分（筋肥大・筋力ともに有意差）</div>
       <div>• Singer, Schoenfeld et al. (2024) Frontiers: 90秒超は差なし、60秒超 > 60秒以下の小差</div>
       <div style="color:var(--accent4);margin-top:4px">→ 60秒以上確保し、コンパウンドは長め・アイソレーションは短めが現時点の最適解</div>
@@ -4417,7 +4420,7 @@ function renderShiftBonusSettings() {
 
   el.innerHTML = `
     <div style="font-size:11px;color:var(--text3);margin-bottom:12px;background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.2);border-radius:var(--rs);padding:10px;line-height:1.7">
-      <div style="font-weight:600;color:var(--accent2);margin-bottom:4px">📌 補正値について</div>
+      <div style="font-weight:600;color:var(--accent2);margin-bottom:4px">補正値について</div>
       <div>• 個人差が大きいため自分の実測値に合わせてください</div>
       <div>• デフォルト値は待機多めの標準的な勤務日を想定</div>
       <div>• 出動が多い日や訓練が多い日は手動で増やしてください</div>
@@ -4583,7 +4586,7 @@ function sortExercisesByType() {
     btn.textContent = '✓ 並び替え完了';
     btn.style.color = 'var(--accent4)';
     setTimeout(() => {
-      btn.textContent = '⚡ 最適順に並び替え';
+      btn.textContent = '最適順に並び替え';
       btn.style.color = '';
     }, 2000);
   }
@@ -4644,7 +4647,7 @@ function updateVolumeLevelNote(level) {
   const lv = VOLUME_LEVELS[level] || VOLUME_LEVELS.beginner;
   const note = document.getElementById('volume-level-note');
   if (note) {
-    note.innerHTML = `${lv.label}基準 — MEV: 週${lv.mev}セット / 効率ゾーン: 週${lv.sweet}セット / MRV: 週${lv.mrv}セット`;
+    note.innerHTML = `${lv.label}の基準　MEV: 週${lv.mev}セット / 効率ゾーン: 週${lv.sweet}セット / MRV: 週${lv.mrv}セット`;
     note.style.color = lv.color;
   }
   // 経験レベル情報パネル
@@ -4666,7 +4669,7 @@ function updateVolumeLevelNote(level) {
           <div style="font-size:9px;color:var(--text3)">MRV(最大回復)</div>
         </div>
       </div>
-      <div style="font-size:10px;color:var(--text3)">⚡ ${shiftNote}</div>
+      <div style="font-size:10px;color:var(--text3)">${shiftNote}</div>
     `;
   }
 }
@@ -4737,16 +4740,16 @@ function calcInjuryRisk() {
   // リスクレベル判定
   let level, color, icon, advice;
   if (score >= 70) {
-    level='高リスク'; color='var(--accent)'; icon='🚨';
+    level='高リスク'; color='var(--accent)'; icon='';
     advice='トレーニング強度を50%以下に下げ、回復を最優先。怪我の前兆（関節痛・筋肉の硬さ）に注意。';
   } else if (score >= 45) {
-    level='中リスク'; color='#f97316'; icon='⚠️';
+    level='中リスク'; color='#f97316'; icon='';
     advice='高強度種目を避け、フォームを丁寧に。十分な睡眠とストレッチを優先。';
   } else if (score >= 20) {
-    level='低リスク'; color='#fbbf24'; icon='💛';
+    level='低リスク'; color='#fbbf24'; icon='';
     advice='通常通りトレーニング可能。ウォームアップを丁寧に行うこと。';
   } else {
-    level='安全'; color='var(--accent4)'; icon='✅';
+    level='安全'; color='var(--accent4)'; icon='✓';
     advice='コンディション良好。負荷を上げるタイミングとしても適切。';
   }
 
@@ -4877,7 +4880,6 @@ function renderInjuryRisk() {
 
   el.innerHTML = `
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-      <div style="font-size:36px;line-height:1">${r.icon}</div>
       <div style="flex:1">
         <div style="font-size:22px;font-weight:700;color:${r.color};font-family:var(--font-mono)">${r.score}<span style="font-size:13px">/100</span></div>
         <div style="font-size:14px;font-weight:600;color:${r.color}">${r.level}</div>
@@ -4923,7 +4925,7 @@ function renderAgeAdjustedTargets() {
   el.innerHTML = `
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
       <div style="flex:1">
-        <div style="font-size:12px;font-weight:600;color:var(--accent2)">${t.age}歳・${t.weight}kg — ${groupLabel}</div>
+        <div style="font-size:12px;font-weight:600;color:var(--accent2)">${t.age}歳・${t.weight}kg（${groupLabel}）</div>
         <div style="font-size:11px;color:var(--text2);margin-top:4px;line-height:1.6">${t.ageAdvice}</div>
       </div>
     </div>
@@ -4982,8 +4984,8 @@ function renderAgeAdjustedTargets() {
     <!-- 注意事項 -->
     ${t.boneHealthNote || t.cvdNote ? `
     <div style="font-size:11px;line-height:1.8">
-      ${t.boneHealthNote ? `<div style="padding:6px 8px;background:rgba(74,158,255,0.08);border-radius:var(--rs);margin-bottom:4px">🦴 ${t.boneHealthNote}</div>` : ''}
-      ${t.cvdNote ? `<div style="padding:6px 8px;background:rgba(255,69,96,0.08);border-radius:var(--rs)">❤️ ${t.cvdNote}</div>` : ''}
+      ${t.boneHealthNote ? `<div style="padding:6px 8px;background:rgba(74,158,255,0.08);border-radius:var(--rs);margin-bottom:4px">${t.boneHealthNote}</div>` : ''}
+      ${t.cvdNote ? `<div style="padding:6px 8px;background:rgba(255,69,96,0.08);border-radius:var(--rs)">${t.cvdNote}</div>` : ''}
     </div>
     ` : ''}
 
@@ -5173,19 +5175,19 @@ function calcCVDRisk() {
 
   let level, color, icon, advice, checkItems;
   if (score >= 60) {
-    level='要注意'; color='var(--accent)'; icon='❤️‍🔥';
+    level='要注意'; color='var(--accent)'; icon='‍';
     advice='医師への相談を強く推奨。激しい運動前に心電図・血圧チェックを。';
     checkItems=['定期的な血圧測定を開始','かかりつけ医への相談','有酸素強度をZone2以下に制限'];
   } else if (score >= 35) {
-    level='注意'; color='#f97316'; icon='⚠️';
+    level='注意'; color='#f97316'; icon='';
     advice='Zone2有酸素を週150分以上継続。体重・睡眠の改善を優先。';
     checkItems=['安静時心拍を毎朝記録','Zone2有酸素を週3回以上','BMI 25以下を目標に'];
   } else if (score >= 15) {
-    level='良好'; color='#fbbf24'; icon='💛';
+    level='良好'; color='#fbbf24'; icon='';
     advice='現状維持。定期的な有酸素運動と体重管理を継続。';
     checkItems=['現在のペースを維持','年1回の健康診断を継続'];
   } else {
-    level='優秀'; color='var(--accent4)'; icon='💚';
+    level='優秀'; color='var(--accent4)'; icon='';
     advice='心血管コンディション良好。このまま維持。';
     checkItems=['現在のライフスタイルを継続'];
   }
@@ -5200,7 +5202,6 @@ function renderCVDRisk() {
 
   el.innerHTML = `
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-      <div style="font-size:32px">${r.icon}</div>
       <div style="flex:1">
         <div style="font-size:22px;font-weight:700;color:${r.color};font-family:var(--font-mono)">${r.score}<span style="font-size:13px">/100</span></div>
         <div style="font-size:14px;font-weight:600;color:${r.color}">${r.level}</div>
@@ -5228,9 +5229,9 @@ function renderCVDRisk() {
     </div>
     <div style="font-size:12px;color:var(--text2);padding:8px 10px;background:rgba(255,255,255,0.04);border-radius:var(--rs);margin-bottom:10px;line-height:1.6">${r.advice}</div>
     <div style="font-size:11px">
-      ${r.checkItems.map(item=>`<div style="padding:4px 0;color:var(--text3)">📋 ${item}</div>`).join('')}
+      ${r.checkItems.map(item=>`<div style="padding:4px 0;color:var(--text3)">${item}</div>`).join('')}
     </div>
-    <div style="font-size:9px;color:var(--text3);margin-top:8px">Smith (2019) / AHA Guidelines / Barger et al. (2015) JCSM / ACSM 2022 <span onclick="openEvidence('心血管')" style="color:var(--accent2);cursor:pointer">📚</span><br>※医療診断ではありません。心配な症状は医師に相談してください。</div>
+    <div style="font-size:9px;color:var(--text3);margin-top:8px">Smith (2019) / AHA Guidelines / Barger et al. (2015) JCSM / ACSM 2022 <span onclick="openEvidence('心血管')" style="color:var(--accent2);cursor:pointer"></span><br>※医療診断ではありません。心配な症状は医師に相談してください。</div>
   `;
 }
 
@@ -5273,8 +5274,8 @@ function renderFireExposureLog() {
           onclick="deleteFireExposure(${r.id})">削除</button>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:4px;font-size:11px">
-        ${r.smoke?'<span style="padding:2px 7px;background:rgba(255,69,96,0.12);border-radius:4px;color:var(--accent)">🔥 煙暴露</span>':''}
-        ${r.ba?'<span style="padding:2px 7px;background:rgba(74,158,255,0.12);border-radius:4px;color:var(--accent2)">🫁 BA使用</span>':''}
+        ${r.smoke?'<span style="padding:2px 7px;background:rgba(255,69,96,0.12);border-radius:4px;color:var(--accent)">煙暴露</span>':''}
+        ${r.ba?'<span style="padding:2px 7px;background:rgba(74,158,255,0.12);border-radius:4px;color:var(--accent2)">BA使用</span>':''}
         ${r.notes?`<span style="color:var(--text3)">${r.notes}</span>`:''}
       </div>
     </div>
@@ -5320,12 +5321,12 @@ function deleteFireExposure(id) {
 // ③ 関節・筋腱ストレス記録
 // ============================================================
 const BODY_PARTS = [
-  {id:'knee',label:'膝',icon:'🦵'},
-  {id:'shoulder',label:'肩',icon:'💪'},
-  {id:'lower_back',label:'腰',icon:'🔧'},
-  {id:'elbow',label:'肘',icon:'💪'},
-  {id:'hip',label:'股関節',icon:'🦴'},
-  {id:'ankle',label:'足首',icon:'🦶'},
+  {id:'knee',label:'膝',icon:''},
+  {id:'shoulder',label:'肩',icon:''},
+  {id:'lower_back',label:'腰',icon:''},
+  {id:'elbow',label:'肘',icon:''},
+  {id:'hip',label:'股関節',icon:''},
+  {id:'ankle',label:'足首',icon:''},
 ];
 
 function saveJointRecord() {
@@ -5359,7 +5360,7 @@ function renderJointLog() {
 
   const activeParts = Object.entries(partData);
   if (!activeParts.length) {
-    el.innerHTML = '<div class="muted" style="color:var(--accent4)">✅ 直近14日で不調な記録なし</div>';
+    el.innerHTML = '<div class="muted" style="color:var(--accent4)">✓ 直近14日で不調な記録なし</div>';
     return;
   }
 
@@ -5370,7 +5371,7 @@ function renderJointLog() {
         const color = data.avg>=7?'var(--accent)':data.avg>=4?'#f97316':'#fbbf24';
         return `
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-            <span style="font-size:18px">${part?.icon||'🔧'}</span>
+            <span style="font-size:18px">${part?.icon||''}</span>
             <div style="flex:1">
               <div style="display:flex;justify-content:space-between;margin-bottom:3px">
                 <span style="font-size:12px;font-weight:500">${part?.label||partId}</span>
@@ -5386,7 +5387,7 @@ function renderJointLog() {
     </div>
     ${activeParts.some(([,d])=>d.avg>=5) ? `
       <div style="font-size:11px;padding:8px;background:rgba(255,69,96,0.08);border:1px solid rgba(255,69,96,0.3);border-radius:var(--rs)">
-        ⚠️ 慢性障害の前兆の可能性があります。該当部位を酷使するエクササイズを一時的に除外し、様子を見てください。
+        慢性障害の前兆の可能性があります。該当部位を酷使するエクササイズを一時的に除外し、様子を見てください。
       </div>
     ` : ''}
   `;
@@ -5448,11 +5449,11 @@ const JOINT_EXERCISE_MAP = {
 };
 
 const JOINT_SEV = {
-  severe:  { label:'除外推奨', icon:'⛔', color:'var(--accent)', bg:'rgba(255,69,96,0.08)',  bd:'rgba(255,69,96,0.3)',
+  severe:  { label:'除外推奨', icon:'', color:'var(--accent)', bg:'rgba(255,69,96,0.08)',  bd:'rgba(255,69,96,0.3)',
              action:'高負荷種目は1〜2週間の除外を推奨。中負荷種目も重量を落として様子を見てください。' },
-  caution: { label:'負荷軽減', icon:'⚠️', color:'#f97316',      bg:'rgba(249,115,22,0.08)', bd:'rgba(249,115,22,0.3)',
+  caution: { label:'負荷軽減', icon:'', color:'#f97316',      bg:'rgba(249,115,22,0.08)', bd:'rgba(249,115,22,0.3)',
              action:'高負荷種目は重量20〜30%減または可動域制限で継続。悪化するようなら除外に切り替えてください。' },
-  watch:   { label:'経過観察', icon:'👁', color:'#fbbf24',      bg:'rgba(251,191,36,0.08)', bd:'rgba(251,191,36,0.3)',
+  watch:   { label:'経過観察', icon:'', color:'#fbbf24',      bg:'rgba(251,191,36,0.08)', bd:'rgba(251,191,36,0.3)',
              action:'除外は不要です。フォームと可動域に注意しつつ、記録を継続して推移を見てください。' },
 };
 
@@ -5530,7 +5531,7 @@ function renderJointExerciseFlags() {
   if (!flags.length) {
     if (full) full.innerHTML = `
       <div style="margin-top:14px;padding:10px 12px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.25);border-radius:var(--rs);font-size:12px;color:var(--accent4)">
-        ✅ 直近14日で要注意の部位はありません。除外を推奨する種目もありません。
+        ✓ 直近14日で要注意の部位はありません。除外を推奨する種目もありません。
       </div>`;
     if (compact) compact.innerHTML = '';
     return;
@@ -5542,7 +5543,7 @@ function renderJointExerciseFlags() {
   if (full) {
     full.innerHTML = `
       <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
-        <div class="h3" style="margin-bottom:4px;font-size:14px">⚡ 種目自動フラグ</div>
+        <div class="h3" style="margin-bottom:4px;font-size:14px">種目自動フラグ</div>
         <div class="muted" style="font-size:11px;margin-bottom:12px">
           直近14日の記録（直近7日は重み×2）から、${prog.name} 内で該当部位に負荷をかける種目を自動抽出しています。
         </div>
@@ -5556,7 +5557,7 @@ function renderJointExerciseFlags() {
           return `
           <div style="margin-bottom:14px;padding:12px;background:${sv.bg};border:1px solid ${sv.bd};border-radius:var(--rs)">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-              <span style="font-size:18px">${part?.icon || '🔧'}</span>
+              <span style="font-size:18px">${part?.icon || ''}</span>
               <span style="font-size:13px;font-weight:700">${part?.label || f.part}</span>
               <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:${sv.color};color:#0a0a0f">${sv.icon} ${sv.label}</span>
               <span style="font-size:10px;font-family:var(--font-mono);color:var(--text3);margin-left:auto">平均${f.avg} / 最大${f.max} / ${f.count}件</span>
@@ -5587,7 +5588,7 @@ function renderJointExerciseFlags() {
           </div>`;
         }).join('')}
         <div style="font-size:9px;color:var(--text3);margin-top:4px;line-height:1.6">
-          Escamilla (2001) / Kolber et al. (2010) / Hartmann et al. (2013) / Gabbett (2016) BJSM <span onclick="openEvidence('傷害予防')" style="color:var(--accent2);cursor:pointer">📚</span><br>
+          Escamilla (2001) / Kolber et al. (2010) / Hartmann et al. (2013) / Gabbett (2016) BJSM <span onclick="openEvidence('傷害予防')" style="color:var(--accent2);cursor:pointer"></span><br>
           ※医療診断ではありません。痛みが2週間以上続く・夜間痛がある場合は整形外科を受診してください。
         </div>
       </div>`;
@@ -5604,7 +5605,7 @@ function renderJointExerciseFlags() {
         return `
         <div style="margin-bottom:12px;padding:11px 13px;background:${sv.bg};border:1px solid ${sv.bd};border-radius:var(--rs)">
           <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap">
-            <span style="font-size:15px">${part?.icon || '🔧'}</span>
+            <span style="font-size:15px">${part?.icon || ''}</span>
             <span style="font-size:12px;font-weight:700">${part?.label || f.part}に負荷が蓄積しています</span>
             <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:${sv.color};color:#0a0a0f">${sv.icon} ${sv.label}</span>
           </div>
@@ -5658,10 +5659,10 @@ function getDutyDayNutrition() {
       magnesium: 400,   // mg/日
     },
     timing: [
-      { time:'出勤前2h', note:`炭水化物${Math.round(weight*1.5)}g + タンパク質${Math.round(weight*0.4)}g`, icon:'🍚' },
-      { time:'活動中', note:`30分毎に水200ml + 電解質補給（長時間出動時）`, icon:'💧' },
-      { time:'帰署後30分', note:`ホエイ${age>=40?'40':'25'}g + 炭水化物${Math.round(weight*0.8)}g（グリコーゲン回復）`, icon:'🏋️' },
-      { time:'就寝前', note:`カゼイン30g + Mg200mg（睡眠中の筋肉保護）`, icon:'🌙' },
+      { time:'出勤前2h', note:`炭水化物${Math.round(weight*1.5)}g + タンパク質${Math.round(weight*0.4)}g`, icon:'' },
+      { time:'活動中', note:`30分毎に水200ml + 電解質補給（長時間出動時）`, icon:'' },
+      { time:'帰署後30分', note:`ホエイ${age>=40?'40':'25'}g + 炭水化物${Math.round(weight*0.8)}g（グリコーゲン回復）`, icon:'' },
+      { time:'就寝前', note:`カゼイン30g + Mg200mg（睡眠中の筋肉保護）`, icon:'' },
     ],
   };
 }
@@ -5693,7 +5694,7 @@ function renderDutyDayProtocol() {
       </div>
     </div>
     <div style="margin-bottom:12px">
-      <div style="font-size:11px;font-weight:600;margin-bottom:8px">📋 タイミング別プロトコル</div>
+      <div style="font-size:11px;font-weight:600;margin-bottom:8px">タイミング別プロトコル</div>
       ${p.timing.map(t=>`
         <div style="display:flex;gap:8px;padding:8px;background:var(--bg3);border-radius:var(--rs);margin-bottom:6px;font-size:11px">
           <div style="font-size:18px;flex-shrink:0">${t.icon}</div>
@@ -5742,7 +5743,7 @@ function calcReverseDiet() {
   const carb = Math.round(Math.max(0, carbKcal) / 4);
 
   document.getElementById('rv-macro-suggest').innerHTML = `
-    <div style="font-size:11px;color:var(--text2);margin-bottom:6px">📊 推奨マクロ（メンテナンス移行後）</div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:6px">推奨マクロ（メンテナンス移行後）</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
       <div style="text-align:center">
         <div style="font-size:10px;color:var(--text3)">タンパク質</div>
@@ -5774,23 +5775,23 @@ function judgeWeightChange() {
   let html = '';
   if (diff <= 0) {
     html = `<div style="background:rgba(0,200,100,0.1);border:1px solid var(--green);border-radius:var(--rs);padding:10px">
-      <div style="color:var(--green);font-weight:700;margin-bottom:4px">✅ 体重減少（${diff}kg）→ メンテナンスカロリー上昇のサイン</div>
+      <div style="color:var(--green);font-weight:700;margin-bottom:4px">✓ 体重減少（${diff}kg）→ メンテナンスカロリー上昇のサイン</div>
       <div style="font-size:11px;color:var(--text2)">現在の摂取カロリーを<strong>10%引き上げて</strong>新しいメンテナンスを確定してください。TEF・NEATの回復が代謝を押し上げています。</div>
     </div>`;
   } else if (diff <= 1.0) {
     html = `<div style="background:rgba(0,200,100,0.08);border:1px solid var(--green);border-radius:var(--rs);padding:10px">
-      <div style="color:var(--green);font-weight:700;margin-bottom:4px">✅ 正常範囲（+${diff}kg）→ グリコーゲン・水分貯留</div>
+      <div style="color:var(--green);font-weight:700;margin-bottom:4px">✓ 正常範囲（+${diff}kg）→ グリコーゲン・水分貯留</div>
       <div style="font-size:11px;color:var(--text2)">炭水化物増量によるグリコーゲン超回復と結合水（1g×3g）による正常な増加です。体脂肪の蓄積ではありません。このまま継続観察してください。</div>
       <div style="font-size:10px;color:var(--text3);margin-top:4px">根拠: Bone et al. (2016) グリコーゲン容量上限・水分貯留データ</div>
     </div>`;
   } else if (diff <= 1.5) {
     html = `<div style="background:rgba(255,200,0,0.1);border:1px solid var(--yellow);border-radius:var(--rs);padding:10px">
-      <div style="color:var(--yellow);font-weight:700;margin-bottom:4px">⚠️ 要観察（+${diff}kg）→ もう1週間様子見</div>
+      <div style="color:var(--yellow);font-weight:700;margin-bottom:4px">要観察（+${diff}kg）→ もう1週間様子見</div>
       <div style="font-size:11px;color:var(--text2)">水分・グリコーゲン由来の可能性が高いですが、ストレス・塩分過多・炎症も考えられます。もう1週間継続して体重の方向性を確認してください。</div>
     </div>`;
   } else {
     html = `<div style="background:rgba(255,60,60,0.1);border:1px solid #ff4444;border-radius:var(--rs);padding:10px">
-      <div style="color:#ff6666;font-weight:700;margin-bottom:4px">🔴 要調整（+${diff}kg）→ 200kcal引き下げ</div>
+      <div style="color:#ff6666;font-weight:700;margin-bottom:4px">要調整（+${diff}kg）→ 200kcal引き下げ</div>
       <div style="font-size:11px;color:var(--text2)">水分だけでなく体脂肪も蓄積している可能性があります。現在の摂取カロリーを<strong>200kcal引き下げ</strong>て再度1〜2週間観察してください。</div>
       <div style="font-size:10px;color:var(--text3);margin-top:4px">※ +1.5kg閾値は臨床経験則（一次エビデンス未確立）</div>
     </div>`;
@@ -5809,7 +5810,7 @@ function calcReverseAdjust() {
     const newKcal = Math.round(currentKcal * 1.10);
     const addKcal = newKcal - currentKcal;
     html = `<div style="background:rgba(0,200,100,0.1);border:1px solid var(--green);border-radius:var(--rs);padding:10px">
-      <div style="color:var(--green);font-weight:700;margin-bottom:6px">✅ メンテナンスカロリー上昇 → +10%引き上げ</div>
+      <div style="color:var(--green);font-weight:700;margin-bottom:6px">✓ メンテナンスカロリー上昇 → +10%引き上げ</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
         <div style="text-align:center"><div style="font-size:10px;color:var(--text3)">現在</div><div class="mono">${currentKcal}</div></div>
         <div style="text-align:center"><div style="font-size:10px;color:var(--text3)">増加分</div><div class="mono accent">+${addKcal}</div></div>
@@ -5819,13 +5820,13 @@ function calcReverseAdjust() {
     </div>`;
   } else if (trend === 'stable') {
     html = `<div style="background:rgba(0,200,100,0.08);border:1px solid var(--green);border-radius:var(--rs);padding:10px">
-      <div style="color:var(--green);font-weight:700;margin-bottom:4px">✅ 現状維持 → ${currentKcal} kcal があなたのメンテナンス</div>
+      <div style="color:var(--green);font-weight:700;margin-bottom:4px">✓ 現状維持 → ${currentKcal} kcal があなたのメンテナンス</div>
       <div style="font-size:11px;color:var(--text2)">現在の ${currentKcal} kcal が実際のメンテナンスカロリーです。TEF・NEATが適応するまでさらに2〜4週間観察を続けてください。</div>
     </div>`;
   } else {
     const adjusted = currentKcal - 200;
     html = `<div style="background:rgba(255,200,0,0.1);border:1px solid var(--yellow);border-radius:var(--rs);padding:10px">
-      <div style="color:var(--yellow);font-weight:700;margin-bottom:4px">⚠️ 増加傾向 → ${adjusted} kcal に調整</div>
+      <div style="color:var(--yellow);font-weight:700;margin-bottom:4px">増加傾向 → ${adjusted} kcal に調整</div>
       <div style="font-size:11px;color:var(--text2)">現在のカロリーが実際のメンテナンスを超えています。200kcal引き下げて <strong>${adjusted} kcal</strong> で再度1〜2週間様子を見てください。</div>
     </div>`;
   }
@@ -6013,9 +6014,9 @@ function renderMacroCycle() {
 
   // 年齢補正コメント
   const ageNote = age >= 50
-    ? '⚡ 50代以上: 各フェーズを6週→8週に延長。回復期を2ヶ月に拡大推奨。'
+    ? '50代以上: 各フェーズを6週→8週に延長。回復期を2ヶ月に拡大推奨。'
     : age >= 40
-    ? '⚡ 40代: 強化期のRPEを8以下に抑え、関節への過負荷を防ぐ。'
+    ? '40代: 強化期のRPEを8以下に抑え、関節への過負荷を防ぐ。'
     : '';
 
   el.innerHTML = `
@@ -6155,7 +6156,7 @@ function renderDashboard(){
   const todayP=todayMeals.reduce((a,m)=>a+(m.protein||0),0);
   const todayC=todayMeals.reduce((a,m)=>a+(m.carb||0),0);
   const todayF=todayMeals.reduce((a,m)=>a+(m.fat||0),0);
-  document.getElementById('d-macro-summary').innerHTML=`<div style="text-align:center"><div class="mono" style="font-size:14px">${todayP}/${macros.protein}g</div><div style="font-size:10px;color:var(--text3);margin-top:2px">PROTEIN</div></div><div style="text-align:center"><div class="mono" style="font-size:14px">${todayC}/${macros.carb}g</div><div style="font-size:10px;color:var(--text3);margin-top:2px">CARBS</div></div><div style="text-align:center"><div class="mono" style="font-size:14px">${todayF}/${macros.fat}g</div><div style="font-size:10px;color:var(--text3);margin-top:2px">FAT</div></div>`;
+  document.getElementById('d-macro-summary').innerHTML=`<div style="text-align:center"><div class="mono" style="font-size:14px">${todayP}/${macros.protein}g</div><div style="font-size:10px;color:var(--text3);margin-top:2px">たんぱく質</div></div><div style="text-align:center"><div class="mono" style="font-size:14px">${todayC}/${macros.carb}g</div><div style="font-size:10px;color:var(--text3);margin-top:2px">炭水化物</div></div><div style="text-align:center"><div class="mono" style="font-size:14px">${todayF}/${macros.fat}g</div><div style="font-size:10px;color:var(--text3);margin-top:2px">脂質</div></div>`;
   const modeColors={maintain:'badge-blue',cut:'badge-amber',bulk:'badge-green'};const modeLabels={maintain:'維持',cut:'減量',bulk:'増量'};
   document.getElementById('d-goal-badge').innerHTML=`<span class="badge ${modeColors[mode]}">${modeLabels[mode]}</span>`;
   document.getElementById('d-avg-sleep').textContent=avgSleep?fmt1(avgSleep)+'h':'—';
@@ -6177,17 +6178,17 @@ function renderDashboard(){
   const todayExtraLabel=typeof todayShiftEntry==='object'?todayShiftEntry.label||'':null;
   if(todayShift==='off-work'){
     const detail=todayExtraHours?` (${todayExtraHours}h${todayExtraLabel?' · '+todayExtraLabel:''})`:' ';
-    alerts.innerHTML+=`<div class="alert alert-warn">⚡ 今日は<strong>非番出勤</strong>${detail}です。全種目RIRを+2して強度を落としてください。</div>`;
+    alerts.innerHTML+=`<div class="alert alert-warn">今日は<strong>非番出勤</strong>${detail}です。全種目RIRを+2して強度を落としてください。</div>`;
   }
   if(todayShift==='rest-work'){
     const detail=todayExtraHours?` (${todayExtraHours}h${todayExtraLabel?' · '+todayExtraLabel:''})`:' ';
     const heavy=todayExtraHours&&todayExtraHours>=6;
-    alerts.innerHTML+=`<div class="alert alert-danger">🚨 今日は<strong>週休出勤</strong>${detail}です。${heavy?'長時間勤務のため筋トレ中止・完全回復を推奨します。':'筋トレは有酸素またはモビリティのみ推奨します。'}</div>`;
+    alerts.innerHTML+=`<div class="alert alert-danger">今日は<strong>週休出勤</strong>${detail}です。${heavy?'長時間勤務のため筋トレ中止・完全回復を推奨します。':'筋トレは有酸素またはモビリティのみ推奨します。'}</div>`;
   }
-  if(tomorrowShift==='24h')alerts.innerHTML+=`<div class="alert alert-info">🔥 明日は24h勤務です。今日のトレーニングは軽めにして翌日のパフォーマンスを確保しましょう。</div>`;
-  if(tomorrowShift==='rest-work')alerts.innerHTML+=`<div class="alert alert-warn">🚨 明日は週休出勤です。今日は完全回復優先（筋トレ中止またはデロード）を推奨します。</div>`;
-  if(tsb<-15)alerts.innerHTML+=`<div class="alert alert-warn">⚠ 疲労蓄積が高い状態（TSB: ${tsb}）。今日は軽負荷またはアクティブリカバリーを推奨します。</div>`;
-  if(avgSleep&&avgSleep<6)alerts.innerHTML+=`<div class="alert alert-warn">⚠ 直近7日の平均睡眠が${fmt1(avgSleep)}時間です。7時間以上の確保を優先してください。</div>`;
+  if(tomorrowShift==='24h')alerts.innerHTML+=`<div class="alert alert-info">明日は24h勤務です。今日のトレーニングは軽めにして翌日のパフォーマンスを確保してください。</div>`;
+  if(tomorrowShift==='rest-work')alerts.innerHTML+=`<div class="alert alert-warn">明日は週休出勤です。今日は完全回復優先（筋トレ中止またはデロード）を推奨します。</div>`;
+  if(tsb<-15)alerts.innerHTML+=`<div class="alert alert-warn">疲労蓄積が高い状態（TSB: ${tsb}）。今日は軽負荷またはアクティブリカバリーを推奨します。</div>`;
+  if(avgSleep&&avgSleep<6)alerts.innerHTML+=`<div class="alert alert-warn">直近7日の平均睡眠が${fmt1(avgSleep)}時間です。7時間以上の確保を優先してください。</div>`;
   if(score>=80&&!todayShift?.includes('work'))alerts.innerHTML+=`<div class="alert alert-success">✓ コンディション良好（${score}/100）。高強度トレーニングに最適な状態です。</div>`;
   const pk=DB.get('peaking');
   if(pk){const startD=new Date(pk.start);const todayD=new Date(today());const weekNum=Math.floor((todayD-startD)/(7*86400000));const phase=pk.phases.find(p=>weekNum>=p.startWeek&&weekNum<p.startWeek+p.weeks);if(phase){const colors={accumulate:'badge-blue',intensify:'badge-amber',convert:'badge-red',taper:'badge-green'};const phaseNames={accumulate:'蓄積期',intensify:'強化期',convert:'変換期',taper:'テーパー期'};document.getElementById('dash-phase-badge').innerHTML=`<span class="badge ${colors[phase.type]}">${phaseNames[phase.type]} W${weekNum+1}</span>`;}}
@@ -6225,7 +6226,7 @@ function renderDashboard(){
             ? '✓ 効率ゾーン'
             : total <= max
               ? '△ 高ボリューム'
-              : '⚠ MRV超過';
+              : 'MRV超過';
         const barCol=total<mev?'#f5a623':total<=sweet?g.color:'#ff4560';
         html2+=`<div>
           <div class="row-between" style="margin-bottom:3px">
@@ -6344,7 +6345,7 @@ function generatePeakingPlan(){
   DB.set('peaking',{start:startStr,phases,totalWeeks,event:document.getElementById('pk-event').value});
   document.getElementById('phase-bar').innerHTML=phases.map(p=>`<div class="phase-block phase-${p.type}" style="flex:${p.weeks}"><span>${p.label}</span><span style="font-size:9px">${p.weeks}W</span></div>`).join('');
   document.getElementById('phase-legend').innerHTML=phases.map(p=>`<span><span class="phase-dot" style="background:${p.color}40;border:1px solid ${p.color}60"></span><span style="font-size:12px;color:var(--text2)">${p.label} ${p.weeks}週</span></span>`).join('');
-  document.getElementById('phase-descriptions').innerHTML='<div class="grid2" style="margin-top:12px">'+phases.map(p=>`<div class="card-sm" style="border-color:${p.color}40"><div style="font-size:12px;font-weight:700;color:${p.color};margin-bottom:6px">${p.label} — ${p.weeks}週間</div><div class="muted">${p.note}</div></div>`).join('')+'</div>';
+  document.getElementById('phase-descriptions').innerHTML='<div class="grid2" style="margin-top:12px">'+phases.map(p=>`<div class="card-sm" style="border-color:${p.color}40"><div style="font-size:12px;font-weight:700;color:${p.color};margin-bottom:6px">${p.label}（${p.weeks}週間）</div><div class="muted">${p.note}</div></div>`).join('')+'</div>';
   const cal=document.getElementById('peaking-calendar');cal.innerHTML='';
   const start=new Date(startStr);const dow=start.getDay();const monday=new Date(start);monday.setDate(start.getDate()-(dow===0?6:dow-1));const todayStr=today();
   const sched={accumulate:['strength','cardio','rest','strength','cardio','strength','rest'],intensify:['strength','hiit','rest','strength','cardio','strength','rest'],convert:['hiit','strength','rest','hiit','cardio','strength','rest'],taper:['strength','cardio','rest','strength','rest','mobility','rest']};
@@ -6579,7 +6580,7 @@ function initProgramPage(){
   const p=PROGRAMS_MASTER[pid];
   // ラベル更新
   const lbl=document.getElementById('prog-program-label');
-  if(lbl)lbl.textContent=prog.name+' — '+Object.keys(prog.sessions).length+'セッション';
+  if(lbl)lbl.textContent=prog.name+'（'+Object.keys(prog.sessions).length+'セッション）';
   // 関節ストレス連動アラート
   renderJointExerciseFlags();
   // セッションボタン描画
@@ -6994,7 +6995,7 @@ function saveTraining(){
   document.getElementById('exercise-list').innerHTML = '';
   exCount = 0;
   renderTrainingLog();
-  alert('記録しました！');
+  alert('記録しました');
 }
 
 // プログラムから種目を読み込む（複数セット対応）
@@ -7128,9 +7129,9 @@ function renderTrainingLog(){
       if (cd.distance) cdInfo += ` / ${cd.distance}km`;
       if (cd.hr) cdInfo += ` / 平均${cd.hr}bpm`;
       if (cd.kcal) cdInfo += ` / ${cd.kcal}kcal`;
-      htmlStr += `<div style="font-size:12px;color:var(--text2);margin-top:6px;padding:5px 8px;background:rgba(34,197,94,0.08);border-radius:4px;border-left:2px solid var(--accent4)">🏃 ${cdInfo}</div>`;
+      htmlStr += `<div style="font-size:12px;color:var(--text2);margin-top:6px;padding:5px 8px;background:rgba(34,197,94,0.08);border-radius:4px;border-left:2px solid var(--accent4)">${cdInfo}</div>`;
     }
-    if (t.notes) htmlStr += `<div class="muted" style="font-size:11px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">📝 ${t.notes}</div>`;
+    if (t.notes) htmlStr += `<div class="muted" style="font-size:11px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">${t.notes}</div>`;
     htmlStr += '</div>';
   });
   htmlStr += '</div>';
@@ -7208,23 +7209,23 @@ function predictTomorrow() {
   // ── 判定 ──
   let level, color, icon, advice, trainingRec;
   if (score >= 80) {
-    level='絶好調'; color='var(--accent4)'; icon='🔥';
+    level='絶好調'; color='var(--accent4)'; icon='';
     advice='高強度トレに最適。PR更新を狙うチャンス。';
     trainingRec='HIGH';
   } else if (score >= 65) {
-    level='好調'; color='#4a9eff'; icon='💪';
+    level='好調'; color='#4a9eff'; icon='';
     advice='通常強度で記録を継続。調子を維持。';
     trainingRec='NORMAL';
   } else if (score >= 50) {
-    level='普通'; color='var(--text2)'; icon='😐';
+    level='普通'; color='var(--text2)'; icon='';
     advice='軽め〜中程度。無理せず継続が大事。';
     trainingRec='LIGHT';
   } else if (score >= 35) {
-    level='注意'; color='var(--accent3)'; icon='⚠️';
+    level='注意'; color='var(--accent3)'; icon='';
     advice='疲労が蓄積中。Z2有酸素か休養を優先。';
     trainingRec='REST';
   } else {
-    level='要回復'; color='var(--accent)'; icon='🛌';
+    level='要回復'; color='var(--accent)'; icon='';
     advice='積極的回復が最優先。今日は休む勇気。';
     trainingRec='OFF';
   }
@@ -7266,7 +7267,6 @@ function renderTomorrowPrediction() {
   el.innerHTML = `
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
       <div style="text-align:center;min-width:64px">
-        <div style="font-size:28px">${p.icon}</div>
         <div style="font-family:var(--font-mono);font-size:26px;font-weight:500;color:${p.color};line-height:1">${p.score}</div>
         <div style="font-size:10px;color:var(--text3);margin-top:2px">/ 100</div>
       </div>
@@ -7432,7 +7432,7 @@ function showRestTimerUI(seconds) {
   }
   panel.style.display = 'block';
   panel.innerHTML = `
-    <div style="font-size:10px;color:var(--text3);letter-spacing:2px;margin-bottom:6px">REST TIMER</div>
+    <div style="font-size:10px;color:var(--text3);margin-bottom:6px">レスト（休憩）</div>
     <div id="rest-timer-display" style="font-family:var(--font-mono);font-size:42px;font-weight:500;color:var(--accent2);line-height:1">${formatTime(seconds)}</div>
     <div style="height:4px;background:var(--bg4);border-radius:2px;margin:10px 0;overflow:hidden">
       <div id="rest-timer-bar" style="height:100%;background:var(--accent2);border-radius:2px;width:100%;transition:width 1s linear"></div>
@@ -7668,8 +7668,8 @@ const CARDIO_TYPES={
   outdoor_run:{label:'屋外ランニング',kcalPerMin:10},
   cycling:{label:'サイクリング',kcalPerMin:7},
   walk:{label:'ウォーキング',kcalPerMin:4},
-  firefighter_run:{label:'🔥防火装備ランニング',kcalPerMin:17},
-  firefighter_hill:{label:'🔥防火装備坂道ダッシュ',kcalPerMin:20},
+  firefighter_run:{label:'防火装備ランニング',kcalPerMin:17},
+  firefighter_hill:{label:'防火装備坂道ダッシュ',kcalPerMin:20},
 };
 const ZONE_HINTS={
   '1':'ゾーン1（〜60%）: アクティブリカバリー。筋肉痛の軽減・血流促進が目的。翌日の筋トレへの影響なし。',
@@ -7956,7 +7956,7 @@ function updateNutritionGoals(){
   if (trainEl) {
     if (tKcal.total > 0) {
       trainEl.style.display = 'block';
-      trainEl.innerHTML = `<span style="color:var(--accent4)">💪 トレ消費 +${tKcal.total}kcal</span>`+
+      trainEl.innerHTML = `<span style="color:var(--accent4)">トレ消費 +${tKcal.total}kcal</span>`+
         `<span style="font-size:10px;color:var(--text3);margin-left:4px">(目標に${Math.round((DB.get('cfg')||{}).trainingKcalRatio??0.5)*100}%反映)</span>`;
     } else {
       trainEl.style.display = 'none';
@@ -7967,7 +7967,7 @@ function updateNutritionGoals(){
   const hintEl=document.getElementById('n-mode-hint');
   if(hintEl){
     const modeText={maintain:'維持: TDEEと同等。筋肉量を保ちながら体組成を安定させます',cut:'減量: TDEE-15%。週0.4〜0.5kg減が目安。タンパク質は高めを維持',bulk:'増量: TDEE+10%。リーンバルクで週0.25〜0.5kg増が目標'}[mode]||'';
-    const shiftText=bonus>0?` ／ <span style="color:${color};font-weight:600">🔥 ${label} +${bonus}kcal自動補正</span>`:'';
+    const shiftText=bonus>0?` ／ <span style="color:${color};font-weight:600">${label} +${bonus}kcal自動補正</span>`:'';
     hintEl.innerHTML=modeText+shiftText;
   }
 }
@@ -8063,7 +8063,7 @@ function renderMealHistory() {
     return `
       <div style="margin-bottom:14px">
         <div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:5px;display:flex;justify-content:space-between;padding-bottom:4px;border-bottom:1px solid var(--border2)">
-          <span>📅 ${date}</span>
+          <span>${date}</span>
           <span style="font-family:var(--font-mono);color:var(--accent)">${total.cal}kcal / P${Math.round(total.protein)}g</span>
         </div>
         ${items.map(m => `
@@ -8214,14 +8214,14 @@ function renderSleepRecordList() {
 
 // ===== shift.js =====
 const SHIFT_TYPES={
-  '24h':     {label:'当番',     bg:'rgba(255,69,96,0.25)',  border:'rgba(255,69,96,0.6)',  text:'#ff6b7a',icon:'🔥',load:800},
-  'off':     {label:'非番',     bg:'rgba(90,90,120,0.25)',  border:'rgba(90,90,120,0.5)',  text:'var(--text2)',icon:'💤',load:100},
-  'off-work':{label:'非番出勤', bg:'rgba(245,166,35,0.28)', border:'rgba(245,166,35,0.7)', text:'#fbbf24',icon:'⚡',load:600},
-  'rest':    {label:'週休',     bg:'rgba(74,158,255,0.2)',  border:'rgba(74,158,255,0.5)', text:'#6baaff',icon:'🏠',load:0},
-  'rest-work':{label:'週休出勤',bg:'rgba(167,139,250,0.28)',border:'rgba(167,139,250,0.7)',text:'#c4b5fd',icon:'🚨',load:700},
-  'dayshift':{label:'日勤',     bg:'rgba(251,191,36,0.18)', border:'rgba(251,191,36,0.45)',text:'#fbbf24',icon:'☀️',load:150},
-  'gym':     {label:'ジム',     bg:'rgba(34,197,94,0.2)',   border:'rgba(34,197,94,0.5)',  text:'#4ade80',icon:'💪',load:0},
-  'cardio':  {label:'有酸素',   bg:'rgba(29,158,117,0.2)',  border:'rgba(29,158,117,0.5)', text:'#34d399',icon:'🏃',load:200},
+  '24h':     {label:'当番',     bg:'rgba(255,69,96,0.25)',  border:'rgba(255,69,96,0.6)',  text:'#ff6b7a',icon:'当',load:800},
+  'off':     {label:'非番',     bg:'rgba(90,90,120,0.25)',  border:'rgba(90,90,120,0.5)',  text:'var(--text2)',icon:'非',load:100},
+  'off-work':{label:'非番出勤', bg:'rgba(245,166,35,0.28)', border:'rgba(245,166,35,0.7)', text:'#fbbf24',icon:'非出',load:600},
+  'rest':    {label:'週休',     bg:'rgba(74,158,255,0.2)',  border:'rgba(74,158,255,0.5)', text:'#6baaff',icon:'週',load:0},
+  'rest-work':{label:'週休出勤',bg:'rgba(167,139,250,0.28)',border:'rgba(167,139,250,0.7)',text:'#c4b5fd',icon:'週出',load:700},
+  'dayshift':{label:'日勤',     bg:'rgba(251,191,36,0.18)', border:'rgba(251,191,36,0.45)',text:'#fbbf24',icon:'日',load:150},
+  'gym':     {label:'ジム',     bg:'rgba(34,197,94,0.2)',   border:'rgba(34,197,94,0.5)',  text:'#4ade80',icon:'筋',load:0},
+  'cardio':  {label:'有酸素',   bg:'rgba(29,158,117,0.2)',  border:'rgba(29,158,117,0.5)', text:'#34d399',icon:'有',load:200},
 };
 // 非番→非番出勤、週休→週休出勤 のサイクルマップ
 const SHIFT_CYCLE={'off':'off-work','off-work':'off','rest':'rest-work','rest-work':'rest'};
@@ -8434,9 +8434,9 @@ function renderShiftACWR(data){
     <div class="metric"><div class="metric-label">慢性負荷(28日平均)</div><div class="metric-val" style="font-size:20px">${Math.round(chronic)}</div></div>
   </div>
   <div style="text-align:center;padding:10px 0">
-    <div style="font-size:11px;color:var(--text3);letter-spacing:2px;font-family:var(--font-mono);margin-bottom:4px">ACWR</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:4px">ACWR（急性：慢性負荷比）</div>
     <div style="font-size:36px;font-weight:500;font-family:var(--font-mono);color:${color}">${acwr.toFixed(2)}</div>
-    <div style="font-size:12px;color:${color};margin-top:4px">${acwr>=0.8&&acwr<=1.3?'✓ スイートスポット':acwr<0.8?'低負荷ゾーン':'⚠ 過負荷リスク'}</div>
+    <div style="font-size:12px;color:${color};margin-top:4px">${acwr>=0.8&&acwr<=1.3?'✓ スイートスポット':acwr<0.8?'低負荷ゾーン':'過負荷リスク'}</div>
   </div>`;
 }
 function applyShiftPattern(){
@@ -8748,7 +8748,7 @@ function renderBodyComposition() {
     if (weightChange < -0.5 && lbmChange !== null && lbmChange >= -0.5) {
       trend = '✓ 理想的な脂肪減少（除脂肪体重維持）'; trendColor = 'var(--accent4)';
     } else if (weightChange < -1.5) {
-      trend = '⚠ 減量速度が速い（筋肉量の損失リスク）'; trendColor = 'var(--accent3)';
+      trend = '減量速度が速い（筋肉量の損失リスク）'; trendColor = 'var(--accent3)';
     } else if (weightChange > 0) {
       trend = '↑ 体重が増加（食事を見直し）'; trendColor = 'var(--accent)';
     } else {
@@ -8758,7 +8758,7 @@ function renderBodyComposition() {
     if (lbmChange !== null && lbmChange > 0.5 && weightChange < 2.0) {
       trend = '✓ 理想的なリーンバルク進行'; trendColor = 'var(--accent4)';
     } else if (weightChange > 2.0) {
-      trend = '⚠ 体重増加ペース速め（脂肪が乗りやすい）'; trendColor = 'var(--accent3)';
+      trend = '体重増加ペース速め（脂肪が乗りやすい）'; trendColor = 'var(--accent3)';
     } else {
       trend = '→ バルク進行中'; trendColor = 'var(--accent2)';
     }
@@ -8979,27 +8979,27 @@ function renderCondSuggestions(history,avgs){
   // トレンド判定
   if(recentAvg&&olderAvg){
     const diff=recentAvg-olderAvg;
-    if(diff<=-10)suggestions.push({type:'warn',icon:'📉',title:`直近2週間のコンディションが${Math.abs(diff)}pt低下しています`,body:'睡眠・勤務パターン・トレーニング強度のどれが変化したか確認してください。'});
-    else if(diff>=10)suggestions.push({type:'good',icon:'📈',title:`直近2週間で${diff}pt改善しています`,body:'この調子を維持しましょう。'});
+    if(diff<=-10)suggestions.push({type:'warn',icon:'',title:`直近2週間のコンディションが${Math.abs(diff)}pt低下しています`,body:'睡眠・勤務パターン・トレーニング強度のどれが変化したか確認してください。'});
+    else if(diff>=10)suggestions.push({type:'good',icon:'',title:`直近2週間で${diff}pt改善しています`,body:'今の配分を続けてください。'});
   }
 
   // 軸別の弱点分析
-  if(avgs.avgSl<55)suggestions.push({type:'danger',icon:'😴',title:'睡眠スコアが低い（平均'+avgs.avgSl+'）',body:'就寝時間を30分早めることが最も即効性のある改善策です。マグネシウム（就寝前200mg）・スクリーンオフ（就寝1時間前）・就寝前のアルコール禁止（REM睡眠を抑制）を試してください。'});
-  else if(avgs.avgSl<70)suggestions.push({type:'warn',icon:'😴',title:'睡眠スコアが改善の余地あり（平均'+avgs.avgSl+'）',body:'7〜8時間の確保を目標に。勤務明けは仮眠（90分サイクル）を優先してください。'});
+  if(avgs.avgSl<55)suggestions.push({type:'danger',icon:'',title:'睡眠スコアが低い（平均'+avgs.avgSl+'）',body:'就寝時間を30分早めることが最も即効性のある改善策です。マグネシウム（就寝前200mg）・スクリーンオフ（就寝1時間前）・就寝前のアルコール禁止（REM睡眠を抑制）を試してください。'});
+  else if(avgs.avgSl<70)suggestions.push({type:'warn',icon:'',title:'睡眠スコアが改善の余地あり（平均'+avgs.avgSl+'）',body:'7〜8時間の確保を目標に。勤務明けは仮眠（90分サイクル）を優先してください。'});
 
-  if(avgs.avgTsb<40)suggestions.push({type:'danger',icon:'🔋',title:'慢性的な疲労蓄積（TSBスコア平均'+avgs.avgTsb+'）',body:'トレーニング負荷を1〜2週間削減（ボリューム40%カット）してください。ATL>CTLが続いており、怪我・免疫低下のリスクが高い状態です。'});
-  else if(avgs.avgTsb<55)suggestions.push({type:'warn',icon:'🔋',title:'回復が追いついていない可能性（TSBスコア平均'+avgs.avgTsb+'）',body:'週1回の完全休養日を必ず設けてください。高RPEセッションの頻度を減らすことを検討してください。'});
+  if(avgs.avgTsb<40)suggestions.push({type:'danger',icon:'',title:'慢性的な疲労蓄積（TSBスコア平均'+avgs.avgTsb+'）',body:'トレーニング負荷を1〜2週間削減（ボリューム40%カット）してください。ATL>CTLが続いており、怪我・免疫低下のリスクが高い状態です。'});
+  else if(avgs.avgTsb<55)suggestions.push({type:'warn',icon:'',title:'回復が追いついていない可能性（TSBスコア平均'+avgs.avgTsb+'）',body:'週1回の完全休養日を必ず設けてください。高RPEセッションの頻度を減らすことを検討してください。'});
 
-  if(avgs.avgWl<50)suggestions.push({type:'danger',icon:'🧠',title:'ウェルネス指標が低水準（平均'+avgs.avgWl+'）',body:'疲労・筋肉痛・モチベーション・気分の複合スコアが低い状態が続いています。ストレス源の特定、社会的サポートの確保、必要に応じて一時的な負荷削減を検討してください。'});
+  if(avgs.avgWl<50)suggestions.push({type:'danger',icon:'',title:'ウェルネス指標が低水準（平均'+avgs.avgWl+'）',body:'疲労・筋肉痛・モチベーション・気分の複合スコアが低い状態が続いています。ストレス源の特定、社会的サポートの確保、必要に応じて一時的な負荷削減を検討してください。'});
 
-  if(avgs.avgNu<50)suggestions.push({type:'warn',icon:'🍽️',title:'栄養達成率が低い（平均'+avgs.avgNu+'）',body:'カロリー目標の達成が安定していません。食品プリセットを活用してトレ後の食事を事前に準備することで改善できます。タンパク質が特に不足している場合はプロテインで補助してください。'});
+  if(avgs.avgNu<50)suggestions.push({type:'warn',icon:'',title:'栄養達成率が低い（平均'+avgs.avgNu+'）',body:'カロリー目標の達成が安定していません。食品プリセットを活用してトレ後の食事を事前に準備することで改善できます。タンパク質が特に不足している場合はプロテインで補助してください。'});
 
   // 24h勤務パターン分析
   const shiftData=DB.get('pf_shift_data')||{};
   const recentShifts=history.filter(h=>shiftData[h.date]);
   const duty24count=recentShifts.filter(h=>getShiftType(shiftData[h.date])==='24h').length;
   if(duty24count>=6){
-    suggestions.push({type:'info',icon:'🚒',title:`分析期間中に${duty24count}回の24h勤務があります`,body:'24h勤務後2日間のコンディションスコアを確認してください。回復に72時間以上かかるパターンが見られる場合は、非番の活動量を減らすことが必要です。'});
+    suggestions.push({type:'info',icon:'',title:`分析期間中に${duty24count}回の24h勤務があります`,body:'24h勤務後2日間のコンディションスコアを確認してください。回復に72時間以上かかるパターンが見られる場合は、非番の活動量を減らすことが必要です。'});
   }
 
   if(!suggestions.length){
@@ -9088,7 +9088,7 @@ function loadSettings(){const c=cfg();['cfg-name','cfg-dept','cfg-tdee','cfg-wat
       apiStatus.textContent = '✓ APIキー設定済み（' + key.slice(0,12) + '...）';
       apiStatus.style.color = 'var(--accent4)';
     } else {
-      apiStatus.textContent = '未設定 — OCR機能を使うには設定してください';
+      apiStatus.textContent = '未設定。OCR機能を使うにはAPIキーを設定してください';
       apiStatus.style.color = 'var(--text3)';
     }
   }if(document.getElementById('cfg-goalweight'))document.getElementById('cfg-goalweight').value=c.goalweight||'';}
@@ -9191,11 +9191,11 @@ function updateGutProgress() {
   if (desc) {
     const descs = [
       '各ステップを完了してプログラムを進めましょう',
-      'STEP 1完了！腸を守る環境が整い始めました。',
-      'STEP 2完了！善玉菌が育つ環境が整いました。',
-      'STEP 3完了！腸内の多様性が高まっています。',
-      'STEP 4完了！自律神経と腸の連携が改善中です。',
-      '全ステップ完了！腸内環境の修復プログラム達成！'
+      'STEP 1 完了。腸を守る環境が整い始めました。',
+      'STEP 2 完了。善玉菌が育つ環境が整いました。',
+      'STEP 3 完了。腸内の多様性が高まっています。',
+      'STEP 4 完了。自律神経と腸の連携が改善しています。',
+      '全ステップ完了。'
     ];
     desc.textContent = descs[completedSteps] || descs[0];
   }
@@ -9225,9 +9225,9 @@ function selectBristol(type) {
   if (!advEl) return;
   const advices = {
     1: {c:'alert-warn',m:'Type 1: 硬い塊。水分不足・Mg不足が主因。水2L以上＋マグネシウム300〜400mgを補給してください。'},
-    2: {c:'alert-warn',m:'Type 2: ソーセージ状の塊。やや便秘気味。水溶性食物繊維（オートミール・海藻）を増やしましょう。'},
+    2: {c:'alert-warn',m:'Type 2: ソーセージ状の塊。やや便秘気味。水溶性食物繊維（オートミール・海藻）を増やしてください。'},
     3: {c:'alert-success',m:'Type 3: ひび割れのあるソーセージ状。良好な方向です。水分と食物繊維をもう少し増やすとType 4に近づきます。'},
-    4: {c:'alert-success',m:'Type 4: バナナ型・滑らか。理想的な便です！腸内環境が良好な状態を示しています。この状態を維持しましょう。'},
+    4: {c:'alert-success',m:'Type 4: バナナ型・滑らか。理想的な便です。腸内環境が良好な状態を示しています。'},
     5: {c:'alert-info',m:'Type 5: 柔らかい塊。やや軟便。食物繊維の種類を見直してください（不溶性を増やす）。'},
     6: {c:'alert-warn',m:'Type 6: 泥状便。炎症またはストレス過多の可能性。発酵食品の過剰摂取も原因になります。'},
     7: {c:'alert-danger',m:'Type 7: 水様便（下痢）。食中毒・腸炎の可能性があります。症状が続く場合は医療機関を受診してください。'},
@@ -9246,7 +9246,7 @@ function saveBristolLog() {
   const existing = log.findIndex(l => l.date === today());
   if (existing >= 0) { log[existing] = {date:today(),type:currentBristolType,id:Date.now()}; DB.set('bristolLog', log); }
   else DB.push('bristolLog', {date:today(),type:currentBristolType,id:Date.now()});
-  alert('Type ' + currentBristolType + ' を記録しました！');
+  alert('Type ' + currentBristolType + ' を記録しました');
   renderBristolStreak();
 }
 
@@ -9575,7 +9575,7 @@ async function onOcrImageSelected(event) {
     preview.style.display = 'block';
   }
   if (statusEl) {
-    statusEl.textContent = '🔍 成分表を読み取り中...';
+    statusEl.textContent = '成分表を読み取り中...';
     statusEl.style.color = 'var(--accent2)';
   }
 
@@ -9585,7 +9585,7 @@ async function onOcrImageSelected(event) {
 
   _lastOcrResult = result;
   if (!result) {
-    if (statusEl) statusEl.textContent = '❌ 読み取り失敗';
+    if (statusEl) statusEl.textContent = '✕ 読み取り失敗';
     return;
   }
 
@@ -9629,7 +9629,7 @@ async function onOcrImageSelected(event) {
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-sm btn-primary" onclick="saveOcrAsPreset(_lastOcrResult)">
-          ⭐ マイプリセットに登録
+          マイプリセットに登録
         </button>
         <button class="btn btn-sm" onclick="document.getElementById('ocr-result-panel').style.display='none'">
           閉じる
@@ -9790,16 +9790,16 @@ async function searchFoodOnline() {
   if (btn) { btn.disabled = true; btn.textContent = '検索中…'; }
   if (panel) {
     panel.style.display = 'block';
-    panel.innerHTML = `<div style="font-size:12px;color:var(--accent2)">🌐 「${q}」をネットで検索中…（10〜30秒かかります）</div>`;
+    panel.innerHTML = `<div style="font-size:12px;color:var(--accent2)">「${q}」をネットで検索中…（10〜30秒かかります）</div>`;
   }
 
   const r = await fetchFoodNutritionOnline(q);
 
   _webSearchBusy = false;
-  if (btn) { btn.disabled = false; btn.textContent = '🌐 ネット検索'; }
+  if (btn) { btn.disabled = false; btn.textContent = 'ネット検索'; }
 
   if (!r || r.found === false) {
-    if (panel) panel.innerHTML = `<div style="font-size:12px;color:var(--accent)">❌ 「${q}」の信頼できる栄養情報が見つかりませんでした。商品名を正確に入力するか、成分表の撮影をお試しください。</div>`;
+    if (panel) panel.innerHTML = `<div style="font-size:12px;color:var(--accent)">✕ 「${q}」の信頼できる栄養情報が見つかりませんでした。商品名を正確に入力するか、成分表の撮影をお試しください。</div>`;
     return;
   }
 
@@ -9832,7 +9832,7 @@ function renderWebFoodPanel(r, query) {
   panel.style.display = 'block';
   panel.innerHTML = `
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
-      <span style="font-size:12px;font-weight:700;color:var(--accent2)">🌐 ネット検索結果</span>
+      <span style="font-size:12px;font-weight:700;color:var(--accent2)">ネット検索結果</span>
       <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:${conf.color};color:#0a0a0f">${conf.label}</span>
     </div>
     <div style="font-size:13px;font-weight:600;margin-bottom:2px">${r.name || query}</div>
@@ -9851,7 +9851,7 @@ function renderWebFoodPanel(r, query) {
         <div style="font-size:16px;font-weight:500;color:var(--accent4)">${r.fat || 0}g</div>
         <div style="font-size:9px;color:var(--text3)">脂質</div></div>
     </div>
-    ${gap > 20 ? `<div style="font-size:10px;color:var(--accent);margin-bottom:8px">⚠️ PFCから計算すると${est}kcalで、表示値と${Math.round(gap)}%乖離しています。数値を確認してください。</div>` : ''}
+    ${gap > 20 ? `<div style="font-size:10px;color:var(--accent);margin-bottom:8px">PFCから計算すると${est}kcalで、表示値と${Math.round(gap)}%乖離しています。数値を確認してください。</div>` : ''}
     ${r.note ? `<div style="font-size:11px;color:var(--text3);line-height:1.6;margin-bottom:8px">${r.note}</div>` : ''}
     ${(r.sources && r.sources.length) ? `
       <div style="font-size:10px;color:var(--text3);margin-bottom:8px;word-break:break-all">
@@ -9859,7 +9859,7 @@ function renderWebFoodPanel(r, query) {
       </div>` : ''}
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-sm btn-primary" onclick="applyWebFoodToForm()">記録フォームに反映</button>
-      ${per100 ? `<button class="btn btn-sm" onclick="saveWebFoodAsPreset()">⭐ マイプリセットに登録</button>` : ''}
+      ${per100 ? `<button class="btn btn-sm" onclick="saveWebFoodAsPreset()">マイプリセットに登録</button>` : ''}
       <button class="btn btn-sm btn-ghost" onclick="document.getElementById('web-food-panel').style.display='none'">閉じる</button>
     </div>
     <div style="font-size:9px;color:var(--text3);margin-top:8px;line-height:1.5">
@@ -9924,7 +9924,7 @@ function saveOcrAsPreset(result) {
     customs.push(preset);
   }
   DB.set('pf_custom_presets', customs);
-  alert(`「${name}」をマイプリセットに登録しました！\n次回から「⭐ マイプリセット」カテゴリから選べます。`);
+  alert(`「${name}」をマイプリセットに登録しました。\n次回から「マイプリセット」カテゴリから選べます。`);
 }
 
 
@@ -10046,11 +10046,11 @@ function renderDiagnosticsPanel(results) {
   const ng = results.filter(r => !r.ok).length;
   el.innerHTML = `
     <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:${ng ? 'var(--accent)' : 'var(--accent4)'}">
-      ${ng ? '⚠️ ' + ng + '件の問題を検出しました' : '✅ 全' + results.length + '項目に問題はありません'}
+      ${ng ? '' + ng + '件の問題を検出しました' : '✓ 全' + results.length + '項目に問題はありません'}
     </div>
     ${results.map(r => `
       <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
-        <span style="flex-shrink:0">${r.ok ? '✅' : '⚠️'}</span>
+        <span style="flex-shrink:0">${r.ok ? '✓' : ''}</span>
         <div style="flex:1;min-width:0">
           <div style="font-size:12px;font-weight:600">${r.name}</div>
           <div style="font-size:11px;color:${r.ok ? 'var(--text3)' : 'var(--accent)'};word-break:break-word">${r.detail}</div>
@@ -10104,7 +10104,7 @@ function renderRestingHRTrend() {
             <div style="font-size:18px;font-weight:600;font-family:var(--font-mono);color:var(--accent2)">${v && v.vo2max ? v.vo2max : '—'}</div>
             <div style="font-size:9px;color:var(--text3)">推定VO2max</div></div>
         </div>
-        ${delta >= 5 ? '<div style="font-size:11px;color:var(--accent);margin-top:8px">⚠️ 直近の安静時心拍が平均より+' + delta + 'bpm。回復不足の可能性があります。</div>' : ''}`;
+        ${delta >= 5 ? '<div style="font-size:11px;color:var(--accent);margin-top:8px">直近の安静時心拍が平均より+' + delta + 'bpm。回復不足の可能性があります。</div>' : ''}`;
     }
   }
 
@@ -10185,7 +10185,7 @@ function nextNotifySlot(from) {
 }
 
 async function fireSuppNotification(slot) {
-  const title = 'PEAK FORM — ' + slot.label;
+  const title = 'PEAK FORM｜' + slot.label;
   const body  = slot.items.join(' / ');
   const opts  = { body, icon: './icon.svg', badge: './icon.svg', tag: 'pf-supp-' + slot.label };
   try {
@@ -10250,9 +10250,9 @@ function renderSuppNotifySettings() {
   const on = cfg.enabled && perm === 'granted';
 
   const permRow = perm === 'unsupported'
-    ? '<div style="font-size:11px;color:var(--accent)">⚠️ このブラウザは通知に対応していません。</div>'
+    ? '<div style="font-size:11px;color:var(--accent)">このブラウザは通知に対応していません。</div>'
     : perm === 'denied'
-      ? '<div style="font-size:11px;color:var(--accent)">⚠️ 通知がブロックされています。ブラウザのサイト設定から許可してください。</div>'
+      ? '<div style="font-size:11px;color:var(--accent)">通知がブロックされています。ブラウザのサイト設定から許可してください。</div>'
       : perm === 'default'
         ? '<button class="btn btn-sm btn-primary" onclick="requestNotifyPermission()">通知を許可する</button>'
         : '';
@@ -10261,7 +10261,7 @@ function renderSuppNotifySettings() {
 
   el.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
-      <span onclick="toggleNotifyMaster()" style="cursor:pointer;font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;background:${on ? 'var(--accent4)' : 'var(--bg4)'};color:${on ? '#0a0a0f' : 'var(--text2)'}">${on ? '🔔 通知ON' : '🔕 通知OFF'}</span>
+      <span onclick="toggleNotifyMaster()" style="cursor:pointer;font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;background:${on ? 'var(--accent4)' : 'var(--bg4)'};color:${on ? '#0a0a0f' : 'var(--text2)'}">${on ? '通知ON' : '通知OFF'}</span>
       ${next ? `<span style="font-size:11px;color:var(--text3)">次回: ${next.slot.label} ${String(next.at.getHours()).padStart(2,'0')}:00</span>` : ''}
     </div>
     ${permRow}
@@ -10371,7 +10371,7 @@ function renderAntioxidantPanel() {
   const a = calcAntioxidantNeed();
   const html = `
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-      <span style="font-size:13px;font-weight:700">🧯 出動連動 抗酸化プロトコル</span>
+      <span style="font-size:13px;font-weight:700">出動連動 抗酸化プロトコル</span>
       <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:${a.color};color:#0a0a0f">${a.label}</span>
       <span style="font-size:10px;color:var(--text3);margin-left:auto;font-family:var(--font-mono)">7日 ${a.count7}件 / 煙 ${a.smoke7}回・30日 煙 ${a.smoke30}回</span>
     </div>
@@ -10386,8 +10386,8 @@ function renderAntioxidantPanel() {
     </div>
     <div style="font-size:10px;color:var(--text3);margin-top:10px;line-height:1.6">
       ISSFAL (2019) / Smith (2011) — オメガ3と慢性炎症 ／ ALDH2多型（社内資料）
-      <span onclick="openEvidence('オメガ3')" style="color:var(--accent2);cursor:pointer">📚 詳細</span><br>
-      ⚠️ 暴露量に応じた増量幅は運用上の目安です。用量反応を示した一次研究に基づくものではありません。
+      <span onclick="openEvidence('オメガ3')" style="color:var(--accent2);cursor:pointer">詳細</span><br>
+      暴露量に応じた増量幅は運用上の目安です。用量反応を示した一次研究に基づくものではありません。
     </div>`;
 
   const p1 = document.getElementById('supp-antiox-panel');
@@ -10419,11 +10419,11 @@ const EVIDENCE_DOMAINS = {
   training:   { label: 'トレーニング',   icon: '▲', color: 'var(--accent2)' },
   nutrition:  { label: '栄養・食事',     icon: '◆', color: '#f5a623' },
   sleep:      { label: '睡眠・回復',     icon: '◑', color: '#a78bfa' },
-  bodycomp:   { label: '体組成・減量',   icon: '⚖', color: '#22c55e' },
-  injury:     { label: '傷害予防',       icon: '🩹', color: 'var(--accent)' },
-  firefighter:{ label: '消防士特有',     icon: '🚒', color: '#f97316' },
-  supplement: { label: 'サプリメント',   icon: '💊', color: '#38bdf8' },
-  gut:        { label: '腸内環境',       icon: '🌿', color: '#4ade80' },
+  bodycomp:   { label: '体組成・減量',   icon: '', color: '#22c55e' },
+  injury:     { label: '傷害予防',       icon: '', color: 'var(--accent)' },
+  firefighter:{ label: '消防士特有',     icon: '', color: '#f97316' },
+  supplement: { label: 'サプリメント',   icon: '', color: '#38bdf8' },
+  gut:        { label: '腸内環境',       icon: '', color: '#4ade80' },
 };
 
 const EVIDENCE_DB = [
@@ -10444,7 +10444,7 @@ const EVIDENCE_DB = [
   { d:'training', topic:'セット間休憩時間', ref:'Schoenfeld et al. (2016) / Singer et al. (2024)', src:'JSCR / Frontiers',
     finding:'3分休憩は1分より筋肥大・筋力ともに有意に優れる。ただし90秒超では差がほぼ無く、60秒超 > 60秒以下の小差にとどまる。', usedIn:['トレーニング記録（インターバルタイマー）'] },
   { d:'training', topic:'種目順序（多関節→単関節）', ref:'Schoenfeld (2010)', src:'NSCA CSCS テキスト準拠',
-    finding:'多関節種目を先に行う順序が筋肥大・安全性の観点で推奨される。', usedIn:['今日のメニュー（⚡自動ソート）'] },
+    finding:'多関節種目を先に行う順序が筋肥大・安全性の観点で推奨される。', usedIn:['今日のメニュー（自動ソート）'] },
   { d:'training', topic:'RPEによる強度管理', ref:'Foster et al. (2001)', src:'sRPE法',
     finding:'セッションRPEと時間の積でトレーニング負荷を定量化する手法を確立。', usedIn:['トレーニング記録（消費kcal推定）'] },
   { d:'training', topic:'1RM推定', ref:'Epley (1985)', src:'Epley式',
@@ -10602,7 +10602,7 @@ function renderEvidenceTabs() {
     const on = _evDomain === key;
     return `<span onclick="setEvidenceDomain('${key}')" style="cursor:pointer;font-size:11px;font-weight:${on?700:500};padding:5px 10px;border-radius:5px;border:1px solid ${on?(color||'var(--accent)'):'var(--border)'};background:${on?(color||'var(--accent)'):'transparent'};color:${on?'#0a0a0f':'var(--text2)'}">${icon} ${label} ${n}</span>`;
   };
-  el.innerHTML = mk('all', 'すべて', '📚', EVIDENCE_DB.length, 'var(--accent)')
+  el.innerHTML = mk('all', 'すべて', '', EVIDENCE_DB.length, 'var(--accent)')
     + Object.entries(EVIDENCE_DOMAINS)
         .map(([k, v]) => counts[k] ? mk(k, v.label, v.icon, counts[k], v.color) : '')
         .join('');
@@ -10642,14 +10642,14 @@ function renderEvidenceList() {
             <div style="font-size:13px;font-weight:600;margin-bottom:3px">${e.topic}</div>
             <div style="font-size:11px;font-family:var(--font-mono);color:${dom.color};margin-bottom:5px">${e.ref}${e.src && e.src !== '—' ? ` — ${e.src}` : ''}</div>
             <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:6px">${e.finding}</div>
-            ${e.caveat ? `<div style="font-size:11px;color:var(--accent);line-height:1.6;margin-bottom:6px">⚠️ ${e.caveat}</div>` : ''}
+            ${e.caveat ? `<div style="font-size:11px;color:var(--accent);line-height:1.6;margin-bottom:6px">${e.caveat}</div>` : ''}
             <div style="font-size:10px;color:var(--text3)">使用箇所: ${(e.usedIn || []).join(' / ')}</div>
           </div>`).join('')}
       </div>`;
   }).join('') + `
     <div style="font-size:10px;color:var(--text3);line-height:1.7;padding:0 4px 20px">
       ※ 本アプリは医療機器ではなく、記載内容は医療診断・治療の代替ではありません。<br>
-      ※ 「⚠️」付きの項目は一次エビデンスが未確立、または限界のある推定です。運用時は注意してください。
+      ※ 「」付きの項目は一次エビデンスが未確立、または限界のある推定です。運用時は注意してください。
     </div>`;
 }
 
@@ -10811,7 +10811,7 @@ function deleteSleep(id) {
 <!-- TOC FAB -->
 <button id="toc-fab" onclick="toggleTocDrawer()" title="メニュー/目次">☰</button>
 <div id="toc-drawer">
-  <div class="toc-drawer-title">🗂 QUICK NAV</div>
+  <div class="toc-drawer-title">QUICK NAV</div>
   <div style="font-size:10px;color:var(--text3);margin-bottom:6px">— ページ移動 —</div>
   <button class="toc-drawer-item" onclick="showPage('dashboard');closeTocDrawer()"><span class="toc-num">◈</span>ダッシュボード</button>
   <button class="toc-drawer-item" onclick="showPage('peaking');closeTocDrawer()"><span class="toc-num">◎</span>ピーキング</button>
@@ -10819,10 +10819,10 @@ function deleteSleep(id) {
   <button class="toc-drawer-item" onclick="showPage('training');closeTocDrawer()"><span class="toc-num">●</span>トレーニング記録</button>
   <button class="toc-drawer-item" onclick="showPage('nutrition');closeTocDrawer()"><span class="toc-num">◆</span>栄養管理</button>
   <button class="toc-drawer-item" onclick="showPage('sleep');closeTocDrawer()"><span class="toc-num">◑</span>睡眠・回復</button>
-  <button class="toc-drawer-item" onclick="showPage('shift');closeTocDrawer()"><span class="toc-num">📅</span>シフト管理</button>
-  <button class="toc-drawer-item" onclick="showPage('analysis');closeTocDrawer()"><span class="toc-num">📊</span>分析レポート</button>
-  <button class="toc-drawer-item" onclick="showPage('evidence');closeTocDrawer()"><span class="toc-num">📚</span>エビデンス</button>
-  <button class="toc-drawer-item" onclick="showPage('settings');closeTocDrawer()"><span class="toc-num">⚙</span>設定</button>
+  <button class="toc-drawer-item" onclick="showPage('shift');closeTocDrawer()"><span class="toc-num"></span>シフト管理</button>
+  <button class="toc-drawer-item" onclick="showPage('analysis');closeTocDrawer()"><span class="toc-num"></span>分析レポート</button>
+  <button class="toc-drawer-item" onclick="showPage('evidence');closeTocDrawer()"><span class="toc-num"></span>エビデンス</button>
+  <button class="toc-drawer-item" onclick="showPage('settings');closeTocDrawer()"><span class="toc-num"></span>設定</button>
   <div id="toc-divider-analysis" style="height:1px;background:var(--bg3);margin:8px 0"></div>
   <div id="toc-section-analysis" style="font-size:10px;color:var(--text3);margin-bottom:6px">— 分析レポート内 —</div>
   <button class="toc-drawer-item" onclick="tocJump('anc-cond');closeTocDrawer()"><span class="toc-num">01</span>コンディション分析</button>
