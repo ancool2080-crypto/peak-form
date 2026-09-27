@@ -1,12 +1,13 @@
 // PEAK FORM Service Worker
 // キャッシュ名にタイムスタンプを埋め込み → デプロイのたびに自動更新
-const CACHE = 'peak-form-20260925';
+const CACHE = 'peak-form-20260927';
 
 const ASSETS = [
   './',
   './index.html',
   'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js',
-  'https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Bebas+Neue&display=swap'
+  'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap',
+  'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&icon_names=analytics,bedtime,calculate,calendar_month,edit_note,fitness_center,gastroenterology,home,medication,menu,restaurant,science,settings,toc,trending_up&display=block'
 ];
 
 // インストール時: 新しいキャッシュを作成
@@ -75,7 +76,8 @@ self.addEventListener('fetch', e => {
     caches.match(e.request).then(cached => {
       if (cached) return cached;
       return fetch(e.request).then(resp => {
-        if (resp && resp.status === 200 && resp.type === 'basic') {
+        // Google Fonts（書体とアイコン）は別オリジンの cors 応答なので、それも保存してオフラインで表示できるようにする
+        if (resp && resp.status === 200 && (resp.type === 'basic' || resp.type === 'cors')) {
           const clone = resp.clone();
           caches.open(CACHE).then(c => c.put(e.request, clone));
         }

@@ -4,8 +4,8 @@
   "description": "消防士コンディショニングシステム — 科学的根拠に基づく総合管理",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#0a0a0f",
-  "theme_color": "#ff4560",
+  "background_color": "#1e100e",
+  "theme_color": "#1e100e",
   "orientation": "portrait-primary",
   "categories": [
     "health",
