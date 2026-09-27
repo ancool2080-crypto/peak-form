@@ -11,24 +11,25 @@
 /* ================================================================
    Material Design 3 ／ ダークスキーム
    種色 #C62828（消防車の赤）から Material Color Utilities の SchemeContent で生成。
+   ただし赤みのある面は読みにくいため、面・文字・枠線・secondary は彩度0の中立グレーのパレットに差し替えている。
    情報・良好・注意・補助の意味色は M3 のカスタムカラーの作法どおり主色へ harmonize してある。
    ================================================================ */
 :root{
   --md-sys-color-primary:#ffb4ac;--md-sys-color-on-primary:#690007;
   --md-sys-color-primary-container:#c62828;--md-sys-color-on-primary-container:#ffe0dd;
-  --md-sys-color-secondary:#ffb4ac;--md-sys-color-on-secondary:#601211;
-  --md-sys-color-secondary-container:#822b27;--md-sys-color-on-secondary-container:#ffdad6;
+  --md-sys-color-secondary:#c6c6c6;--md-sys-color-on-secondary:#303030;
+  --md-sys-color-secondary-container:#474747;--md-sys-color-on-secondary-container:#e2e2e2;
   --md-sys-color-tertiary:#ffb867;--md-sys-color-on-tertiary:#482900;
   --md-sys-color-tertiary-container:#945a00;--md-sys-color-on-tertiary-container:#ffe2c6;
   --md-sys-color-error:#ffb4ab;--md-sys-color-on-error:#690005;
   --md-sys-color-error-container:#93000a;--md-sys-color-on-error-container:#ffdad6;
-  --md-sys-color-surface:#1e100e;
-  --md-sys-color-surface-container-lowest:#180a09;--md-sys-color-surface-container-low:#271816;
-  --md-sys-color-surface-container:#2b1c1a;--md-sys-color-surface-container-high:#372624;
-  --md-sys-color-surface-container-highest:#42302e;
-  --md-sys-color-on-surface:#f9dcd9;--md-sys-color-on-surface-variant:#e4beba;
-  --md-sys-color-outline:#ab8985;--md-sys-color-outline-variant:#5b403d;
-  --md-sys-color-inverse-surface:#f9dcd9;--md-sys-color-inverse-on-surface:#3e2c2a;
+  --md-sys-color-surface:#131313;
+  --md-sys-color-surface-container-lowest:#0e0e0e;--md-sys-color-surface-container-low:#1b1b1b;
+  --md-sys-color-surface-container:#1f1f1f;--md-sys-color-surface-container-high:#2a2a2a;
+  --md-sys-color-surface-container-highest:#353535;
+  --md-sys-color-on-surface:#e2e2e2;--md-sys-color-on-surface-variant:#c6c6c6;
+  --md-sys-color-outline:#919191;--md-sys-color-outline-variant:#474747;
+  --md-sys-color-inverse-surface:#e2e2e2;--md-sys-color-inverse-on-surface:#303030;
   --md-custom-info:#b5c4ff;--md-custom-info-container:#123ea3;--md-custom-on-info-container:#dbe1ff;
   --md-custom-success:#87dc4d;--md-custom-success-container:#245100;--md-custom-on-success-container:#a2f966;
   --md-custom-warning:#ffb77c;--md-custom-warning-container:#6e3900;--md-custom-on-warning-container:#ffdcc3;
@@ -192,7 +193,7 @@ canvas{max-width:100%}
 
 /* ラベル（M3 の assist chip に近い小さな札） */
 .badge{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:var(--md-shape-sm);font-size:12px;line-height:16px;font-weight:500;letter-spacing:.4px;border:none;white-space:nowrap}
-.badge-red{background:var(--md-sys-color-secondary-container);color:var(--md-sys-color-on-secondary-container)}
+.badge-red{background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container)}
 .badge-blue{background:var(--md-custom-info-container);color:var(--md-custom-on-info-container)}
 .badge-green{background:var(--md-custom-success-container);color:var(--md-custom-on-success-container)}
 .badge-amber{background:var(--md-custom-warning-container);color:var(--md-custom-on-warning-container)}
@@ -207,7 +208,7 @@ input:hover,select:hover,textarea:hover{border-color:var(--md-sys-color-on-surfa
 input:focus,select:focus,textarea:focus{border-color:var(--md-sys-color-primary);box-shadow:inset 0 0 0 1px var(--md-sys-color-primary)}
 input::placeholder,textarea::placeholder{color:var(--text2);opacity:.8}
 select{appearance:none;-webkit-appearance:none;padding-right:44px;cursor:pointer;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e4beba'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23c6c6c6'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 12px center;background-size:24px}
 select option{background:var(--md-sys-color-surface-container-high);color:var(--text)}
 input[type=checkbox],input[type=radio]{width:18px;height:18px;min-height:0;padding:0;accent-color:var(--md-sys-color-primary);cursor:pointer}
@@ -251,7 +252,7 @@ table{width:100%;border-collapse:collapse;font-size:14px;line-height:20px}
 td,th{padding:12px 16px;border-bottom:1px solid var(--md-sys-color-outline-variant);text-align:left;vertical-align:middle}
 th{font-size:14px;font-weight:500;color:var(--text2);background:transparent}
 tr:last-child td{border-bottom:none}
-@media (hover:hover){tr:hover td{background:rgba(249,220,217,.04)}}
+@media (hover:hover){tr:hover td{background:rgba(226,226,226,.04)}}
 
 .row{display:flex;align-items:center;gap:12px}
 .row-between{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
@@ -274,7 +275,7 @@ tr:last-child td{border-bottom:none}
 .day-cell:hover{border-color:var(--border2)}
 .day-cell.rest{background:var(--bg3)}.day-cell.strength{background:rgba(181,196,255,0.18);border-color:rgba(181,196,255,0.3)}
 .day-cell.hiit{background:rgba(255,180,172,0.18);border-color:rgba(255,180,172,0.3)}.day-cell.cardio{background:rgba(135,220,77,0.18);border-color:rgba(135,220,77,0.3)}
-.day-cell.mobility{background:rgba(171,137,133,0.2);border-color:var(--border2)}.day-cell.today-cell{box-shadow:0 0 0 2px var(--accent)}
+.day-cell.mobility{background:rgba(145,145,145,0.2);border-color:var(--border2)}.day-cell.today-cell{box-shadow:0 0 0 2px var(--accent)}
 .day-header{font-size:12px;color:var(--text3);text-align:center;padding:3px 0;font-family:var(--font-mono)}
 .topbar-date{font-family:var(--font-mono);font-size:12px;color:var(--text3)}
 /* ===== GUT HEALTH ===== */
@@ -285,11 +286,11 @@ tr:last-child td{border-bottom:none}
 .step-card.completed .step-number{color:rgba(135,220,77,0.1)}.step-card.active-step .step-number{color:rgba(181,196,255,0.1)}
 .step-title{font-weight:700;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
 .step-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;flex-shrink:0;transition:all 0.2s}
-.step-check.done{background:var(--accent4);border-color:var(--accent4);color:#1e100e;font-weight:700}
+.step-check.done{background:var(--accent4);border-color:var(--accent4);color:#131313;font-weight:700}
 .step-task{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
 .step-task:last-child{border-bottom:none}
 .step-task-check{width:18px;height:18px;border-radius:4px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;flex-shrink:0;margin-top:2px;transition:all 0.15s}
-.step-task-check.done{background:var(--accent4);border-color:var(--accent4);color:#1e100e}
+.step-task-check.done{background:var(--accent4);border-color:var(--accent4);color:#131313}
 .step-task-text{font-size:14px;color:var(--text2);flex:1;line-height:1.5}
 .step-task-text.done{text-decoration:line-through;color:var(--text3)}
 .bristol-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:12px 0}
@@ -418,7 +419,7 @@ details.expl > .expl-body{background:var(--md-sys-color-surface-container);borde
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="PEAK FORM">
-  <meta name="theme-color" content="#1e100e">
+  <meta name="theme-color" content="#131313">
 </head>
 <body>
 
@@ -2515,8 +2516,8 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSideb
 if (typeof Chart !== 'undefined') {
   Chart.defaults.font.family = '"Roboto","Noto Sans JP",sans-serif';
   Chart.defaults.font.size = 12;
-  Chart.defaults.color = '#e4beba';
-  Chart.defaults.borderColor = 'rgba(171,137,133,0.18)';
+  Chart.defaults.color = '#c6c6c6';
+  Chart.defaults.borderColor = 'rgba(145,145,145,0.18)';
 }
 
 const cfg=()=>DB.get('cfg')||{tdee:2800,goalmode:'maintain',water:2500,name:''};
@@ -2613,7 +2614,7 @@ const PROGRAMS={
     sessions:{PUSH:{name:'PUSH DAY',focus:'胸・肩・三頭筋',color:'#ffb4ac',letter:'P'},PULL:{name:'PULL DAY',focus:'背中・二頭筋',color:'#b5c4ff',letter:'L'},LEGS:{name:'LEGS DAY',focus:'脚・臀部・腹',color:'#87dc4d',letter:'L'}},
     cycle:['PUSH','PULL','LEGS'],scheduleHint:'Push→Pull→Legs→休養のサイクル'},
   PPL_LU:{id:'PPL_LU',name:'PPL + LOWER/UPPER',abbr:'PPL+LU',desc:'PPLにLower・Upperを組み合わせた5分割',color:'#e1b6ff',freq:'週5回',
-    sessions:{PUSH:{name:'PUSH DAY',focus:'胸・肩・三頭',color:'#ffb4ac',letter:'P'},PULL:{name:'PULL DAY',focus:'背中・二頭',color:'#b5c4ff',letter:'P'},LEGS:{name:'LEGS DAY',focus:'脚全体',color:'#87dc4d',letter:'L'},UPPER:{name:'UPPER DAY',focus:'上半身',color:'#ffb77c',letter:'U'},LOWER:{name:'LOWER DAY',focus:'下半身',color:'#ab8985',letter:'L'}},
+    sessions:{PUSH:{name:'PUSH DAY',focus:'胸・肩・三頭',color:'#ffb4ac',letter:'P'},PULL:{name:'PULL DAY',focus:'背中・二頭',color:'#b5c4ff',letter:'P'},LEGS:{name:'LEGS DAY',focus:'脚全体',color:'#87dc4d',letter:'L'},UPPER:{name:'UPPER DAY',focus:'上半身',color:'#ffb77c',letter:'U'},LOWER:{name:'LOWER DAY',focus:'下半身',color:'#919191',letter:'L'}},
     cycle:['PUSH','PULL','LEGS','UPPER','LOWER'],scheduleHint:'Push→Pull→Legs→Upper→Lower の5日サイクル'},
   LU:{id:'LU',name:'LOWER / UPPER',abbr:'L/U',desc:'上半身・下半身の2分割',color:'#87dc4d',freq:'週2〜4回',
     sessions:{UPPER:{name:'UPPER DAY',focus:'胸・背中・肩・腕',color:'#b5c4ff',letter:'U'},LOWER:{name:'LOWER DAY',focus:'脚・臀部・ハム・腹',color:'#87dc4d',letter:'L'}},
@@ -4013,7 +4014,7 @@ function renderSuppAgeRecommend() {
   if (badgeEl) {
     badgeEl.textContent = groupLabels[t.ageGroup] + ' 最適化';
     badgeEl.style.background = groupColors[t.ageGroup];
-    badgeEl.style.color = '#1e100e';
+    badgeEl.style.color = '#131313';
   }
 
   // 年代別のサプリ調整内容
@@ -4240,7 +4241,7 @@ function renderWeeklyReview(){
       },
       options:{
         responsive:true,maintainAspectRatio:false,
-        scales:{r:{min:0,max:100,ticks:{display:false,stepSize:25},grid:{color:'rgba(255,255,255,0.08)'},pointLabels:{font:{size:12},color:'#ab8985'}}},
+        scales:{r:{min:0,max:100,ticks:{display:false,stepSize:25},grid:{color:'rgba(255,255,255,0.08)'},pointLabels:{font:{size:12},color:'#919191'}}},
         plugins:{legend:{display:false}}
       }
     });
@@ -5173,7 +5174,7 @@ function renderAgeAdjustedTargets() {
     <div style="margin-bottom:12px">
       <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--text2)">心拍ゾーン（${t.age}歳基準）</div>
       ${[
-        ['Zone1 回復', t.zone1HR, '#ab8985'],
+        ['Zone1 回復', t.zone1HR, '#919191'],
         ['Zone2 脂肪燃焼・心肺持久力', t.zone2HR, '#87dc4d'],
         ['Zone3 有酸素閾値', t.zone3HR, '#ffb867'],
         ['Zone4 消防活動想定強度', t.zone4HR, 'var(--accent)'],
@@ -5246,7 +5247,7 @@ function renderLongTermTrend() {
   const monthTrainingCounts = monthLabels.map(m => monthlyTraining[m] || 0);
 
   // グラフ描画
-  const co = { color: 'rgba(171,137,133,0.9)', font: { size: 10, family: 'DM Mono' } };
+  const co = { color: 'rgba(145,145,145,0.9)', font: { size: 10, family: 'DM Mono' } };
   const canvas = document.getElementById('a-longterm-chart');
   if (!canvas) return;
   if (window._ltChart) window._ltChart.destroy();
@@ -5276,7 +5277,7 @@ function renderLongTermTrend() {
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: {
-        legend: { display: true, labels: { color: '#ab8985', font: { size: 10 }, boxWidth: 12, usePointStyle: true } },
+        legend: { display: true, labels: { color: '#919191', font: { size: 10 }, boxWidth: 12, usePointStyle: true } },
         tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y } }
       },
       scales: {
@@ -5764,7 +5765,7 @@ function renderJointExerciseFlags() {
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
               <span style="font-size:18px">${part?.icon || ''}</span>
               <span style="font-size:14px;font-weight:700">${part?.label || f.part}</span>
-              <span style="font-size:12px;font-weight:700;padding:2px 8px;border-radius:4px;background:${sv.color};color:#1e100e">${sv.icon} ${sv.label}</span>
+              <span style="font-size:12px;font-weight:700;padding:2px 8px;border-radius:4px;background:${sv.color};color:#131313">${sv.icon} ${sv.label}</span>
               <span style="font-size:12px;font-family:var(--font-mono);color:var(--text3);margin-left:auto">平均${f.avg} / 最大${f.max} / ${f.count}件</span>
             </div>
             <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:10px">${sv.action}</div>
@@ -5812,7 +5813,7 @@ function renderJointExerciseFlags() {
           <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap">
             <span style="font-size:16px">${part?.icon || ''}</span>
             <span style="font-size:12px;font-weight:700">${part?.label || f.part}に負荷が蓄積しています</span>
-            <span style="font-size:12px;font-weight:700;padding:2px 7px;border-radius:4px;background:${sv.color};color:#1e100e">${sv.icon} ${sv.label}</span>
+            <span style="font-size:12px;font-weight:700;padding:2px 7px;border-radius:4px;background:${sv.color};color:#131313">${sv.icon} ${sv.label}</span>
           </div>
           ${hits.length ? `
             <div style="font-size:12px;color:var(--text2);line-height:1.7">
@@ -6414,7 +6415,7 @@ function renderDashboard(){
         {label:'胸',parts:['胸','胸・三頭','胸下部'],color:'#ffb4ac'},
         {label:'肩',parts:['肩','肩後部'],color:'#ffb77c'},
         {label:'腕',parts:['二頭','三頭','カーフ'],color:'#e1b6ff'},
-        {label:'体幹',parts:['腹'],color:'#ab8985'},
+        {label:'体幹',parts:['腹'],color:'#919191'},
       ];
       // 経験レベル別閾値（シフト補正込み）
       const thresh = getVolumeThresholds();
@@ -6449,7 +6450,7 @@ function renderDashboard(){
   }
 
   const last21=history.slice(-21);if(dashChart)dashChart.destroy();
-  if(last21.length){const co={color:'#ab8985',font:{size:12}};dashChart=new Chart(document.getElementById('dash-load-chart'),{type:'line',data:{labels:last21.map(d=>d.date.slice(5)),datasets:[{label:'CTL',data:last21.map(d=>d.ctl),borderColor:'#b5c4ff',tension:0.4,fill:false,borderWidth:2,pointRadius:0},{label:'ATL',data:last21.map(d=>d.atl),borderColor:'#ffb4ac',tension:0.4,fill:false,borderWidth:2,pointRadius:0},{label:'TSB',data:last21.map(d=>d.tsb),borderColor:'#87dc4d',tension:0.4,fill:false,borderWidth:1.5,pointRadius:0,borderDash:[5,4]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:co,grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:co,grid:{color:'rgba(255,255,255,0.04)'}}}}})}
+  if(last21.length){const co={color:'#919191',font:{size:12}};dashChart=new Chart(document.getElementById('dash-load-chart'),{type:'line',data:{labels:last21.map(d=>d.date.slice(5)),datasets:[{label:'CTL',data:last21.map(d=>d.ctl),borderColor:'#b5c4ff',tension:0.4,fill:false,borderWidth:2,pointRadius:0},{label:'ATL',data:last21.map(d=>d.atl),borderColor:'#ffb4ac',tension:0.4,fill:false,borderWidth:2,pointRadius:0},{label:'TSB',data:last21.map(d=>d.tsb),borderColor:'#87dc4d',tension:0.4,fill:false,borderWidth:1.5,pointRadius:0,borderDash:[5,4]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:co,grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:co,grid:{color:'rgba(255,255,255,0.04)'}}}}})}
 
   renderTomorrowPrediction();
   updateVolumeLevelNote((DB.get('cfg')||{}).experienceLevel||'beginner');
@@ -6566,7 +6567,7 @@ function generatePeakingPlan(){
   const tsbData=[];const labels=[];let sAtl=0,sCtl=0;const lbp={accumulate:350,intensify:420,convert:480,taper:120};
   for(let w=0;w<totalWeeks;w++){const ph=phases.find(p=>w>=p.startWeek&&w<p.startWeek+p.weeks);const wl=ph?lbp[ph.type]:0;for(let d=0;d<7;d++){const dl=wl/7;sAtl=sAtl+(dl-sAtl)*(1-Math.exp(-1/7));sCtl=sCtl+(dl-sCtl)*(1-Math.exp(-1/42));}tsbData.push(Math.round(sCtl-sAtl));labels.push('W'+(w+1));}
   if(pkTsbChart)pkTsbChart.destroy();
-  pkTsbChart=new Chart(document.getElementById('pk-tsb-chart'),{type:'line',data:{labels,datasets:[{data:tsbData,borderColor:'#87dc4d',backgroundColor:'rgba(135,220,77,0.08)',tension:0.4,fill:true,borderWidth:2,pointRadius:3,pointBackgroundColor:tsbData.map(v=>v>0?'#87dc4d':'#ffb4ac')},{data:labels.map(()=>0),borderColor:'rgba(255,255,255,0.15)',borderDash:[4,4],borderWidth:1,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#ab8985',font:{size:12}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#ab8985',font:{size:12}},grid:{color:'rgba(255,255,255,0.04)'}}}}});
+  pkTsbChart=new Chart(document.getElementById('pk-tsb-chart'),{type:'line',data:{labels,datasets:[{data:tsbData,borderColor:'#87dc4d',backgroundColor:'rgba(135,220,77,0.08)',tension:0.4,fill:true,borderWidth:2,pointRadius:3,pointBackgroundColor:tsbData.map(v=>v>0?'#87dc4d':'#ffb4ac')},{data:labels.map(()=>0),borderColor:'rgba(255,255,255,0.15)',borderDash:[4,4],borderWidth:1,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#919191',font:{size:12}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#919191',font:{size:12}},grid:{color:'rgba(255,255,255,0.04)'}}}}});
   document.getElementById('peaking-result').style.display='block';
 }
 
@@ -6931,11 +6932,11 @@ function selectSession(id){
   const typeBg={C:'rgba(255,180,172,0.12)',M:'rgba(181,196,255,0.12)',I:'rgba(225,182,255,0.12)'};
   const typeCol={C:'#ffb4ac',M:'#b5c4ff',I:'#e1b6ff'};
   const typeShort={C:'CF',M:'CM',I:'ISO'};
-  const pc={'背中':'#b5c4ff','胸':'#ffb4ac','胸・三頭':'#ffb4ac','四頭':'#87dc4d','ハム':'#87dc4d','腹':'#ab8985','肩':'#ffb77c','肩後部':'#ffb77c','三頭':'#e1b6ff','二頭':'#e1b6ff','カーフ':'#ab8985','内転筋':'#87dc4d','臀部':'#87dc4d','脚全体':'#87dc4d','脊柱起立筋':'#b5c4ff','僧帽筋':'#b5c4ff','胸下部':'#ffb4ac'};
+  const pc={'背中':'#b5c4ff','胸':'#ffb4ac','胸・三頭':'#ffb4ac','四頭':'#87dc4d','ハム':'#87dc4d','腹':'#919191','肩':'#ffb77c','肩後部':'#ffb77c','三頭':'#e1b6ff','二頭':'#e1b6ff','カーフ':'#919191','内転筋':'#87dc4d','臀部':'#87dc4d','脚全体':'#87dc4d','脊柱起立筋':'#b5c4ff','僧帽筋':'#b5c4ff','胸下部':'#ffb4ac'};
   document.getElementById('prog-exercise-list').innerHTML=
     '<table><thead><tr><th>#</th><th>種目</th><th>部位</th><th>タイプ</th><th>推奨rep</th><th style="color:var(--accent)">今日のRIR</th></tr></thead><tbody>'+
     s.exercises.map((e,i)=>{
-      const col=pc[e.part]||'#ab8985';const t=e.rpe||'I';const ti=typeIdx[t]??2;
+      const col=pc[e.part]||'#919191';const t=e.rpe||'I';const ti=typeIdx[t]??2;
       const rirVal=rirArr[ti];const rirCol=rirColArr[ti];
       return`<tr><td class="mono" style="color:var(--text3);font-size:12px">${i+1}</td><td style="font-size:14px">${e.name}</td><td><span style="font-size:12px;padding:2px 7px;border-radius:10px;background:${col}20;color:${col};border:1px solid ${col}40">${e.part}</span></td><td><span style="font-size:12px;padding:2px 6px;border-radius:4px;background:${typeBg[t]};color:${typeCol[t]};font-weight:500">${typeShort[t]}</span></td><td class="mono" style="font-size:12px">${e.reps}</td><td class="mono" style="color:${rirCol};font-weight:600">${rirVal}</td></tr>`;
     }).join('')+'</tbody></table>'+
@@ -7009,7 +7010,7 @@ function addExRow(nameVal, setsData){
     <div class="set-rows" id="${eid}-sets"></div>
     <div style="display:flex;gap:6px;margin-top:6px">
       <button class="btn btn-sm" style="flex:1;font-size:12px" onclick="addSetRow('${eid}')">+ 作業セット</button>
-      <button class="btn btn-sm" style="font-size:12px;background:rgba(171,137,133,0.2);border-color:var(--border2)" onclick="addSetRow('${eid}','','',true)">W ウォームアップ</button>
+      <button class="btn btn-sm" style="font-size:12px;background:rgba(145,145,145,0.2);border-color:var(--border2)" onclick="addSetRow('${eid}','','',true)">W ウォームアップ</button>
       <button class="btn btn-sm" style="font-size:12px;color:var(--accent2);border-color:rgba(181,196,255,0.3)" onclick="startRestTimer('${eid}')">⏱ 休憩</button>
     </div>
   `;
@@ -7034,7 +7035,7 @@ function addSetRow(eid, weightVal, repsVal, isWarmup, rpeVal){
   const rm1 = (w>0&&r>0&&r<30) ? Math.round(w*(1+r/30)*10)/10 : 0;
   const rm1Text = rm1 > 0 ? `<span style="font-size:12px;color:var(--text3);font-family:var(--font-mono)">=1RM ${rm1}kg</span>` : '';
   
-  const bgColor = isWarmup ? 'rgba(171,137,133,0.15)' : 'transparent';
+  const bgColor = isWarmup ? 'rgba(145,145,145,0.15)' : 'transparent';
   const warmupLabel = isWarmup ? '<span style="font-size:12px;color:var(--text3);background:var(--bg4);padding:1px 4px;border-radius:2px">W</span>' : '';
   
   row.style.cssText = `background:${bgColor};border-radius:4px;padding:3px 4px;margin-bottom:3px`;
@@ -7302,7 +7303,7 @@ function renderTrainingLog(){
         const setStr = allSets.map((s,i) => {
           const wLabel = s.warmup ? 'W' : (i+1);
           const rpeStr = s.rpe ? ` <span style="font-size:12px;color:var(--text3)">@${s.rpe}</span>` : '';
-          const bg = s.warmup ? 'rgba(171,137,133,0.2)' : 'var(--bg4)';
+          const bg = s.warmup ? 'rgba(145,145,145,0.2)' : 'var(--bg4)';
           return `<span style="font-size:12px;font-family:var(--font-mono);padding:2px 6px;background:${bg};border-radius:3px;opacity:${s.warmup?0.6:1}">${wLabel}:${parseFloat(s.weight)||'—'}kg×${parseInt(s.reps)||'—'}${rpeStr}</span>`;
         }).join('');
         // 1RM推定（最大重量×最大セット）
@@ -8082,7 +8083,7 @@ function renderWeightTracker(){
   }
   // グラフ描画
   if(trackerChart)trackerChart.destroy();
-  const co={color:'#ab8985',font:{size:12}};
+  const co={color:'#919191',font:{size:12}};
   const ctx=document.getElementById('tracker-chart');
   if(!ctx)return;
   trackerChart=new Chart(ctx,{
@@ -8384,7 +8385,7 @@ function saveSleep(){
   alert(`睡眠を記録しました。実効睡眠: ${effectiveDur}h（メイン${mainDur}h - 中断${interrupts}分 + 仮眠${napMin}分）`);
 }
 
-function renderSleepCharts(){const sl=DB.arr('sleeps').slice(-7);if(!sl.length)return;const labels=sl.map(s=>s.date.slice(5));const co={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#ab8985',font:{size:12}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#ab8985',font:{size:12}},grid:{color:'rgba(255,255,255,0.04)'}}}};if(sleepChart)sleepChart.destroy();sleepChart=new Chart(document.getElementById('sleep-chart'),{type:'bar',data:{labels,datasets:[{data:sl.map(s=>s.duration||0),backgroundColor:'rgba(181,196,255,0.45)',borderColor:'#b5c4ff',borderWidth:1,borderRadius:4}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:0,max:12}}}});if(wellnessChart)wellnessChart.destroy();wellnessChart=new Chart(document.getElementById('wellness-chart'),{type:'line',data:{labels,datasets:[{data:sl.map(s=>s.wellness||0),borderColor:'#ffb77c',tension:0.4,borderWidth:2,fill:false,pointRadius:5,pointBackgroundColor:'#ffb77c'}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:0,max:10}}}});
+function renderSleepCharts(){const sl=DB.arr('sleeps').slice(-7);if(!sl.length)return;const labels=sl.map(s=>s.date.slice(5));const co={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#919191',font:{size:12}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#919191',font:{size:12}},grid:{color:'rgba(255,255,255,0.04)'}}}};if(sleepChart)sleepChart.destroy();sleepChart=new Chart(document.getElementById('sleep-chart'),{type:'bar',data:{labels,datasets:[{data:sl.map(s=>s.duration||0),backgroundColor:'rgba(181,196,255,0.45)',borderColor:'#b5c4ff',borderWidth:1,borderRadius:4}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:0,max:12}}}});if(wellnessChart)wellnessChart.destroy();wellnessChart=new Chart(document.getElementById('wellness-chart'),{type:'line',data:{labels,datasets:[{data:sl.map(s=>s.wellness||0),borderColor:'#ffb77c',tension:0.4,borderWidth:2,fill:false,pointRadius:5,pointBackgroundColor:'#ffb77c'}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:0,max:10}}}});
   // 睡眠記録リスト（直近10件）
   renderSleepRecordList();
 }
@@ -8420,7 +8421,7 @@ function renderSleepRecordList() {
 // ===== shift.js =====
 const SHIFT_TYPES={
   '24h':     {label:'当番',     bg:'rgba(255,180,172,0.25)',  border:'rgba(255,180,172,0.6)',  text:'#ffb4ac',icon:'当',load:800},
-  'off':     {label:'非番',     bg:'rgba(171,137,133,0.25)',  border:'rgba(171,137,133,0.5)',  text:'var(--text2)',icon:'非',load:100},
+  'off':     {label:'非番',     bg:'rgba(145,145,145,0.25)',  border:'rgba(145,145,145,0.5)',  text:'var(--text2)',icon:'非',load:100},
   'off-work':{label:'非番出勤', bg:'rgba(255,183,124,0.28)', border:'rgba(255,183,124,0.7)', text:'#ffb77c',icon:'非出',load:600},
   'rest':    {label:'週休',     bg:'rgba(181,196,255,0.2)',  border:'rgba(181,196,255,0.5)', text:'#b5c4ff',icon:'週',load:0},
   'rest-work':{label:'週休出勤',bg:'rgba(225,182,255,0.28)',border:'rgba(225,182,255,0.7)',text:'#e1b6ff',icon:'週出',load:700},
@@ -8686,7 +8687,7 @@ function applyShiftPattern(){
 
 // ===== analysis.js =====
 function renderAnalysis(){
-  const{atl,ctl,tsb}=computeLoad();const co={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#ab8985',font:{size:12}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#ab8985',font:{size:12}},grid:{color:'rgba(255,255,255,0.04)'}}}};
+  const{atl,ctl,tsb}=computeLoad();const co={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#919191',font:{size:12}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#919191',font:{size:12}},grid:{color:'rgba(255,255,255,0.04)'}}}};
   const tr=DB.arr('trainings');const weeks={};tr.forEach(t=>{const d=new Date(t.date);const mon=new Date(d);mon.setDate(d.getDate()-(d.getDay()===0?6:d.getDay()-1));const wk=mon.toISOString().slice(0,10);weeks[wk]=(weeks[wk]||0)+(parseInt(t.duration)||0)*(parseInt(t.rpe)||5)});
   const wKeys=Object.keys(weeks).sort().slice(-8);if(aWeekly)aWeekly.destroy();if(wKeys.length){aWeekly=new Chart(document.getElementById('a-weekly-chart'),{type:'bar',data:{labels:wKeys.map(d=>d.slice(5)),datasets:[{data:wKeys.map(k=>weeks[k]),backgroundColor:'rgba(181,196,255,0.45)',borderColor:'#b5c4ff',borderWidth:1,borderRadius:4}]},options:co});}
   const sleeps=DB.arr('sleeps').filter(s=>s.weight>0).slice(-30);if(aWeight)aWeight.destroy();if(sleeps.length){
@@ -8700,7 +8701,7 @@ function renderAnalysis(){
   aWeight=new Chart(document.getElementById('a-weight-chart'),{type:'line',data:{labels:sleeps.map(s=>s.date.slice(5)),datasets:[
     {label:'体重',data:weights,borderColor:'#b5c4ff',backgroundColor:'rgba(181,196,255,0.08)',tension:0.3,fill:true,borderWidth:2,pointRadius:2,pointHoverRadius:5},
     {label:'7日移動平均',data:movAvg,borderColor:'#ffb867',backgroundColor:'transparent',tension:0.4,fill:false,borderWidth:2.5,pointRadius:0,borderDash:[],borderCapStyle:'round'}
-  ]},options:{...co,plugins:{...co.plugins,legend:{display:true,labels:{color:'#ab8985',font:{size:12},boxWidth:20,usePointStyle:true}}}}}
+  ]},options:{...co,plugins:{...co.plugins,legend:{display:true,labels:{color:'#919191',font:{size:12},boxWidth:20,usePointStyle:true}}}}}
   );}
   const meals=DB.arr('meals');const mbd={};meals.forEach(m=>{if(!mbd[m.date])mbd[m.date]={cal:0};mbd[m.date].cal+=m.cal||0});const mDates=Object.keys(mbd).sort().slice(-14);const calT=getCalTarget(cfg().goalmode||'maintain');if(aNutr)aNutr.destroy();if(mDates.length){aNutr=new Chart(document.getElementById('a-nutrition-chart'),{type:'bar',data:{labels:mDates.map(d=>d.slice(5)),datasets:[{data:mDates.map(d=>mbd[d].cal),backgroundColor:'rgba(255,183,124,0.45)',borderColor:'#ffb77c',borderWidth:1,borderRadius:4},{data:mDates.map(()=>calT),type:'line',borderColor:'rgba(255,180,172,0.6)',borderDash:[5,3],borderWidth:1.5,pointRadius:0}]},options:co});}
   const sl14=DB.arr('sleeps').slice(-14);if(aWell)aWell.destroy();if(sl14.length){aWell=new Chart(document.getElementById('a-wellness-chart'),{type:'line',data:{labels:sl14.map(s=>s.date.slice(5)),datasets:[{data:sl14.map(s=>s.wellness||0),borderColor:'#ffb77c',tension:0.4,borderWidth:2,fill:false,pointRadius:3},{data:sl14.map(s=>s.duration||0),borderColor:'#b5c4ff',tension:0.4,borderWidth:1.5,fill:false,pointRadius:0,borderDash:[3,3]}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:0,max:10}}}});}
@@ -8784,8 +8785,8 @@ function renderWeeklySummary(){
     responsive: true, maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
-      x: { ticks: { color: '#ab8985', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-      y: { ticks: { color: '#ab8985', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
+      x: { ticks: { color: '#919191', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+      y: { ticks: { color: '#919191', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
     }
   };
   const labels = weeks.map(w => w.slice(5));
@@ -8907,10 +8908,10 @@ function renderBodyComposition() {
   const labels = points.map(p => p.date.slice(5));
   const co = {
     responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { position: 'top', labels: { color: '#ab8985', font: { size: 10 }, boxWidth: 12, padding: 10 } } },
+    plugins: { legend: { position: 'top', labels: { color: '#919191', font: { size: 10 }, boxWidth: 12, padding: 10 } } },
     scales: {
-      x: { ticks: { color: '#ab8985', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-      y: { ticks: { color: '#ab8985', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
+      x: { ticks: { color: '#919191', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+      y: { ticks: { color: '#919191', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
     }
   };
   
@@ -9099,12 +9100,12 @@ function renderConditionAnalysis(){
       options:{
         responsive:true,maintainAspectRatio:false,
         plugins:{
-          legend:{display:true,position:'top',labels:{color:'#ab8985',font:{size:12},boxWidth:12,padding:12}},
+          legend:{display:true,position:'top',labels:{color:'#919191',font:{size:12},boxWidth:12,padding:12}},
           tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y}`}}
         },
         scales:{
-          x:{ticks:{color:'#ab8985',font:{size:12}},grid:{color:'rgba(255,255,255,0.04)'}},
-          y:{min:0,max:100,ticks:{color:'#ab8985',font:{size:12},callback:v=>v},grid:{color:'rgba(255,255,255,0.04)'}}
+          x:{ticks:{color:'#919191',font:{size:12}},grid:{color:'rgba(255,255,255,0.04)'}},
+          y:{min:0,max:100,ticks:{color:'#919191',font:{size:12},callback:v=>v},grid:{color:'rgba(255,255,255,0.04)'}}
         }
       }
     });
@@ -9161,7 +9162,7 @@ function renderCondHeatmap(weekMap,wks){
     html2+=`<div style="display:flex;flex-direction:column;gap:2px;width:40px">`;
     axes.forEach(ax=>{
       const v=vals[ax.key];
-      html2+=`<div title="${ax.label}: ${v}" style="height:18px;border-radius:3px;background:${scoreColor(v)};display:flex;align-items:center;justify-content:center"><span style="font-size:12px;color:#1e100e;font-family:var(--font-mono)">${v}</span></div>`;
+      html2+=`<div title="${ax.label}: ${v}" style="height:18px;border-radius:3px;background:${scoreColor(v)};display:flex;align-items:center;justify-content:center"><span style="font-size:12px;color:#131313;font-family:var(--font-mono)">${v}</span></div>`;
     });
     html2+=`<div style="font-size:12px;color:var(--text3);text-align:center;margin-top:2px">${wk.slice(5)}</div>`;
     html2+='</div>';
@@ -9557,7 +9558,7 @@ function renderShiftTrainingPlan() {
     strength: 'background:rgba(181,196,255,0.22);border:1px solid rgba(181,196,255,0.5);color:#b5c4ff',
     suggest:  'background:rgba(135,220,77,0.12);border:1px solid rgba(135,220,77,0.3);color:#87dc4d',
     cardio:   'background:rgba(135,220,77,0.18);border:1px solid rgba(135,220,77,0.4);color:#87dc4d',
-    recovery: 'background:rgba(171,137,133,0.2);border:1px solid var(--border);color:var(--text3)',
+    recovery: 'background:rgba(145,145,145,0.2);border:1px solid var(--border);color:var(--text3)',
     duty:     'background:rgba(255,180,172,0.07);border:1px solid rgba(255,180,172,0.2);color:var(--text3)',
     light:    'background:rgba(225,182,255,0.1);border:1px solid rgba(225,182,255,0.25);color:#e1b6ff',
   };
@@ -10038,7 +10039,7 @@ function renderWebFoodPanel(r, query) {
   panel.innerHTML = `
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
       <span style="font-size:12px;font-weight:700;color:var(--accent2)">ネット検索結果</span>
-      <span style="font-size:12px;font-weight:700;padding:2px 7px;border-radius:4px;background:${conf.color};color:#1e100e">${conf.label}</span>
+      <span style="font-size:12px;font-weight:700;padding:2px 7px;border-radius:4px;background:${conf.color};color:#131313">${conf.label}</span>
     </div>
     <div style="font-size:14px;font-weight:600;margin-bottom:2px">${r.name || query}</div>
     <div style="font-size:12px;color:var(--text2);margin-bottom:8px">${r.serving || ''}${g > 0 ? `（約${g}g）` : ''}</div>
@@ -10323,8 +10324,8 @@ function renderRestingHRTrend() {
                              backgroundColor: 'rgba(255,184,103,0.08)', tension: 0.35, fill: true,
                              borderWidth: 2, pointRadius: 3 }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                   scales: { x: { ticks: { color: '#ab8985', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-                             y: { ticks: { color: '#ab8985', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } } } },
+                   scales: { x: { ticks: { color: '#919191', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+                             y: { ticks: { color: '#919191', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } } } },
       });
     }
   }
@@ -10466,7 +10467,7 @@ function renderSuppNotifySettings() {
 
   el.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
-      <span onclick="toggleNotifyMaster()" style="cursor:pointer;font-size:12px;font-weight:700;padding:5px 12px;border-radius:5px;background:${on ? 'var(--accent4)' : 'var(--bg4)'};color:${on ? '#1e100e' : 'var(--text2)'}">${on ? '通知ON' : '通知OFF'}</span>
+      <span onclick="toggleNotifyMaster()" style="cursor:pointer;font-size:12px;font-weight:700;padding:5px 12px;border-radius:5px;background:${on ? 'var(--accent4)' : 'var(--bg4)'};color:${on ? '#131313' : 'var(--text2)'}">${on ? '通知ON' : '通知OFF'}</span>
       ${next ? `<span style="font-size:12px;color:var(--text3)">次回: ${next.slot.label} ${String(next.at.getHours()).padStart(2,'0')}:00</span>` : ''}
     </div>
     ${permRow}
@@ -10577,7 +10578,7 @@ function renderAntioxidantPanel() {
   const html = `
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
       <span style="font-size:14px;font-weight:700">出動連動 抗酸化プロトコル</span>
-      <span style="font-size:12px;font-weight:700;padding:2px 8px;border-radius:4px;background:${a.color};color:#1e100e">${a.label}</span>
+      <span style="font-size:12px;font-weight:700;padding:2px 8px;border-radius:4px;background:${a.color};color:#131313">${a.label}</span>
       <span style="font-size:12px;color:var(--text3);margin-left:auto;font-family:var(--font-mono)">7日 ${a.count7}件 / 煙 ${a.smoke7}回・30日 煙 ${a.smoke30}回</span>
     </div>
     <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px">${a.msg}</div>
@@ -10805,7 +10806,7 @@ function renderEvidenceTabs() {
   const counts = evidenceDomainCounts();
   const mk = (key, label, icon, n, color) => {
     const on = _evDomain === key;
-    return `<span onclick="setEvidenceDomain('${key}')" style="cursor:pointer;font-size:12px;font-weight:${on?700:500};padding:5px 10px;border-radius:5px;border:1px solid ${on?(color||'var(--accent)'):'var(--border)'};background:${on?(color||'var(--accent)'):'transparent'};color:${on?'#1e100e':'var(--text2)'}">${icon} ${label} ${n}</span>`;
+    return `<span onclick="setEvidenceDomain('${key}')" style="cursor:pointer;font-size:12px;font-weight:${on?700:500};padding:5px 10px;border-radius:5px;border:1px solid ${on?(color||'var(--accent)'):'var(--border)'};background:${on?(color||'var(--accent)'):'transparent'};color:${on?'#131313':'var(--text2)'}">${icon} ${label} ${n}</span>`;
   };
   el.innerHTML = mk('all', 'すべて', '', EVIDENCE_DB.length, 'var(--accent)')
     + Object.entries(EVIDENCE_DOMAINS)
