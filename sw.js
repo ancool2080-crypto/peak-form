@@ -1,6 +1,6 @@
 // PEAK FORM Service Worker
 // キャッシュ名にタイムスタンプを埋め込み → デプロイのたびに自動更新
-const CACHE = 'peak-form-20261113';
+const CACHE = 'peak-form-20261113b';
 
 const ASSETS = [
   './',

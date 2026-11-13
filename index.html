@@ -2344,7 +2344,11 @@ function safeRender(label, fn) {
 window.addEventListener('error', e => logAppError('window', e.error || e.message));
 window.addEventListener('unhandledrejection', e => logAppError('promise', e.reason));
 const cfg=()=>DB.get('cfg')||{tdee:2800,goalmode:'maintain',water:2500,name:''};
-const today=()=>new Date().toISOString().slice(0,10);
+// 日付文字列は端末のローカル日付で扱う。toISOString() はUTCなので、日本では0〜9時に前日の日付になる。
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+// 'YYYY-MM-DD' をローカル0時として読む（new Date(str) はUTC0時になり、ymd() と組み合わせると日付がずれる地域がある）
+const pdate=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s);return m?new Date(+m[1],m[2]-1,+m[3]):new Date(s);};
+const today=()=>ymd(new Date());
 const fmtInt=n=>isFinite(n)?Math.round(n):'—';
 const fmt1=n=>isFinite(n)?Number(n).toFixed(1):'—';
 const typeLabel={strength:'筋力',hiit:'HIIT',cardio:'有酸素',functional:'機能',mobility:'回復',firefighting:'消防訓練',firefighter_run:'防火装備RUN'};
@@ -3963,8 +3967,8 @@ function renderWeeklyReview(){
   const sunday=new Date(monday);
   sunday.setDate(monday.getDate()+6);
 
-  const monStr=monday.toISOString().slice(0,10);
-  const sunStr=sunday.toISOString().slice(0,10);
+  const monStr=ymd(monday);
+  const sunStr=ymd(sunday);
   const isCurrentWeek=weeklyReviewOffset===0;
   if(nextBtn)nextBtn.disabled=isCurrentWeek;
 
@@ -4137,7 +4141,7 @@ function renderSupplementPage(){
     let streak=0,html2='<div style="display:flex;gap:4px;flex-wrap:wrap">';
     for(let i=days-1;i>=0;i--){
       const d=new Date(now);d.setDate(now.getDate()-i);
-      const ds=d.toISOString().slice(0,10);
+      const ds=ymd(d);
       const chks=(suppData[ds]||[]).length;
       const isToday=ds===todayStr;
       const col=chks>=3?'var(--accent4)':chks>=1?'var(--accent3)':'var(--bg4)';
@@ -4730,7 +4734,7 @@ function calcInjuryRisk() {
   const shiftData = DB.get('pf_shift_data') || {};
   const last7Dates = Array.from({length:7}, (_,i) => {
     const d = new Date(); d.setDate(d.getDate()-i);
-    return d.toISOString().slice(0,10);
+    return ymd(d);
   });
   const duty24hDays = last7Dates.filter(d => {
     const s = shiftData[d];
@@ -6170,7 +6174,7 @@ function renderDashboard(){
   };
   // 最大2年分のみ保持
   const cutoff=new Date();cutoff.setFullYear(cutoff.getFullYear()-2);
-  const cutoffStr=cutoff.toISOString().slice(0,10);
+  const cutoffStr=ymd(cutoff);
   Object.keys(dailyScores).forEach(k=>{if(k<cutoffStr)delete dailyScores[k];});
   DB.set('pf_daily_scores',dailyScores);
   document.getElementById('d-condition').textContent=score;
@@ -6198,7 +6202,7 @@ function renderDashboard(){
   const todayShiftEntry=shiftData[today()];
   const todayShift=getShiftType(todayShiftEntry);
   const tomorrowD=new Date();tomorrowD.setDate(tomorrowD.getDate()+1);
-  const tomorrowShiftEntry=shiftData[tomorrowD.toISOString().slice(0,10)];
+  const tomorrowShiftEntry=shiftData[ymd(tomorrowD)];
   const tomorrowShift=getShiftType(tomorrowShiftEntry);
   // 特別出勤の場合は時間数と内容も取得してアラートに反映
   const todayExtraHours=typeof todayShiftEntry==='object'?todayShiftEntry.hours:null;
@@ -6304,9 +6308,9 @@ function computeLoad(){
   });
   if(!Object.keys(days).length)return{atl:0,ctl:0,tsb:0,history:[]};
   let atl=0,ctl=0;const all=[];
-  const start=new Date(Object.keys(days).sort()[0]);const end=new Date(today());
+  const start=pdate(Object.keys(days).sort()[0]);const end=pdate(today());
   for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
-    const ds=d.toISOString().slice(0,10);const load=days[ds]||0;
+    const ds=ymd(d);const load=days[ds]||0;
     atl=atl+(load-atl)*(1-Math.exp(-1/7));ctl=ctl+(load-ctl)*(1-Math.exp(-1/42));
     all.push({date:ds,atl:Math.round(atl),ctl:Math.round(ctl),tsb:Math.round(ctl-atl)});
   }
@@ -6317,7 +6321,7 @@ function computeWeeklyVolume(){
   // 今週月曜日を計算
   const now=new Date();const dow=now.getDay();const mon=new Date(now);
   mon.setDate(now.getDate()-(dow===0?6:dow-1));mon.setHours(0,0,0,0);
-  const monStr=mon.toISOString().slice(0,10);
+  const monStr=ymd(mon);
   const weekTr=DB.arr('trainings').filter(t=>t.date>=monStr);
   if(!weekTr.length)return null;
 
@@ -6374,13 +6378,13 @@ function generatePeakingPlan(){
   document.getElementById('phase-legend').innerHTML=phases.map(p=>`<span><span class="phase-dot" style="background:${p.color}40;border:1px solid ${p.color}60"></span><span style="font-size:12px;color:var(--text2)">${p.label} ${p.weeks}週</span></span>`).join('');
   document.getElementById('phase-descriptions').innerHTML='<div class="grid2" style="margin-top:12px">'+phases.map(p=>`<div class="card-sm" style="border-color:${p.color}40"><div style="font-size:12px;font-weight:700;color:${p.color};margin-bottom:6px">${p.label}（${p.weeks}週間）</div><div class="muted">${p.note}</div></div>`).join('')+'</div>';
   const cal=document.getElementById('peaking-calendar');cal.innerHTML='';
-  const start=new Date(startStr);const dow=start.getDay();const monday=new Date(start);monday.setDate(start.getDate()-(dow===0?6:dow-1));const todayStr=today();
+  const start=pdate(startStr);const dow=start.getDay();const monday=new Date(start);monday.setDate(start.getDate()-(dow===0?6:dow-1));const todayStr=today();
   const sched={accumulate:['strength','cardio','rest','strength','cardio','strength','rest'],intensify:['strength','hiit','rest','strength','cardio','strength','rest'],convert:['hiit','strength','rest','hiit','cardio','strength','rest'],taper:['strength','cardio','rest','strength','rest','mobility','rest']};
   for(let w=0;w<Math.min(totalWeeks,16);w++){
     const ws=new Date(monday);ws.setDate(monday.getDate()+w*7);const ph=phases.find(p=>w>=p.startWeek&&w<p.startWeek+p.weeks);const sc=sched[ph?.type||'accumulate'];
     let rowHTML=`<div class="week-label" style="font-size:10px">W${w+1}${ph?` <span style="color:${ph.color};font-size:9px">${ph.label.slice(0,2)}</span>`:''}</div>`;
     const icons={strength:'▲',hiit:'◆',cardio:'●',mobility:'◎',rest:'—'};
-    for(let d=0;d<7;d++){const dt=new Date(ws);dt.setDate(ws.getDate()+d);const ds=dt.toISOString().slice(0,10);const tp=sc[d]||'rest';rowHTML+=`<div class="day-cell ${tp}${ds===todayStr?' today-cell':''}" title="${ds}"><span style="font-size:11px">${icons[tp]||'—'}</span><span style="font-size:9px;opacity:0.7">${dt.getDate()}</span></div>`;}
+    for(let d=0;d<7;d++){const dt=new Date(ws);dt.setDate(ws.getDate()+d);const ds=ymd(dt);const tp=sc[d]||'rest';rowHTML+=`<div class="day-cell ${tp}${ds===todayStr?' today-cell':''}" title="${ds}"><span style="font-size:11px">${icons[tp]||'—'}</span><span style="font-size:9px;opacity:0.7">${dt.getDate()}</span></div>`;}
     const row=document.createElement('div');row.className='week-row';row.innerHTML=rowHTML;cal.appendChild(row);
   }
   const ns={accumulate:{cal:'+5〜10%',protein:'2.0〜2.2g/kg',carb:'4〜6g/kg',timing:'トレ後30分以内に高P・高C食'},intensify:{cal:'維持〜+5%',protein:'2.0g/kg',carb:'3〜5g/kg',timing:'トレ前2hに中GI炭水化物'},convert:{cal:'維持〜-5%',protein:'2.2〜2.4g/kg',carb:'3〜4g/kg',timing:'トレ後のプロテイン窓を厳守'},taper:{cal:'+5〜10%（炭水化物増）',protein:'1.8〜2.0g/kg',carb:'6〜8g/kg（充填）',timing:'毎日こまめに摂取、空腹を避ける'}};
@@ -7211,7 +7215,7 @@ function predictTomorrow() {
     const last3Days = [];
     for (let d = 0; d < 3; d++) {
       const dt = new Date(); dt.setDate(dt.getDate() - d);
-      const ds = dt.toISOString().slice(0, 10);
+      const ds = ymd(dt);
       const dayMeals = DB.arr('meals').filter(m => m.date === ds);
       if (dayMeals.length) {
         const cal = dayMeals.reduce((s, m) => s + (m.cal||0), 0);
@@ -8443,7 +8447,7 @@ function renderShiftACWR(data){
   const trainings=DB.arr('trainings');
   for(let i=0;i<28;i++){
     const d=new Date(nowD);d.setDate(nowD.getDate()-i);
-    const ds=d.toISOString().slice(0,10);
+    const ds=ymd(d);
     const entry_acwr=data[ds];
     let load=getShiftLoad(entry_acwr);
     // 通常シフトのデフォルト負荷は SHIFT_TYPES で管理済み
@@ -8489,10 +8493,10 @@ function applyShiftPattern(){
   };
   const cycle=patterns[pat]||patterns['cycle1'];
   let idx=0;
-  const base=new Date(start);
+  const base=pdate(start);
   for(let d=0;d<weeks*7;d++){
     const cur=new Date(base);cur.setDate(base.getDate()+d);
-    const ds=cur.toISOString().slice(0,10);
+    const ds=ymd(cur);
     data[ds]=cycle[idx%cycle.length];
     idx++;
   }
@@ -8509,7 +8513,7 @@ function applyShiftPattern(){
 // ===== analysis.js =====
 function renderAnalysis(){
   const{atl,ctl,tsb}=computeLoad();const co={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a5a78',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#5a5a78',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}}};
-  const tr=DB.arr('trainings');const weeks={};tr.forEach(t=>{const d=new Date(t.date);const mon=new Date(d);mon.setDate(d.getDate()-(d.getDay()===0?6:d.getDay()-1));const wk=mon.toISOString().slice(0,10);weeks[wk]=(weeks[wk]||0)+(parseInt(t.duration)||0)*(parseInt(t.rpe)||5)});
+  const tr=DB.arr('trainings');const weeks={};tr.forEach(t=>{const d=pdate(t.date);const mon=new Date(d);mon.setDate(d.getDate()-(d.getDay()===0?6:d.getDay()-1));const wk=ymd(mon);weeks[wk]=(weeks[wk]||0)+(parseInt(t.duration)||0)*(parseInt(t.rpe)||5)});
   const wKeys=Object.keys(weeks).sort().slice(-8);if(aWeekly)aWeekly.destroy();if(wKeys.length){aWeekly=new Chart(document.getElementById('a-weekly-chart'),{type:'bar',data:{labels:wKeys.map(d=>d.slice(5)),datasets:[{data:wKeys.map(k=>weeks[k]),backgroundColor:'rgba(74,158,255,0.45)',borderColor:'#4a9eff',borderWidth:1,borderRadius:4}]},options:co});}
   const sleeps=DB.arr('sleeps').filter(s=>s.weight>0).slice(-30);if(aWeight)aWeight.destroy();if(sleeps.length){
   // 7日移動平均を計算
@@ -8560,10 +8564,10 @@ function renderWeeklySummary(){
 
   // 週ごとにグループ化
   function getMonday(dateStr) {
-    const d = new Date(dateStr);
+    const d = pdate(dateStr);
     const dow = d.getDay() === 0 ? 6 : d.getDay() - 1;
     d.setDate(d.getDate() - dow);
-    return d.toISOString().slice(0, 10);
+    return ymd(d);
   }
   const byWeek = {};
   trainings.forEach(t => {
@@ -8823,7 +8827,7 @@ function saveBfRecord() {
 function updateWeeklyWeightPanel(){
   const sleeps=DB.arr('sleeps').filter(s=>s.weight>0);
   if(sleeps.length<2){const adv=document.getElementById('wa-advice');if(adv){adv.className='alert alert-info';adv.textContent='2週間以上の体重データが揃うと自動判定が始まります。'}return;}
-  const getWS=(ds)=>{const d=new Date(ds);const day=d.getDay();const mon=new Date(d);mon.setDate(d.getDate()-(day===0?6:1-day));return mon.toISOString().slice(0,10);};
+  const getWS=(ds)=>{const d=pdate(ds);const day=d.getDay();const mon=new Date(d);mon.setDate(d.getDate()-(day===0?6:1-day));return ymd(mon);};
   const byWeek={};sleeps.forEach(s=>{const wk=getWS(s.date);if(!byWeek[wk])byWeek[wk]=[];byWeek[wk].push(s.weight)});
   const weeks=Object.keys(byWeek).sort();if(weeks.length<2)return;
   const thisW=weeks[weeks.length-1],lastW=weeks[weeks.length-2];
@@ -8860,17 +8864,17 @@ function getConditionHistory(days){
   const result=[];
   for(let i=days-1;i>=0;i--){
     const d=new Date(now);d.setDate(now.getDate()-i);
-    const ds=d.toISOString().slice(0,10);
+    const ds=ymd(d);
     result.push({date:ds,data:scores[ds]||null});
   }
   return result;
 }
 
 function getWeekKey(dateStr){
-  const d=new Date(dateStr);
+  const d=pdate(dateStr);
   const dow=d.getDay()===0?6:d.getDay()-1;
   const mon=new Date(d);mon.setDate(d.getDate()-dow);
-  return mon.toISOString().slice(0,10);
+  return ymd(mon);
 }
 
 function renderConditionAnalysis(){
@@ -9287,7 +9291,7 @@ function renderBristolStreak() {
   let html = '';
   for (let i = 13; i >= 0; i--) {
     const d = new Date(now); d.setDate(now.getDate() - i);
-    const ds = d.toISOString().slice(0, 10);
+    const ds = ymd(d);
     const type = logMap[ds];
     const isToday = ds === today();
     const good = type === 3 || type === 4;
@@ -9370,7 +9374,7 @@ function renderShiftTrainingPlan() {
   const base = new Date(now.getFullYear(), now.getMonth() + shiftMonthDelta, 1);
   const year = base.getFullYear(), month = base.getMonth() + 1;
   const schedule = getShiftTrainingSchedule(year, month);
-  const todayStr = new Date().toISOString().slice(0,10);
+  const todayStr = today();
   const daysInMonth = new Date(year, month, 0).getDate();
   const firstDow = new Date(year, month-1, 1).getDay();
   const offset = firstDow===0 ? 6 : firstDow-1;
@@ -9759,7 +9763,7 @@ function buildAiReviewPayload(days) {
   const to = today();
   const all = DB.arr('trainings').slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
   let from;
-  if (days > 0) { const d = new Date(); d.setDate(d.getDate() - days + 1); from = d.toISOString().slice(0, 10); }
+  if (days > 0) { const d = new Date(); d.setDate(d.getDate() - days + 1); from = ymd(d); }
   else from = all.length ? all[0].date : to;
   const inRange = r => r.date >= from && r.date <= to;
 
@@ -10008,8 +10012,8 @@ function renderAiReviewResult(id) {
     </div>`;
   const section = (title, arr, fn) => (arr?.length ? head(title) + arr.map(fn).join('') : '');
   const picker = list.length > 1
-    ? `<select style="width:auto;font-size:12px;padding:5px 10px" onchange="renderAiReviewResult(Number(this.value))">${list.slice().reverse().map(x => `<option value="${x.id}"${x.id === rec.id ? ' selected' : ''}>${x.at.slice(0, 10)} 実行分</option>`).join('')}</select>`
-    : `<span class="muted" style="font-size:12px">${rec.at.slice(0, 10)} 実行分</span>`;
+    ? `<select style="width:auto;font-size:12px;padding:5px 10px" onchange="renderAiReviewResult(Number(this.value))">${list.slice().reverse().map(x => `<option value="${x.id}"${x.id === rec.id ? ' selected' : ''}>${ymd(new Date(x.at))} 実行分</option>`).join('')}</select>`
+    : `<span class="muted" style="font-size:12px">${ymd(new Date(rec.at))} 実行分</span>`;
   const modelName = { 'claude-fable-5-2': 'Claude Fable 5.2', 'claude-opus-5': 'Claude Opus 5', 'claude-opus-4-8': 'Claude Opus 4.8' }[rec.model] || rec.model;
 
   el.innerHTML = `
