@@ -8827,7 +8827,7 @@ function saveBfRecord() {
 function updateWeeklyWeightPanel(){
   const sleeps=DB.arr('sleeps').filter(s=>s.weight>0);
   if(sleeps.length<2){const adv=document.getElementById('wa-advice');if(adv){adv.className='alert alert-info';adv.textContent='2週間以上の体重データが揃うと自動判定が始まります。'}return;}
-  const getWS=(ds)=>{const d=pdate(ds);const day=d.getDay();const mon=new Date(d);mon.setDate(d.getDate()-(day===0?6:1-day));return ymd(mon);};
+  const getWS=(ds)=>{const d=pdate(ds);const day=d.getDay();const mon=new Date(d);mon.setDate(d.getDate()-(day===0?6:day-1));return ymd(mon);};
   const byWeek={};sleeps.forEach(s=>{const wk=getWS(s.date);if(!byWeek[wk])byWeek[wk]=[];byWeek[wk].push(s.weight)});
   const weeks=Object.keys(byWeek).sort();if(weeks.length<2)return;
   const thisW=weeks[weeks.length-1],lastW=weeks[weeks.length-2];
