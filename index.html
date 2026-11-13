@@ -594,7 +594,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     <div class="field"><label class="label">メモ</label><textarea id="t-notes" rows="2" placeholder="体調、気づき、怪我の有無など"></textarea></div>
     <button class="btn btn-primary" onclick="saveTraining()">記録する</button>
   </div>
-  <div class="card"><div class="card-header-bar"></div><div class="h3" style="margin-bottom:14px">記録一覧（直近20件）</div><div id="training-log-table"></div></div>
+  <div class="card"><div class="card-header-bar"></div><div class="row-between" style="margin-bottom:14px"><div class="h3">記録一覧（直近20件）</div><button class="btn btn-sm" onclick="showPage('analysis');tocJump('anc-aireview')">AIで振り返る</button></div><div id="training-log-table"></div></div>
 </div>
 
 
@@ -1386,6 +1386,7 @@ input[type=range]:focus{border:none;box-shadow:none}
     </div>
     <div id="toc-body">
       <div class="toc-grid">
+        <button class="toc-btn" onclick="tocJump('anc-aireview')"><span class="toc-num">AI</span>AIによる振り返り</button>
         <button class="toc-btn" onclick="tocJump('anc-cond')"><span class="toc-num">01</span>コンディション長期分析</button>
         <button class="toc-btn" onclick="tocJump('anc-weight')"><span class="toc-num">02</span>週平均体重モニター</button>
         <button class="toc-btn" onclick="tocJump('anc-minicut')"><span class="toc-num">03</span>ミニカット & バルク判定</button>
@@ -1413,6 +1414,32 @@ input[type=range]:focus{border:none;box-shadow:none}
   </div>
 
 
+
+  <!-- ===== AIによる振り返り（トレーニング記録） ===== -->
+  <div class="card" style="margin-bottom:18px">
+    <div id="anc-aireview" class="card-header-bar"></div>
+    <div class="row-between" style="margin-bottom:10px">
+      <div>
+        <div class="h3">AIによる振り返り（トレーニング記録）</div>
+        <div class="muted" style="font-size:12px;margin-top:3px">記録を丸ごとAIに読ませて、種目ごとの伸び・停滞や、勤務との関係を探します</div>
+      </div>
+      <div class="row" style="gap:8px">
+        <select id="air-range" style="width:auto;font-size:12px;padding:5px 10px" onchange="renderAiReviewPreview()">
+          <option value="30">30日</option>
+          <option value="90" selected>90日</option>
+          <option value="180">6ヶ月</option>
+          <option value="0">全期間</option>
+        </select>
+      </div>
+    </div>
+    <div id="air-preview"></div>
+    <div class="row" style="gap:8px;flex-wrap:wrap;margin:12px 0 4px">
+      <button class="btn btn-primary" id="air-run" onclick="runAiReview()">振り返りを実行</button>
+      <button class="btn" id="air-cancel" style="display:none" onclick="cancelAiReview()">中止</button>
+    </div>
+    <div id="air-status"></div>
+    <div id="air-result"></div>
+  </div>
 
   <!-- ===== 長期コンディション分析 ===== -->
   <div class="card card-accent" style="margin-bottom:18px">
@@ -2360,7 +2387,7 @@ function showPage(id){
   updateTocFab(id);
   if(id==='dashboard')renderDashboard();
   if(id==='program')initProgramPage();
-  if(id==='analysis'){renderAnalysis();updateTocFab('analysis');updateWeeklyWeightPanel();updateMiniCut();initWeightTracker();renderConditionAnalysis();renderBodyComposition();renderWeeklyReview();}
+  if(id==='analysis'){renderAnalysis();updateTocFab('analysis');updateWeeklyWeightPanel();updateMiniCut();initWeightTracker();renderConditionAnalysis();renderBodyComposition();renderWeeklyReview();safeRender('AIによる振り返り',renderAiReview);}
   if(id==='nutrition'){updateNutritionGoals();updateSmartNutrition();updateSessionLabel();renderMealLog();renderMealHistory();updateNutritionTotals();const tmplEl=document.getElementById('meal-template-btns');if(tmplEl)tmplEl.innerHTML=getMealTemplateButtonsHTML();}
   if(id==='sleep')renderSleepCharts();
   if(id==='shift')renderShiftPage();
@@ -9667,6 +9694,345 @@ function saveApiKeyFromSettings() {
 }
 
 // ============================================================
+// AIによる振り返り（トレーニング記録）
+// ============================================================
+// 集計表には出てこない「記録をまたいだ関係」を、記録を丸ごと読ませて探させる。
+// 月に1回程度の実行を想定し、最も推論力の高い Claude Fable 5.2 を使う（毎日の軽い処理には使わない）。
+// 送るのはトレーニング記録が主で、解釈に必要な勤務区分・出動記録・プロフィールを添える。名前は送らない。
+// 送信内容と概算費用を実行前に画面へ出し、本人がボタンを押したときだけ送信する。
+const AIR_MODEL = 'claude-fable-5-2';
+// 100万トークンあたりの料金（USD）。安全上の理由で別モデルが代わりに答えた場合も正しく計算するため、その分も持つ
+const AIR_PRICE = { 'claude-fable-5-2': [8, 40], 'claude-opus-5': [5, 25], 'claude-opus-4-8': [5, 25] };
+const AIR_MIN_SESSIONS = 4;   // これより少ないと傾向を読めないので、費用をかけて送らない
+const AIR_KEEP = 6;           // 保存しておく過去の振り返りの件数
+
+const AIR_SYSTEM = `あなたは、消防士個人が自分のために使っているコンディション管理アプリ「PEAK FORM」の中で、トレーニング記録の定期的な振り返りを担当します。読むのは本人ひとりです。本人は24時間勤務（当番）→非番→週休を繰り返す交替制で働きながら、筋力トレーニングと有酸素運動を続けています。
+
+渡されるのは、本人がアプリに記録した生のデータです（トレーニングの全セット、勤務区分、出動の記録、プロフィール）。週ごとのセット数や負荷の推移といった決まった集計は、アプリ側に既にあります。ここで欲しいのは、集計表には出てこない、記録をまたいで初めて見える関係です。たとえば、当番明けのセッションで挙上重量やRPEがどう変わるか、種目ごとの伸びと停滞、部位や種目の偏り、休みの入れ方と次のセッションの出来の関係などです。何に注目するかは、データを見て決めてください。
+
+書くうえで守ってほしいこと:
+- 所見には、根拠になった日付と数値を必ず添える。記録から確かめられないことは書かない。
+- 件数が少なくて偶然と区別できないものは、確信度を low にして、そう明記する。相関と因果を混同しない。
+- 次の行動は、本人がそのまま実行できる具体さで、多くても3つ。勤務の周期に無理なく収まるものにする。
+- 痛みや体調不良の記載があっても診断はしない。受診の目安に触れるにとどめる。
+- 文章は日本語で、平易に、事実を淡々と書く。励ましの言葉、感嘆符、絵文字は要らない。専門用語には一言の説明を添える。
+- 判断に必要なのに記録が無かった項目は data_gaps に挙げ、何を記録すれば分かるようになるかを書く。`;
+
+const AIR_SCHEMA = {
+  type: 'object', additionalProperties: false,
+  required: ['summary', 'findings', 'exercise_trends', 'concerns', 'next_actions', 'data_gaps'],
+  properties: {
+    summary: { type: 'string', description: 'この期間の総括。2〜4文' },
+    findings: { type: 'array', description: '記録をまたいで見えた関係。重要な順', items: {
+      type: 'object', additionalProperties: false, required: ['title', 'detail', 'evidence', 'confidence'],
+      properties: {
+        title: { type: 'string' }, detail: { type: 'string' },
+        evidence: { type: 'string', description: '根拠になった日付と数値' },
+        confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
+      } } },
+    exercise_trends: { type: 'array', description: '主な種目ごとの推移', items: {
+      type: 'object', additionalProperties: false, required: ['exercise', 'trend', 'detail'],
+      properties: {
+        exercise: { type: 'string' },
+        trend: { type: 'string', enum: ['up', 'flat', 'down', 'insufficient'], description: 'insufficient は記録が少なく判断できない場合' },
+        detail: { type: 'string', description: '最初と最後の重量・回数など、数値で' },
+      } } },
+    concerns: { type: 'array', description: '停滞・偏り・回復不足などの気になる点', items: {
+      type: 'object', additionalProperties: false, required: ['title', 'detail'],
+      properties: { title: { type: 'string' }, detail: { type: 'string' } } } },
+    next_actions: { type: 'array', description: '次の期間にやること。多くても3つ', items: {
+      type: 'object', additionalProperties: false, required: ['action', 'reason'],
+      properties: { action: { type: 'string' }, reason: { type: 'string' } } } },
+    data_gaps: { type: 'array', description: '記録が無くて判断できなかった点と、何を記録すればよいか', items: { type: 'string' } },
+  },
+};
+
+let _airAbort = null;
+let _airTimer = null;
+
+function escHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// 送信するデータを組み立てる。トークンを節約するため、セットは [重量kg, 回数, RPE, ウォームアップか] の配列にする
+function buildAiReviewPayload(days) {
+  const to = today();
+  const all = DB.arr('trainings').slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+  let from;
+  if (days > 0) { const d = new Date(); d.setDate(d.getDate() - days + 1); from = d.toISOString().slice(0, 10); }
+  else from = all.length ? all[0].date : to;
+  const inRange = r => r.date >= from && r.date <= to;
+
+  const trainings = all.filter(inRange).map(t => {
+    const o = { date: t.date, type: typeLabel[t.type] || t.type, minutes: t.duration, session_rpe: t.rpe };
+    if (t.notes) o.notes = t.notes;
+    if (t.exercises?.length) {
+      o.exercises = t.exercises.map(e => e.setData?.length
+        ? { name: e.name, sets: e.setData.map(s => [s.weight, s.reps, s.rpe === '' || s.rpe == null ? null : Number(s.rpe), s.warmup ? 1 : 0]) }
+        // 全セットを保存する前の古い記録は、代表値しか残っていない
+        : { name: e.name, top_set_only: { sets: e.sets, weight: e.weight, reps: e.reps } });
+    }
+    if (t.cardioData) {
+      const c = t.cardioData;
+      o.cardio = { kind: c.cardioType, zone: c.zone };
+      if (c.distance) o.cardio.km = c.distance;
+      if (c.hr) o.cardio.avg_hr = c.hr;
+      if (c.kcal) o.cardio.kcal = c.kcal;
+    }
+    return o;
+  });
+
+  const shiftData = getShiftData();
+  const shifts = {};
+  Object.keys(shiftData).filter(d => d >= from && d <= to).sort().forEach(d => {
+    const tp = getShiftType(shiftData[d]);
+    if (tp) shifts[d] = SHIFT_TYPES[tp]?.label || tp;
+  });
+
+  const dispatchLabel = { fire: '建物火災', rescue: '救助', training: '訓練', drill: '消防訓練' };
+  const dispatches = DB.arr('fire_exposures').filter(inRange).map(r => {
+    const o = { date: r.date, type: dispatchLabel[r.type] || r.type, minutes: r.duration };
+    if (r.smoke) o.smoke_exposure = true;
+    if (r.ba) o.breathing_apparatus = true;
+    return o;
+  });
+
+  const c = cfg();
+  const lastWeight = DB.arr('sleeps').filter(s => s.weight).slice(-1)[0]?.weight;
+  const expLabel = { beginner: '初級', intermediate: '中級', advanced: '上級' };
+  const goalLabel = { maintain: '維持', cut: '減量', bulk: '増量' };
+  const profile = {};
+  if (c.age) profile.age = Number(c.age);
+  if (c.sex) profile.sex = c.sex === 'female' ? '女性' : '男性';
+  if (c.height) profile.height_cm = Number(c.height);
+  if (lastWeight || c.tdeeweight) profile.weight_kg = Number(lastWeight || c.tdeeweight);
+  if (c.experienceLevel) profile.training_experience = expLabel[c.experienceLevel] || c.experienceLevel;
+  if (c.goalmode) profile.nutrition_goal = goalLabel[c.goalmode] || c.goalmode;
+  try { const p = getCurrentProgramData(); if (p?.name) profile.current_program = p.name; } catch {}
+
+  return {
+    period: { from, to },
+    notes_on_format: 'exercises[].sets は [重量kg, 回数, そのセットのRPE（未記入は null）, ウォームアップなら1] の配列。shifts は日付→勤務区分で、非番は当番明けの日。',
+    profile, shifts, dispatches, trainings,
+  };
+}
+
+// 送信前の概算。日本語は1文字がおおよそ1トークン強、英数字は3〜4文字で1トークンになる
+function estimateAirTokens(text) {
+  let ascii = 0;
+  for (let i = 0; i < text.length; i++) if (text.charCodeAt(i) < 128) ascii++;
+  return Math.round(ascii / 3.2 + (text.length - ascii) * 1.15);
+}
+
+function renderAiReviewPreview() {
+  const el = document.getElementById('air-preview');
+  if (!el) return;
+  const days = parseInt(document.getElementById('air-range')?.value ?? '90');
+  const payload = buildAiReviewPayload(days);
+  const n = payload.trainings.length;
+  if (n < AIR_MIN_SESSIONS) {
+    el.innerHTML = `<div class="alert alert-info">この期間のトレーニング記録は${n}件です。傾向を読むには少なすぎるため、${AIR_MIN_SESSIONS}件以上たまってから実行してください（期間を広げることもできます）。</div>`;
+    if (!_airAbort) document.getElementById('air-run')?.setAttribute('disabled', '');
+    return;
+  }
+  if (!_airAbort) document.getElementById('air-run')?.removeAttribute('disabled');
+  const json = JSON.stringify(payload);
+  const inTok = estimateAirTokens(AIR_SYSTEM) + estimateAirTokens(json) + 600;
+  const [pin, pout] = AIR_PRICE[AIR_MODEL];
+  // 出力（考える分を含む）は内容しだいで大きく変わるため、幅で示す
+  const lo = inTok * pin / 1e6 + 6000 * pout / 1e6, hi = inTok * pin / 1e6 + 25000 * pout / 1e6;
+  const row = (k, v) => `<div style="display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px"><span class="muted" style="font-size:12px">${k}</span><span style="text-align:right">${v}</span></div>`;
+  el.innerHTML = `
+    <div class="card-sm">
+      ${row('対象期間', `${payload.period.from} 〜 ${payload.period.to}`)}
+      ${row('送信する記録', `トレーニング ${n}件 ／ 勤務区分 ${Object.keys(payload.shifts).length}日分 ／ 出動 ${payload.dispatches.length}件`)}
+      ${row('使うAI', 'Claude Fable 5.2')}
+      ${row('費用の目安', `約 $${lo.toFixed(2)}〜$${hi.toFixed(2)}（入力 約${inTok.toLocaleString()}トークン）`)}
+      <div style="font-size:11px;color:var(--text3);line-height:1.7;margin-top:8px">
+        実行すると、上の記録とプロフィール（年齢・性別・身長・体重・経験・目標）がAnthropicのAPIへ送信されます。名前は送りません。このAIは、送信内容がAnthropic側で30日間保持されることが利用条件です。費用はご自身のAPIキーに請求されます。
+      </div>
+      <details class="expl"><summary>送信するデータを見る</summary><div class="expl-body"><pre style="white-space:pre-wrap;word-break:break-all;font-size:11px;margin:0;max-height:260px;overflow:auto">${escHtml(JSON.stringify(payload, null, 1))}</pre></div></details>
+    </div>`;
+}
+
+// ストリーミング応答（SSE）を1イベントずつ読む
+async function readAirStream(res, onEvent) {
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let buf = '';
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i;
+    while ((i = buf.search(/\r?\n\r?\n/)) >= 0) {
+      const chunk = buf.slice(0, i);
+      buf = buf.slice(i).replace(/^\r?\n\r?\n/, '');
+      const data = chunk.split(/\r?\n/).filter(l => l.startsWith('data:')).map(l => l.slice(5).trimStart()).join('');
+      if (data) { let ev; try { ev = JSON.parse(data); } catch { continue; } onEvent(ev); }
+    }
+  }
+}
+
+function setAirStatus(html, cls) {
+  const el = document.getElementById('air-status');
+  if (el) el.innerHTML = html ? `<div class="alert ${cls || 'alert-info'}" style="margin-top:8px">${html}</div>` : '';
+}
+
+function airBusy(on) {
+  const run = document.getElementById('air-run'), cancel = document.getElementById('air-cancel');
+  if (run) { run.disabled = on; run.textContent = on ? '分析中…' : '振り返りを実行'; }
+  if (cancel) cancel.style.display = on ? '' : 'none';
+  const range = document.getElementById('air-range'); if (range) range.disabled = on;
+}
+
+function cancelAiReview() { _airAbort?.abort(); }
+
+async function runAiReview() {
+  if (_airAbort) return;
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    setAirStatus('APIキーが設定されていません。<a href="#" onclick="showPage(\'settings\');return false" style="color:inherit;text-decoration:underline">設定ページ</a>でAnthropicのAPIキーを入力してください。', 'alert-warn');
+    return;
+  }
+  const days = parseInt(document.getElementById('air-range')?.value ?? '90');
+  const payload = buildAiReviewPayload(days);
+  if (payload.trainings.length < AIR_MIN_SESSIONS) { renderAiReviewPreview(); return; }
+
+  _airAbort = new AbortController();
+  airBusy(true);
+  const started = Date.now();
+  let phase = '記録を読んで考えています';
+  const tick = () => {
+    const s = Math.floor((Date.now() - started) / 1000);
+    setAirStatus(`${phase}…（経過 ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}）<br><span style="font-size:11px;opacity:.85">数分かかることがあります。終わるまでこの画面を開いたままにしてください。</span>`);
+  };
+  tick();
+  _airTimer = setInterval(tick, 1000);
+  // 分析中に画面が消えて通信が切れるのを防ぐ（対応していない端末では何もしない）
+  let wake = null;
+  try { wake = await navigator.wakeLock?.request('screen'); } catch {}
+
+  let text = '', model = AIR_MODEL, stop = null, usage = { in: 0, out: 0 }, apiErr = null;
+  try {
+    const offline = e => { if (e.name === 'AbortError') throw e; throw new Error('通信できませんでした。電波の状態を確認して、もう一度試してください。'); };
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      signal: _airAbort.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2026-10-21',
+        // 安全上の理由でこのモデルが回答を見送ったとき、Anthropic推奨の別モデルで同じ依頼を続けてもらう
+        'anthropic-beta': 'server-side-fallback-2026-07-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: AIR_MODEL,
+        max_tokens: 32000,   // 考える分も含む上限。途中で切れると結果が壊れるため余裕を持たせる
+        stream: true,
+        fallbacks: 'default',
+        output_config: { effort: 'high', format: { type: 'json_schema', schema: AIR_SCHEMA } },
+        system: AIR_SYSTEM,
+        messages: [{ role: 'user', content: `以下が ${payload.period.from} から ${payload.period.to} までの記録です。振り返りを作成してください。\n\n<records>\n${JSON.stringify(payload)}\n</records>` }],
+      }),
+    }).catch(offline);
+    if (!res.ok) {
+      let msg = '';
+      try { msg = (await res.json()).error?.message || ''; } catch {}
+      const hint = { 401: 'APIキーが正しくありません。設定ページで確認してください。', 429: '利用上限に達しています。少し時間をおいて試してください。', 529: 'AIが混み合っています。少し時間をおいて試してください。' }[res.status];
+      throw new Error((hint || `APIエラー（${res.status}）`) + (msg ? `<br><span style="font-size:11px;opacity:.85">${escHtml(msg)}</span>` : ''));
+    }
+    await readAirStream(res, ev => {
+      if (ev.type === 'message_start') {
+        model = ev.message?.model || model;
+        const u = ev.message?.usage || {};
+        usage.in = (u.input_tokens || 0) + (u.cache_creation_input_tokens || 0) + (u.cache_read_input_tokens || 0);
+      } else if (ev.type === 'content_block_start' && ev.content_block?.type === 'text') {
+        phase = '結果を書いています';
+      } else if (ev.type === 'content_block_delta' && ev.delta?.type === 'text_delta') {
+        text += ev.delta.text;
+      } else if (ev.type === 'message_delta') {
+        if (ev.delta?.stop_reason) stop = ev.delta.stop_reason;
+        if (ev.usage?.output_tokens != null) usage.out = ev.usage.output_tokens;
+      } else if (ev.type === 'error') {
+        apiErr = ev.error?.message || '通信中にエラーが発生しました';
+      }
+    }).catch(offline);
+    if (apiErr) throw new Error(`AIの処理が途中で止まりました。少し時間をおいて試してください。<br><span style="font-size:11px;opacity:.85">${escHtml(apiErr)}</span>`);
+    if (stop === 'refusal') throw new Error('AIが安全上の理由で回答を見送りました。メモ欄の内容などが原因のことがあります。期間を変えて試してください。');
+    if (stop === 'max_tokens') throw new Error('結果が長くなりすぎて途中で切れました。期間を短くして試してください。');
+    if (!text.trim()) throw new Error('AIから結果が返りませんでした。もう一度試してください。');
+    let result;
+    try { result = JSON.parse(text); } catch { throw new Error('結果を読み取れませんでした。もう一度試してください。'); }
+
+    const [pin, pout] = AIR_PRICE[model] || AIR_PRICE[AIR_MODEL];
+    const rec = {
+      id: Date.now(), at: new Date().toISOString(), period: payload.period,
+      sessions: payload.trainings.length, model,
+      usage, cost: usage.in * pin / 1e6 + usage.out * pout / 1e6, seconds: Math.round((Date.now() - started) / 1000),
+      result,
+    };
+    DB.set('ai_reviews', DB.arr('ai_reviews').concat([rec]).slice(-AIR_KEEP));
+    setAirStatus('');
+    renderAiReviewResult();
+  } catch (e) {
+    if (e.name === 'AbortError') setAirStatus('中止しました。送信済みの分の費用は発生している場合があります。', 'alert-warn');
+    else setAirStatus(e.message, 'alert-danger');
+  } finally {
+    clearInterval(_airTimer); _airTimer = null;
+    _airAbort = null;
+    try { await wake?.release(); } catch {}
+    airBusy(false);
+  }
+}
+
+// 保存してある振り返りを表示する。id を渡すとその回を、省略すると最新の回を出す
+function renderAiReviewResult(id) {
+  const el = document.getElementById('air-result');
+  if (!el) return;
+  const list = DB.arr('ai_reviews');
+  if (!list.length) { el.innerHTML = ''; return; }
+  const rec = list.find(r => r.id === id) || list[list.length - 1];
+  const r = rec.result || {};
+  const conf = { high: ['確信度 高', 'badge-green'], medium: ['確信度 中', 'badge-amber'], low: ['確信度 低', 'badge-gray'] };
+  const trend = { up: ['伸びている', 'badge-green'], flat: ['横ばい', 'badge-gray'], down: ['下がっている', 'badge-red'], insufficient: ['記録不足', 'badge-gray'] };
+  const head = t => `<div class="label" style="margin:16px 0 8px">${t}</div>`;
+  const item = (title, badge, body, sub) => `
+    <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <div style="font-size:13px;font-weight:700">${escHtml(title)}</div>${badge ? `<span class="badge ${badge[1]}">${badge[0]}</span>` : ''}
+      </div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.7;margin-top:4px">${escHtml(body)}</div>
+      ${sub ? `<div style="font-size:11px;color:var(--text3);line-height:1.6;margin-top:4px">根拠: ${escHtml(sub)}</div>` : ''}
+    </div>`;
+  const section = (title, arr, fn) => (arr?.length ? head(title) + arr.map(fn).join('') : '');
+  const picker = list.length > 1
+    ? `<select style="width:auto;font-size:12px;padding:5px 10px" onchange="renderAiReviewResult(Number(this.value))">${list.slice().reverse().map(x => `<option value="${x.id}"${x.id === rec.id ? ' selected' : ''}>${x.at.slice(0, 10)} 実行分</option>`).join('')}</select>`
+    : `<span class="muted" style="font-size:12px">${rec.at.slice(0, 10)} 実行分</span>`;
+  const modelName = { 'claude-fable-5-2': 'Claude Fable 5.2', 'claude-opus-5': 'Claude Opus 5', 'claude-opus-4-8': 'Claude Opus 4.8' }[rec.model] || rec.model;
+
+  el.innerHTML = `
+    <div class="divider"></div>
+    <div class="row-between" style="margin-bottom:8px"><div class="h3" style="font-size:14px">振り返りの結果</div>${picker}</div>
+    <div style="font-size:14px;line-height:1.8">${escHtml(r.summary)}</div>
+    ${section('分かったこと', r.findings, f => item(f.title, conf[f.confidence], f.detail, f.evidence))}
+    ${section('種目ごとの推移', r.exercise_trends, x => item(x.exercise, trend[x.trend], x.detail))}
+    ${section('気になる点', r.concerns, x => item(x.title, null, x.detail))}
+    ${section('次にやること', r.next_actions, x => item(x.action, null, x.reason))}
+    ${r.data_gaps?.length ? head('記録が足りず判断できなかった点') + `<ul style="margin:0;padding-left:18px;font-size:13px;color:var(--text2);line-height:1.8">${r.data_gaps.map(g => `<li>${escHtml(g)}</li>`).join('')}</ul>` : ''}
+    <div style="font-size:11px;color:var(--text3);line-height:1.7;margin-top:14px">
+      対象 ${rec.period.from} 〜 ${rec.period.to}（${rec.sessions}件）／ ${escHtml(modelName)} ／ 入力 ${rec.usage.in.toLocaleString()}・出力 ${rec.usage.out.toLocaleString()}トークン ／ 費用 約$${rec.cost.toFixed(2)} ／ ${rec.seconds}秒<br>
+      AIが記録から読み取った所見で、誤りを含むことがあります。根拠の日付と数値を記録と見比べて判断してください。医療上の診断ではありません。
+    </div>`;
+}
+
+function renderAiReview() {
+  renderAiReviewPreview();
+  renderAiReviewResult();
+}
+
+// ============================================================
 // ネット検索で栄養情報を取得（Claude API + Web検索ツール）
 // ============================================================
 // 商品名・料理名から実際にWeb検索を行い、栄養成分を推定して取り込む。
@@ -10825,6 +11191,7 @@ function deleteSleep(id) {
   <button class="toc-drawer-item" onclick="showPage('settings');closeTocDrawer()"><span class="toc-num"></span>設定</button>
   <div id="toc-divider-analysis" style="height:1px;background:var(--bg3);margin:8px 0"></div>
   <div id="toc-section-analysis" style="font-size:10px;color:var(--text3);margin-bottom:6px">— 分析レポート内 —</div>
+  <button class="toc-drawer-item" onclick="tocJump('anc-aireview');closeTocDrawer()"><span class="toc-num">AI</span>AIによる振り返り</button>
   <button class="toc-drawer-item" onclick="tocJump('anc-cond');closeTocDrawer()"><span class="toc-num">01</span>コンディション分析</button>
   <button class="toc-drawer-item" onclick="tocJump('anc-weight');closeTocDrawer()"><span class="toc-num">02</span>体重モニター</button>
   <button class="toc-drawer-item" onclick="tocJump('anc-minicut');closeTocDrawer()"><span class="toc-num">03</span>ミニカット&バルク</button>
